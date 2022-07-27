@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-1 {
+        stroke: #b7b7b7;
+      }
+
+      .cls-2 {
+        stroke: #888;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.5px;
+      }
+
+      .cls-3 {
+        stroke: none;
+      }
+
+      .cls-4 {
+        fill: none;
+      }
+    </style>
+  </defs>
+  <g id="그룹_381" data-name="그룹 381" transform="translate(-560 -184)">
+    <g id="그룹_48" data-name="그룹 48" transform="translate(560 184)">
+      <g id="사각형_138" data-name="사각형 138" class="cls-1">
+        <rect class="cls-3" width="28" height="28" rx="3"/>
+        <rect class="cls-4" x="0.5" y="0.5" width="27" height="27" rx="2.5"/>
+      </g>
+      <path id="패스_71" data-name="패스 71" class="cls-2" d="M.015,0,0,14.18,3.271,11.5l1.879,4.2L8.3,14.3,6.417,10.1l4.177-.654Z" transform="matrix(0.966, -0.259, 0.259, 0.966, 7.771, 7.117)"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,246 @@
+<template>
+  <layout>
+    <div id="contents">
+      <div class="tit-bar tit-NavType1">
+        <div class="tit-top">
+          <h2 class="ti">신규엔진 배포</h2>
+        </div>
+      </div>
+
+      <div class="clmFlex mt15">
+        <!-- step1. [S] -->
+        <div class="newEngin-l">
+          <h1 class="ti-s">현재 재인식 서버 정보</h1>
+          <fieldset>
+            <legend>정렬영역</legend>
+            <label for="sel002" class="sl-nm">본부</label>
+            <select id="sel002" class="select">
+              <option value="">전체</option>
+              <option value="수도권">수도권</option>
+            </select>
+          </fieldset>
+
+          <div class="table-l1 mt15">
+            <table>
+              <colgroup>
+                <col width="50" />
+                <col width="50" />
+                <col width="90" />
+                <col width="100" />
+                <col width="*" />
+                <col width="*" />
+                <col width="60" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>
+                    <span class="chkbox2">
+                      <input
+                        type="checkbox"
+                        id="th001"
+                        v-model="checked"
+                        @change="checkAll"
+                      />
+                      <label for="th001" class="th_chk">전체</label>
+                    </span>
+                  </th>
+                  <th>본부</th>
+                  <th>번호</th>
+                  <th>IP주소</th>
+                  <th>현재 가중치 버전</th>
+                  <th>최종 업데이트 시작</th>
+                  <th>업데이트<br />상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="(item, index) in serverList">
+                  <tr :key="index">
+                    <td class="tx-c">
+                      <span class="chkbox2">
+                        <input
+                          type="checkbox"
+                          :id="`ch00` + index"
+                          v-model="item.chked"
+                        />
+                        <label :for="`ch00` + index"></label>
+                      </span>
+                    </td>
+                    <td class="tx-c">{{ item.hdqrNm }}</td>
+                    <td class="tx-c">{{ item.exlprNum }}</td>
+                    <td class="tx-c">{{ item.vmIp }}</td>
+                    <td class="tx-c">{{ item.crntWeightVer }}</td>
+                    <td class="tx-c">{{ item.updateDttm }}</td>
+                    <td class="tx-c fc1">{{ item.updateYn }}</td>
+                  </tr>
+                </template>
+                <tr v-if="serverList.length === 0">
+                  <td class="tx-c" colspan="7">검색된 기록이 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <pagination
+            :pageInfo="pageInfo"
+            @pagination="(p) => onSearch(p.pageNo)"
+          />
+        </div>
+        <!-- step2. [E] -->
+
+        <!-- step3. [S] -->
+        <div class="newEngin-r">
+          <h1 class="ti-s">신규 가중치 셋</h1>
+
+          <fieldset class="newWeight flex flex-btw">
+            <legend>정렬영역</legend>
+            <label for="sel002" class="sch-id">선택된 가중치 셋</label>
+            <input type="text" class="inp ml5" v-model="selDataset" />
+            <button
+              type="button"
+              class="btn btn-sz1 btn-gnc"
+              @click="onShowPop(true)"
+            >
+              선택
+            </button>
+          </fieldset>
+
+          <div class="table-l1 mt15">
+            <table>
+              <colgroup>
+                <col width="50%" />
+                <col width="50%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>유형</th>
+                  <th>가중치ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="tx-c">번호판 탐색</td>
+                  <td class="tx-c">WP-004</td>
+                </tr>
+                <tr>
+                  <td class="tx-c">번호판 탐색</td>
+                  <td class="tx-c">WP-004</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="udt-btn">
+            <button type="button" id="btn-update" class="btn-bg-gn">
+              업데이트
+            </button>
+          </div>
+        </div>
+        <!-- step3. [E] -->
+      </div>
+    </div>
+
+    <!-- 팝업 [S] -->
+    <div v-if="showPop" class="popup pop1" :style="`display:block;left:30%`">
+      <h1>가중치 셋 목록</h1>
+
+      <div class="table-l1 mt15 pop-body scl">
+        <table>
+          <colgroup>
+            <col width="*" />
+            <col width="100" />
+            <col width="100" />
+            <col width="100" />
+            <col width="100" />
+            <col width="100" />
+            <col width="100" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>현재 가중치 버전</th>
+              <th>번호판 탐색</th>
+              <th>문자/숫자1</th>
+              <th>문자/숫자2</th>
+              <th>문자/숫자3</th>
+              <th>꺾임/훼손</th>
+              <th>스미어/빛반사</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="(item, index) in dsList">
+              <tr :key="index" @click="onSelItem(item)">
+                <td class="tx-c">{{ item.algoVer }}</td>
+                <td class="tx-c">{{ item.plateWeightId }}</td>
+                <td class="tx-c">{{ item.word1WeightId }}</td>
+                <td class="tx-c">{{ item.word2WeightId }}</td>
+                <td class="tx-c">{{ item.word3WeightId }}</td>
+                <td class="tx-c">{{ item.incnWeightId }}</td>
+                <td class="tx-c">{{ item.smbrWeightId }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="pop-close" @click="onShowPop(false)">
+        닫기
+      </button>
+    </div>
+    <!-- 팝업 [E] -->
+
+    <div
+      v-if="showPop"
+      @click="showPop = false"
+      class="mask"
+      style="display: block"
+    ></div>
+  </layout>
+</template>
+<script lang="ts">
+import { Vue, Component } from "vue-property-decorator";
+import Layout from "~/components/layout.vue";
+import { IPageInfoModel } from "~/models/common-model";
+import commonService from "~/service/common-service";
+@Component({ components: { Layout } })
+export default class extends Vue {
+  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  showPop = false;
+  checked = false;
+  serverList = [];
+  dsList = [];
+  selDataset = "";
+  onShowPop(show) {
+    this.showPop = show;
+  }
+  checkAll() {
+    this.serverList = this.serverList.map((v) => {
+      return { ...v, chked: this.checked };
+    });
+  }
+  async datasetList() {
+    const data = await commonService.request(
+      { weightType: "ALL" },
+      "/api/algo-info/list"
+    );
+    console.log(data);
+    this.dsList = data;
+  }
+  created() {
+    this.onSearch(1);
+    this.datasetList();
+  }
+  onSelItem(item) {
+    this.selDataset = item.algoVer;
+    this.showPop = false;
+  }
+  async onSearch(pageNo: number) {
+    const newpage = { ...this.pageInfo, pageNo };
+    const data = await commonService.request(
+      { startDate: "", endDate: "", ...newpage },
+      "/api/updt/list"
+    );
+    newpage.totalCount = data.page.totalCount;
+    this.serverList = data.list;
+    this.pageInfo = { ...newpage };
+  }
+}
+</script>
+<style scoped></style>
