@@ -717,6 +717,10 @@ nav ol > li > .subMenu > ul > li > a:hover {
   border-radius: 3px;
 }
 
+.as-area2 .lb-as-l.active {
+  background-color: yellow;
+}
+
 .as-area2 .lb-as-l .lb-l-nm {
   font-size: 14px;
   color: var(--black);
@@ -771,7 +775,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
   margin-right: 10px;
   background-image: url(../images/bt_lb_point.svg);
   background-position: 0 0;
-  background-color: transparent;
+  background-color: red;
   text-indent: -9999px;
   cursor: pointer;
 }

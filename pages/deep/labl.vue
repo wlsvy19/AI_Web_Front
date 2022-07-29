@@ -308,7 +308,7 @@
             v-if="typeof labeler.getShapeList == 'function'"
           >
             <template v-for="(item, index) in labeler.getShapeList()">
-              <div class="lb-as-l" :key="index">
+              <div class="lb-as-l" :key="index" :class="sel2 === item.id ? 'active' : ''">
                 <button type="button" class="width70" @click="onActiveLabel(index)">
                   <span class="lb-l-nm">{{
                     item.data ? labelNm(item.data) : "-"
@@ -388,6 +388,7 @@ export default class extends Vue {
   currentMenu: any = {};
   selDate = "";
   sel1 = "";
+  sel2 = "";  // 2022.07.29. design.song
   selIndex = -1;
   selItem: any = {};
   selLabel = "";
@@ -428,6 +429,7 @@ export default class extends Vue {
     console.log("item====", item);
     this.selDate = workDate;
     this.sel1 = workNo;
+    this.sel2 = "";
     this.selImg = workNo;
     this.selItem = item;
     this.selIndex = index;
@@ -604,6 +606,7 @@ export default class extends Vue {
     labeler.on("click", (obj) => {
       if(obj.ante.currentTarget == null) return;  // design.song
       const data = obj.ante.currentTarget.data;
+      this.sel2 = obj.ante.currentTarget.id;
       this.onSelLabel(data);
     });
 
@@ -823,6 +826,7 @@ export default class extends Vue {
   onActiveLabel(index) {
     this.labeler.getShapeList().map((v, idx) => {
       if (idx === index) {
+        this.sel2 = v.id;
         console.log(v);
         this.onSelLabel(v.data);
         v.setActive(true);
