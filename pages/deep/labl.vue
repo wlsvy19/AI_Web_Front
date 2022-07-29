@@ -79,24 +79,15 @@
         <div class="vod-l">
           <div class="view-mini mb25">
             <figure>
-              <img v-if="pageType === '꺾임'"
+              <!--
+              <img
                 alt="번호판 이미지"
                 width="152"
                 height="88"
-                :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
-              />
-              <img v-else-if="pageType === '차량번호'"
-                alt="번호판 이미지"
-                width="152"
-                height="88"
-                :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
-              />
-              <img v-else
-                alt="번호판 이미지"
-                width="152"
-                height="88"
+                v-if="selImg"
                 :src="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
+              -->
             </figure>
           </div>
 
@@ -174,7 +165,7 @@
             </div>
             <div class="label-v-ctl">
               <div class="flex lb-btn">
-                <button type="button" class="bt-lb-potin">선택</button>
+                <button type="button" class="bt-lb-potin" @click="setSelection()">선택</button>
                 <button
                   v-if="pageType === '빛' || pageType === '꺾임'"
                   type="button"
@@ -309,7 +300,7 @@
           >
             <template v-for="(item, index) in labeler.getShapeList()">
               <div class="lb-as-l" :key="index">
-                <button type="button" @click="onActiveLabel(index)">
+                <button type="button" class="width70" @click="onActiveLabel(index)">
                   <span class="lb-l-nm">{{
                     item.data ? labelNm(item.data) : "-"
                   }}</span>
@@ -338,42 +329,47 @@ import Layout from "~/components/layout.vue";
 import LabelImg, { IShapeOptions, Points, Shape } from "label-img";
 import commonService from "~/service/common-service";
 import { IPageInfoModel } from "~/models/common-model";
-const style1 = {
+
+// 2022.07.29. design.song
+const COLORS = ['red', 'blue','mediumslateblue', 'cyan', 'lime', 'orchid'];
+const rectStyle = {
   normal: {
-    dotColor: "red", // 坐标点颜色
-    dotRadius: 5, // 坐标点大小
-    lineColor: "#c30", // 连线颜色
-    lineWidth: 3, // 连线宽度
-    fillColor: "transparent", // 填充色
+    dotColor: "aqua", 
+    dotRadius: 5, 
+    lineColor: "#c30", 
+    lineWidth: 2, 
+    fillColor: "transparent", 
+    opacity: 0.1,
   },
   active: {
-    dotColor: "red", // 坐标点颜色
-    dotRadius: 5, // 坐标点大小
-    lineColor: "#c30", // 连线颜色
-    lineWidth: 3, // 连线宽度
-    fillColor: "transparent", // 填充色
+    dotColor: "yellow", 
+    dotRadius: 5,
+    lineColor: "yellow", 
+    lineWidth: 3, 
+    fillColor: "yellow", 
+    opacity: 0.2,
   },
 };
-const shapeOptions = {
-  //registerID: "I-10001",
-  //id: "I0001", // 图形唯一id 可自动生成
-  type: "Rect", // 图形类型 必填 Polygon | Rect
-  name: "tupian1", // 图形名称
-  positions: [
-    [533, 229],
-    [712, 229],
-    [712, 426],
-    [533, 426],
-  ], // 坐标集合 ex: [[0, 0], [100, 100]]
-  data: "", //{ text: "111" }, // 自定义数据 可用于存储实体属性等内容
-  tag: "hello1", // 展示在图形上的说明标签
-  showTag: true, // 是否展示标签
-  closed: false, // 是否闭合
-  visible: true, // 是否可见
-  active: false, // 是否被选中
-  disabled: false, // 是否禁用
-  style: style1, // 图形样式
+
+const polygonStyle = {
+  normal: {
+    dotColor: "green", 
+    dotRadius: 5, 
+    lineColor: "#c30", 
+    lineWidth: 2, 
+    fillColor: "orange", 
+    opacity: 0.1,
+  },
+  active: {
+    dotColor: "yellow", 
+    dotRadius: 5,
+    lineColor: "yellow", 
+    lineWidth: 3, 
+    fillColor: "yellow", 
+    opacity: 0.2,
+  },
 };
+
 @Component({ components: { Layout } })
 export default class extends Vue {
   @Prop()
@@ -394,8 +390,11 @@ export default class extends Vue {
   dataset: any = { learnDtstType: "" };
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
   labelTypeList: any = [];
+  shapeID : 0;
   // labelWorkList: any = [];
   created() {
+    console.log("====pageType====", this.pageType);
+    this.shapeID = 0;
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
   }
@@ -429,10 +428,13 @@ export default class extends Vue {
     }));
     if (this.selImg) {
       if (this.pageType === "꺾임") {
-        this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        console.log("onSelImg: " + `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else if (this.pageType === "차량번호") {
-        this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        console.log("onSelImg: " + `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else {
+        console.log("onSelImg: " + `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
         this.labeler.load(`/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
       }
     }
@@ -447,23 +449,44 @@ export default class extends Vue {
       },
       "/api/label-rslt/data"
     );
-
     if (label && label.labelJson) {
       console.log(label.labelJson);
       const labelArr = JSON.parse(label.labelJson);
-      // this.labeler.label("rect");
-      let i = 0;
+      
+      // 2022.07.29. design.song
+      let typeName = "";
+      switch(this.pageType)
+      {
+        case "꺾임":
+        case "빛":
+          typeName = "Polygon";
+          break;
+
+        case "번호판":
+        case "차량번호":
+          typeName = "Rect";
+          break;
+      }
       for (item of labelArr) {
-        console.log("tag", i);
+        this.shapeID++;
+        let colorIndex = this.shapeID % COLORS.length;
+        let itemID = String(this.shapeID);
         const shape = new Shape({
-          ...shapeOptions,
-          tag: "" + i++,
+          type: typeName,
+          registerID: itemID,
+          name: itemID,
+          ...item,
+          style: typeName == "Rect" ? rectStyle : polygonStyle,
           visible2: true,
           visible: true,
-          type: "Rect",
-          ...item,
           showTag: true,
+          tag: item.data,
         } as IShapeOptions);
+
+        // apply different color
+        shape.style.normal.dotColor = COLORS[colorIndex];
+        shape.style.normal.lineColor = COLORS[colorIndex];
+        shape.style.normal.fillColor = COLORS[colorIndex];
         this.labeler.addShape(shape);
         this.labeler.render();
       }
@@ -545,34 +568,32 @@ export default class extends Vue {
     console.log("dataset", this.dataset);
     const element: HTMLDivElement = document.getElementById("img-view") as any;
 
-    let width = 1200;
-    let height = 600;
-
     const labeler = new LabelImg(element, {
-      // width: 1200,
-      // height: 600,
-      width : width,
-      height: height,
-      bgColor: `#000`, // 背景色
+      width: 800,
+      height: 600,
+      bgColor: `#000`, // black
     });
-    // 注册图形
+    
+    // 2022.07.29. design.song
+    // 웹에서 신규 박스 그릴 시 아래 등록된 정보로 그려진다.
     labeler.register("polygon", {
-      name: "test polygon",
+      name: "insert polygon",
       type: "Polygon",
       tag: "폴리곤",
       showTag: false,
-      style: style1,
+      style: polygonStyle,
     });
 
     labeler.register("rect", {
-      name: "test rect",
+      name: "insert rect",
       type: "Rect",
       tag: "사각형",
       showTag: false,
-      style: style1,
+      style: rectStyle,
     });
 
-    labeler.on("dblclick", (obj) => {
+    labeler.on("click", (obj) => {
+      if(obj.ante.currentTarget == null) return;  // design.song
       const data = obj.ante.currentTarget.data;
       this.onSelLabel(data);
     });
@@ -610,6 +631,7 @@ export default class extends Vue {
         ...v,
         checked: false,
       }));
+      console.log("=====", 1111);
       this.labelTypeList = labelTypeList;
     }
     if (this.pageType === "꺾임") {
@@ -668,14 +690,22 @@ export default class extends Vue {
     console.log(lis);
     alert(JSON.stringify(lis));
   }
+  setSelection() {
+    console.log('setSelection');
+    this.labeler.labelOff();
+    this.nonActive();
+  }
   setLabel(type: string) {
-    console.log(type);
+    console.log('setLabel: ' + type);
+    this.nonActive();
     this.labeler.label(type);
   }
   reDraw() {
+    console.log('reDraw');
     this.labeler.labelOff();
   }
   onSelLabel(val) {
+    console.log("onSelLabel: " + val);
     this.labelTypeList = this.labelTypeList.map((v) => ({
       ...v,
       checked: v.cmmnCd === val,
@@ -728,25 +758,31 @@ export default class extends Vue {
     });
     this.labeler.render();
   }
+  
   add(type: string, tag) {
+    this.shapeID++;
     let Shape = LabelImg.Shape;
+
     if (type === "rect") {
       const shape = new Shape({
-        ...shapeOptions,
-        type: "Rect",
-        tag: tag,
+        type: 'Rect',
+        registerID: String(this.shapeID),
+        name: 'rect',
         positions: [
           [533, 229],
           [712, 229],
           [712, 426],
           [533, 426],
         ],
+        style: rectStyle
       } as IShapeOptions);
       this.labeler.addShape(shape);
-    } else {
+    } 
+    else {
       const shape = new Shape({
-        ...shapeOptions,
-        type: "Polygon",
+        type: 'Polygon',
+        registerID: String(this.shapeID),
+        name: 'polygon',
         positions: [
           [214.37, 69.615],
           [194.48, 117.13],
@@ -756,6 +792,7 @@ export default class extends Vue {
           [427.635, 64.09],
           [236.47, 51.935],
         ],
+        style: polygonStyle
       } as IShapeOptions);
       this.labeler.addShape(shape);
     }
@@ -783,6 +820,7 @@ export default class extends Vue {
       } else v.setActive(false);
       return v;
     });
+    console.log("onActiveLabel: " + index);
     this.labeler.render();
   }
   onRemoveLabel() {
