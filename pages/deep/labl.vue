@@ -79,15 +79,24 @@
         <div class="vod-l">
           <div class="view-mini mb25">
             <figure>
-              <!--
-              <img
+              <img v-if="pageType === '꺾임'"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
-                v-if="selImg"
+                :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
+              />
+              <img v-else-if="pageType === '차량번호'"
+                alt="번호판 이미지"
+                width="152"
+                height="88"
+                :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
+              />
+              <img v-else
+                alt="번호판 이미지"
+                width="152"
+                height="88"
                 :src="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              -->
             </figure>
           </div>
 
