@@ -79,15 +79,24 @@
         <div class="vod-l">
           <div class="view-mini mb25">
             <figure>
-              <!--
-              <img
+              <img v-if="pageType === '꺾임'"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
-                v-if="selImg"
+                :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
+              />
+              <img v-else-if="pageType === '차량번호'"
+                alt="번호판 이미지"
+                width="152"
+                height="88"
+                :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
+              />
+              <img v-else
+                alt="번호판 이미지"
+                width="152"
+                height="88"
                 :src="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              -->
             </figure>
           </div>
 
@@ -334,16 +343,15 @@ const style1 = {
     dotColor: "red", // 坐标点颜色
     dotRadius: 5, // 坐标点大小
     lineColor: "#c30", // 连线颜色
-    lineWidth: 1, // 连线宽度
+    lineWidth: 3, // 连线宽度
     fillColor: "transparent", // 填充色
   },
   active: {
     dotColor: "red", // 坐标点颜色
     dotRadius: 5, // 坐标点大小
     lineColor: "#c30", // 连线颜色
-    lineWidth: 1, // 连线宽度
-    fillColor: "blue", // 填充色
-    //opacity: 0.8,
+    lineWidth: 3, // 连线宽度
+    fillColor: "transparent", // 填充色
   },
 };
 const shapeOptions = {
@@ -388,7 +396,6 @@ export default class extends Vue {
   labelTypeList: any = [];
   // labelWorkList: any = [];
   created() {
-    console.log("====pageType====", this.pageType);
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
   }
@@ -422,13 +429,10 @@ export default class extends Vue {
     }));
     if (this.selImg) {
       if (this.pageType === "꺾임") {
-        console.log("onSelImg: " + `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
-        this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
+        this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
       } else if (this.pageType === "차량번호") {
-        console.log("onSelImg: " + `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
-        this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
+        this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
       } else {
-        console.log("onSelImg: " + `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
         this.labeler.load(`/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
       }
     }
@@ -443,6 +447,7 @@ export default class extends Vue {
       },
       "/api/label-rslt/data"
     );
+
     if (label && label.labelJson) {
       console.log(label.labelJson);
       const labelArr = JSON.parse(label.labelJson);
@@ -540,30 +545,34 @@ export default class extends Vue {
     console.log("dataset", this.dataset);
     const element: HTMLDivElement = document.getElementById("img-view") as any;
 
-    const labeler = new LabelImg(element, {
-      width: 800,
-      height: 600,
-      bgColor: `#000`, // black
-    });
-    // // 注册图形
-    // labeler.register("polygon", {
-    //   name: "test polygon",
-    //   type: "Polygon",
-    //   tag: "폴리곤",
-    //   showTag: false,
-    //   style: style1,
-    // });
+    let width = 1200;
+    let height = 600;
 
-    // labeler.register("rect", {
-    //   name: "test rect",
-    //   type: "Rect",
-    //   tag: "사각형",
-    //   showTag: false,
-    //   style: style1,
-    // });
+    const labeler = new LabelImg(element, {
+      // width: 1200,
+      // height: 600,
+      width : width,
+      height: height,
+      bgColor: `#000`, // 背景色
+    });
+    // 注册图形
+    labeler.register("polygon", {
+      name: "test polygon",
+      type: "Polygon",
+      tag: "폴리곤",
+      showTag: false,
+      style: style1,
+    });
+
+    labeler.register("rect", {
+      name: "test rect",
+      type: "Rect",
+      tag: "사각형",
+      showTag: false,
+      style: style1,
+    });
 
     labeler.on("dblclick", (obj) => {
-      if(obj.ante.currentTarget == null) return;  // design.song
       const data = obj.ante.currentTarget.data;
       this.onSelLabel(data);
     });
@@ -601,7 +610,6 @@ export default class extends Vue {
         ...v,
         checked: false,
       }));
-      console.log("=====", 1111);
       this.labelTypeList = labelTypeList;
     }
     if (this.pageType === "꺾임") {
@@ -668,7 +676,6 @@ export default class extends Vue {
     this.labeler.labelOff();
   }
   onSelLabel(val) {
-    console.log("onSelLabel: " + val);
     this.labelTypeList = this.labelTypeList.map((v) => ({
       ...v,
       checked: v.cmmnCd === val,
@@ -776,7 +783,6 @@ export default class extends Vue {
       } else v.setActive(false);
       return v;
     });
-    console.log("onActiveLabel: " + index);
     this.labeler.render();
   }
   onRemoveLabel() {

@@ -26,7 +26,7 @@
               <!-- chart -->
               <div id="combine-chart"></div>
 
-              <div class="table-l1">
+              <!-- <div class="table-l1">
                 <table>
                   <thead>
                     <tr>
@@ -61,8 +61,36 @@
                     </tr>
                   </tbody>
                 </table>
+              </div> -->
+              <div class="table-l1 tb-op1 tb-ov1">
+              <table class="tx-c">
+                <thead>
+                  <tr>
+                    <th class="tx-c">생성일자</th>
+                    <th class="tx-c">통합데이터셋ID</th>
+                    <th class="tx-c">단위데이터셋 개수</th>
+                    <th class="tx-c">학습데이터 개수</th>
+                    <th class="tx-c">삭제</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(item, index) in data">
+                    <tr :key="index">
+                      <td>{{ item.workDate }}</td>
+                      <td>{{ item.combDtstId }}</td>
+                      <td>{{ item.unitDtstCnt }}</td>
+                      <td>{{ item.totalCnt }}</td>
+                      <td><button type="button">삭제</button></td>
+                    </tr>
+                  </template>
+                  <tr v-if="data.length == 0">
+                    <td colspan="7">조회된 데이터가 없습니다.</td>
+                  </tr>
+                </tbody>
+              </table>
               </div>
-              <div class="paging mt40">
+
+              <!-- <div class="paging mt40">
                 <a href="#">맨처음</a>
                 <a href="#">이전</a>
                 <a href="#">1</a>
@@ -71,14 +99,18 @@
                 <a href="#">4</a>
                 <a href="#">다음</a>
                 <a href="#">맨마지막</a>
-              </div>
+              </div> -->
+              <pagination
+                :pageInfo="pageInfo"
+                @pagination="(p) => onSearch(p.pageNo)"
+              />
             </div>
           </div>
 
           <!-- 우측 컨텐츠영역 -->
           <div class="clmBox">
             <div class="clm-body4">
-              <div class="table-l1 mt50">
+              <!-- <div class="table-l1 mt50">
                 <table>
                   <thead>
                     <tr>
@@ -119,7 +151,31 @@
                 <a href="#">4</a>
                 <a href="#">다음</a>
                 <a href="#">맨마지막</a>
+              </div> -->
+              <div class="table-l1 tb-op1 tb-ov1">
+              <table class="tx-c">
+                <thead>
+                  <tr>
+                    <th class="tx-c">생성일자</th>
+                    <th class="tx-c">단위데이터셋ID</th>
+                    <th class="tx-c">학습데이터 개수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(item, index) in data2">
+                    <tr :key="index">
+                      <td>{{ item.workDate }}</td>
+                      <td>{{ item.unitDtstId }}</td>
+                      <td>{{ item.totalCnt }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
               </div>
+              <pagination
+                :pageInfo="pageInfo2"
+                @pagination="(p) => onSubSearch(p.pageNo)"
+              />
 
               <!-- 생성버튼 -->
               <button
@@ -139,9 +195,26 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
+import { IPageInfoModel } from "~/models/common-model";
+import commonService from "~/service/common-service";
+import { comma } from "~/utils/common";
 import * as echarts from "echarts";
 @Component({ components: { Layout } })
 export default class extends Vue {
+  data = {};
+  data2 = {};
+  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+    search = {
+    combDtstType: "A",
+    ordfield: "work_dttm",
+    order: "ASC",
+  }
+  pageInfo2: IPageInfoModel = commonService.getPageInitInfo();
+    search2 = {
+    combDtstId: "TD-20220720-001",
+    ordfield: "work_dttm",
+    order: "ASC",
+  }
   mounted() {
     this.init();
   }
@@ -225,6 +298,30 @@ export default class extends Vue {
     }
 
     window.addEventListener("resize", myChart.resize);
+  }
+  async onSearch(pageNo: number) {
+    const newpage = { ...this.pageInfo, pageNo };
+    const data = await commonService.request(
+      { ...this.search, ...newpage },
+      "/api/comb-dtst/list"
+    );
+    newpage.totalCount = data.page.totalCount;
+    this.data = data.list;
+    this.pageInfo = { ...newpage };
+  }
+  async onSubSearch(pageNo: number) {
+    const newpage2 = { ...this.pageInfo2, pageNo };
+    const data2 = await commonService.request(
+      { ...this.search2, ...newpage2, },
+      "/api/unit-dtst/list/id"
+    );
+    newpage2.totalCount = data2.page.totalCount;
+    this.data2 = data2.list;
+    this.pageInfo2 = { ...newpage2 };
+  }
+  created() {
+    this.onSearch(1);
+    this.onSubSearch(1);
   }
 }
 </script>

@@ -21,15 +21,18 @@
               <table>
                 <thead>
                   <tr>
-                    <th>통합데이터 셋 ID</th>
-                    <th>데이터 개수</th>
+                    <th>유형</th>
+                    <th>가중치ID</th>
+                    <th>학습일자</th>
                   </tr>
                 </thead>
                 <tbody>
                   <template v-for="(item, index) in weightList">
-                    <tr :key="index" @click="onSearchDataset(item)">
+                    <!-- <tr :key="index" @click="onSearchDataset(item)"> -->
+                    <tr :key="index">
+                      <td class="tx-c">{{ item.weightType }}</td>
                       <td class="tx-c">{{ item.weightId }}</td>
-                      <td class="tx-c">344,023</td>
+                      <td class="tx-c">{{ item.workDate }}</td>
                     </tr>
                   </template>
                   <tr v-if="weightList.length === 0">
@@ -148,6 +151,7 @@ export default class extends Vue {
   isRun = "";
   @Prop()
   pageType: string;
+  code = {};
   weightList = [];
   dtstList = [];
   dtstListBak = [];

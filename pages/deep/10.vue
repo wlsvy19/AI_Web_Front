@@ -87,7 +87,7 @@
                           :id="'ch00' + index"
                           name=""
                           disabled
-                          :checked="item.prosYn === 'Y'"
+                          :checked="item.dtrmYn === 'Y'"
                         />
                         <label for="ch001"></label>
                       </span>
@@ -194,9 +194,9 @@
               type="button"
               id="btn-classClose"
               class="btn-bg-gn"
-              @click="onOk(selItem.prosYn === 'Y' ? 'N' : 'Y')"
+              @click="onOk(selItem.dtrmYn === 'Y' ? 'N' : 'Y')"
             >
-              {{ selItem.prosYn === "Y" ? "미확정" : "확정" }}
+              {{ selItem.dtrmYn === "Y" ? "미확정" : "확정" }}
             </button>
           </div>
         </div>
@@ -286,7 +286,8 @@ export default class extends Vue {
     this.selIndex = index;
     this.code.NMRECG_CD = this.code.NMRECG_CD.map((v) => ({
       ...v,
-      checked: v.cmmnCd === item.nmrecgCd,
+      // checked: v.cmmnCd === item.nmrecgCd,
+      checked: v.cmmnCd === (item.dtrmNmrecgCd === "" ? item.nmrecgCd : item.dtrmNmrecgCd)
     }));
   }
   onShowPop(show) {
@@ -344,28 +345,26 @@ export default class extends Vue {
   onKeyup(event) {
     console.log(event);
     if (event.key === "Enter") {
-      this.onOk(this.selItem.prosYn === "Y" ? "N" : "Y");
+      this.onOk(this.selItem.dtrmYn === "Y" ? "N" : "Y");
     } else if (event.key === "ArrowRight") {
       this.onNextImage();
     } else if (event.key === "ArrowLeft") {
       this.onBeforeImage();
     }
   }
-  async onOk(prosYn) {
-    console.log("====prosYn", prosYn);
+  async onOk(dtrmYn) {
     const item = this.selItem;
-    console.log("item", item);
     if (!item.newNmrecgCd) {
       notification("확정유형을 선택하세요.");
       return;
     } else {
-      item.prosYn = prosYn;
+      item.dtrmYn = dtrmYn;
       await commonService.request(
         {
           workDate: item.workDate,
           workNo: item.workNo,
-          nmrecgCd: prosYn === "N" ? "" : item.newNmrecgCd,
-          prosYn,
+          nmrecgCd: dtrmYn === "N" ? "" : item.newNmrecgCd,
+          dtrmYn,
         },
         "/api/crgw-img-data/save"
       );

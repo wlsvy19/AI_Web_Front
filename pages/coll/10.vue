@@ -133,7 +133,7 @@ export default class extends Vue {
       yAxis: [
         {
           type: "value",
-          name: "수집현황",
+          name: "수집건수",
           min: 0,
           // max: Math.max(),
           interval: 5000,
@@ -172,28 +172,28 @@ export default class extends Vue {
           },
           data: [...cnts],
         },
-        {
-          name: "수집현황",
-          type: "line",
-          yAxisIndex: 1,
-          itemStyle: {
-            color: "#88BF3D",
-          },
-          label: {
-            show: true,
-            position: "top",
-            color: "#88BF3D",
-          },
-          lineStyle: {
-            type: "dotted",
-          },
-          tooltip: {
-            valueFormatter: function (value) {
-              return value;
-            },
-          },
-          data: [...cnts],
-        },
+        // {
+        //   name: "수집현황",
+        //   type: "line",
+        //   yAxisIndex: 1,
+        //   itemStyle: {
+        //     color: "#88BF3D",
+        //   },
+        //   label: {
+        //     show: true,
+        //     position: "top",
+        //     color: "#88BF3D",
+        //   },
+        //   lineStyle: {
+        //     type: "dotted",
+        //   },
+        //   tooltip: {
+        //     valueFormatter: function (value) {
+        //       return value;
+        //     },
+        //   },
+        //   data: [...cnts],
+        // },
       ],
     };
 
@@ -224,21 +224,21 @@ export default class extends Vue {
   async changeDate() {
     const lineList = await commonService.request(
       { searchDate: this.selDate },
-      "/api/comb-dtst/count"
+      "/api/crgw-img-data/list/count"
     );
     console.log(lineList);
     this.lineList = lineList;
     this.chart();
     this.dataList = lineList;
   }
-  async onDataList() {
-    const dataList = await commonService.request(
-      { date: this.date },
-      "/api/comb-dtst/list"
-    );
-    console.log("===", dataList);
-    this.dataList = dataList;
-  }
+  // async onDataList() {
+  //   const dataList = await commonService.request(
+  //     { date: this.date },
+  //     "/api/comb-dtst/list"
+  //   );
+  //   console.log("===", dataList);
+  //   this.dataList = dataList;
+  // }
   async codeList() {
     const codeList = await commonService.request(
       ["NGTP"],
