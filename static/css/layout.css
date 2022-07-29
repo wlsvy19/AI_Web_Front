@@ -1522,3 +1522,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
   width: 150px;
   margin: 20px auto;
 }
+
+.width70 {
+  width: 70%;
+}
