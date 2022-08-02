@@ -6,14 +6,15 @@
           <h2 class="ti wid6p">
             {{ ((currentMenu || {}).subMenu || {}).MENU_NM }}
           </h2>
-          <el-date-picker
+          <!-- 준공검사 주석 -->
+          <!-- <el-date-picker
             v-model="search.workDate"
             value-format="yyyy-MM-dd"
             type="date"
             placeholder="검색날짜"
           >
-          </el-date-picker>
-          <div class="wid4p tx-r">
+          </el-date-picker> -->
+          <!-- <div class="wid4p tx-r">
             <label for="sel002" class="sl-nm">엔진 종류</label>
             <select id="sel002" class="select" v-model="search.learnDtstType">
               <option value="">선택</option>
@@ -30,7 +31,7 @@
             >
               조회
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -152,6 +153,11 @@
           <div class="vod-result">
             {{ codeNm(selItem.nmrecgCd) }}
           </div>
+          
+          <div class="tx-c" @click="onShowPop(true)" style="cursor: pointer">
+            <span class="cl-v">유형별 설명보기</span>
+          </div>
+
           <h2 class="ti-s mb10">사용자 확정유형</h2>
           <fieldset class="s-fm">
             <legend>분류 결과 콤보박스</legend>
@@ -182,9 +188,6 @@
               </template>
             </select> -->
 
-            <div class="tx-c" @click="onShowPop(true)" style="cursor: pointer">
-              <span class="cl-v">유형별 설명보기</span>
-            </div>
           </fieldset>
 
           <!-- 팝업오픈 이벤트 걸려 있음 -->
@@ -287,7 +290,7 @@ export default class extends Vue {
     this.code.NMRECG_CD = this.code.NMRECG_CD.map((v) => ({
       ...v,
       // checked: v.cmmnCd === item.nmrecgCd,
-      checked: v.cmmnCd === (item.dtrmNmrecgCd === "" ? item.nmrecgCd : item.dtrmNmrecgCd)
+      checked: v.cmmnCd === ((item.dtrmNmrecgCd === "" || item.dtrmNmrecgCd === null) ? item.nmrecgCd : item.dtrmNmrecgCd)
     }));
   }
   onShowPop(show) {

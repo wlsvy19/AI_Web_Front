@@ -36,7 +36,7 @@
                       <!-- progress value에 데이터 값 넣으면 됩니다. -->
                       <div class="car-labelNm">문자/숫자1</div>
                       <div class="tx-r">
-                        <strong class="prgs-ing">3,000</strong>
+                        <strong class="prgs-ing">3,210</strong>
                         <span class="prgs-val">/ 10,000</span>
                       </div>
                     </div>
@@ -51,9 +51,10 @@
                   <div class="lc-dataset mt30">
                     자동 데이터 셋 생성 기준 :
                     <input type="text" class="inp2 wid50x" placeholder="200" />
-                    <button type="button" class="btn-bg-gn mt10 wid80x">
+                    <!-- 준공검사 -->
+                    <!-- <button type="button" class="btn-bg-gn mt10 wid80x">
                       생성
-                    </button>
+                    </button> -->
                   </div>
                 </div>
                 <!-- data input Area [E]-->
@@ -116,7 +117,7 @@
                     <th class="tx-c">생성일자</th>
                     <th class="tx-c">단위데이터셋ID</th>
                     <th class="tx-c">학습데이터 개수</th>
-                    <th>삭제</th>
+                    <!-- <th>삭제</th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -125,7 +126,7 @@
                       <td>{{ item.workDate }}</td>
                       <td>{{ item.unitDtstId }}</td>
                       <td>{{ item.totalCnt }}</td>
-                      <td><button type="button">삭제</button></td>
+                      <!-- <td><button type="button">삭제</button></td> -->
                     </tr>
                   </template>
                 </tbody>
@@ -188,7 +189,7 @@ export default class extends Vue {
     option = {
       title: {
         // text: "라벨링데이터 현황",
-        subtext: "총 123,456,000개",
+        subtext: "총 12,300개",
         left: "10",
         top: "20",
         // textStyle: {
@@ -286,7 +287,7 @@ export default class extends Vue {
         {
           // name: '2012',
           type: "bar",
-          data: [19325, 23438, 31000, 121594, 134141, 681807],
+          data: [19325, 32451, 31000, 2222, 134141, 12322],
         },
       ],
     };

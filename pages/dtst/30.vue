@@ -70,7 +70,7 @@
                     <th class="tx-c">통합데이터셋ID</th>
                     <th class="tx-c">단위데이터셋 개수</th>
                     <th class="tx-c">학습데이터 개수</th>
-                    <th class="tx-c">삭제</th>
+                    <!-- <th class="tx-c">삭제</th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -80,7 +80,7 @@
                       <td>{{ item.combDtstId }}</td>
                       <td>{{ item.unitDtstCnt }}</td>
                       <td>{{ item.totalCnt }}</td>
-                      <td><button type="button">삭제</button></td>
+                      <!-- <td><button type="button">삭제</button></td> -->
                     </tr>
                   </template>
                   <tr v-if="data.length == 0">
@@ -177,6 +177,7 @@
                 @pagination="(p) => onSubSearch(p.pageNo)"
               />
 
+              <!-- 준공검사 -->
               <!-- 생성버튼 -->
               <button
                 type="button"

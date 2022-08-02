@@ -7,12 +7,12 @@
           <div class="wid8p tx-r">
             <fieldset class="s-fm">
               <legend>검색영역</legend>
-              <span>학습 시작 시간</span>
+              <!-- <span>학습 시작 시간</span>
               <el-date-picker v-model="search.startDate" type="date">
               </el-date-picker>
               <span class="ml5 mr5">~</span>
               <el-date-picker v-model="search.endDate" type="date">
-              </el-date-picker>
+              </el-date-picker> -->
               <label for="sel002" class="sl-nm">엔진 종류</label>
               <select
                 id="sel002"

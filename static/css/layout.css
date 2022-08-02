@@ -129,6 +129,8 @@ nav ol > li > .subMenu > ul > li > a:hover {
   width: 1280px;
   margin: 0 auto;
   padding: 13px 0 0 3px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 #location #loc-in .loc-arr {

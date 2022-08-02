@@ -40,13 +40,13 @@
                 <!-- progress value에 데이터 값 넣으면 됩니다. -->
                 <div class="car-labelNm">문자/숫자2</div>
                 <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
+                  <strong class="prgs-ing">4,000</strong>
                   <span class="prgs-val">/ 10,000</span>
                 </div>
               </div>
               <progress
                 class="prog-bar"
-                value="30"
+                value="40"
                 min="10"
                 max="100"
               ></progress>
@@ -59,13 +59,13 @@
                 <!-- progress value에 데이터 값 넣으면 됩니다. -->
                 <div class="car-labelNm">문자/숫자1</div>
                 <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
+                  <strong class="prgs-ing">5,000</strong>
                   <span class="prgs-val">/ 10,000</span>
                 </div>
               </div>
               <progress
                 class="prog-bar"
-                value="30"
+                value="50"
                 min="10"
                 max="100"
               ></progress>
@@ -77,13 +77,13 @@
                 <!-- progress value에 데이터 값 넣으면 됩니다. -->
                 <div class="car-labelNm">문자/숫자3</div>
                 <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
+                  <strong class="prgs-ing">1,000</strong>
                   <span class="prgs-val">/ 10,000</span>
                 </div>
               </div>
               <progress
                 class="prog-bar"
-                value="30"
+                value="10"
                 min="10"
                 max="100"
               ></progress>
@@ -95,13 +95,13 @@
                 <!-- progress value에 데이터 값 넣으면 됩니다. -->
                 <div class="car-labelNm">꺾임/훼손</div>
                 <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
+                  <strong class="prgs-ing">2,000</strong>
                   <span class="prgs-val">/ 10,000</span>
                 </div>
               </div>
               <progress
                 class="prog-bar"
-                value="30"
+                value="20"
                 min="10"
                 max="100"
               ></progress>
@@ -171,7 +171,7 @@ export default class extends Vue {
     option = {
       title: {
         text: "라벨링데이터 현황",
-        subtext: "총 123,456,000",
+        subtext: "총 234,000",
         left: "10",
         top: "20",
         textStyle: {
@@ -245,7 +245,7 @@ export default class extends Vue {
     option2 = {
       title: {
         text: "단위데이터 셋 현황",
-        subtext: "총 123,456,000",
+        subtext: "총 12,300",
         left: "10",
         top: "20",
         textStyle: {
@@ -319,7 +319,7 @@ export default class extends Vue {
     option3 = {
       title: {
         text: "통합데이터 셋 현황",
-        subtext: "총 123,456,000",
+        subtext: "총 104",
         left: "10",
         top: "20",
         textStyle: {

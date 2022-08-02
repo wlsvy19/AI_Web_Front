@@ -5,7 +5,7 @@
         <div class="tit-top flex flex-btw">
           <h2 class="ti wid6p">재인식 엔진 비교 검증</h2>
           <div class="wid4p tx-r pr25">
-            <button type="button" class="btn wid138x btn-sz2 btn-bg-gn">
+            <button type="button" class="btn wid138x btn-sz2 btn-bg-gn" @click="$emit('onRun', '')">             
               신규 검증하기
             </button>
           </div>
@@ -19,7 +19,7 @@
             <dl class="target-top">
               <dt class="wid4p">대상</dt>
               <dd class="wid6p">
-                OO본부OO본부OO본부 OO지사 OO영업소 TCS/HIPASS 전체차로
+                수도권 본부 수원 지사 서울영업소 TCS/HIPASS 전체차로
               </dd>
             </dl>
             <dl class="target-btm">
@@ -28,9 +28,9 @@
               <dt class="wid4p">검증완료 시간</dt>
               <dd class="wid6p">2022-04-23 12:59</dd>
               <dt class="wid4p">재인식 버전</dt>
-              <dd class="wid6p">vXXXX</dd>
+              <dd class="wid6p">v1.0.0</dd>
               <dt class="wid4p">신규학습 버전</dt>
-              <dd class="wid6p">vXXXX</dd>
+              <dd class="wid6p">v1.0.1</dd>
             </dl>
           </div>
           <!-- 비교 검증 대상 [E] -->
@@ -60,17 +60,17 @@
               <tbody>
                 <tr>
                   <td>1</td>
-                  <td>1111</td>
-                  <td>11111</td>
-                  <td>11111</td>
-                  <td>11111</td>
+                  <td>12가3456</td>
+                  <td>12가3458</td>
+                  <td>밝음</td>
+                  <td>밝음</td>
                 </tr>
                 <tr>
                   <td>2</td>
-                  <td>222222</td>
-                  <td>2222221</td>
-                  <td>2222221</td>
-                  <td>2222221</td>
+                  <td>32나2234</td>
+                  <td>33나3334</td>
+                  <td>어두움</td>
+                  <td>꺾임</td>
                 </tr>
               </tbody>
             </table>
@@ -91,25 +91,26 @@
             <div class="cmpNumstatis">
               <div id="chart-numStatis"></div>
               <span class="data-val-a">525,002</span>
-              <span class="data-val-b">14,125</span>
+              <span class="data-val-b">4,125</span>
             </div>
             <div class="cmpTypestatis">
               <div id="chart-typeStatis"></div>
               <span class="data-val-a">525,002</span>
-              <span class="data-val-b">14,125</span>
+              <span class="data-val-b">5,223</span>
             </div>
           </div>
 
           <div class="cmp-statits-btm">
             <div class="cmp-video">비디오 영상 들어갈 자리</div>
             <div class="tx-c">
-              <button
+              <!-- 준공검사 -->
+              <!-- <button
                 type="button"
                 class="btn btn-sz5 btn-gnc"
                 @click="$emit('onRun', '')"
               >
                 재처리영상 보기
-              </button>
+              </button> -->
             </div>
           </div>
         </div>

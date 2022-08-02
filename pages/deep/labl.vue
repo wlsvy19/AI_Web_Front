@@ -16,7 +16,8 @@
                 </option>
               </template>
             </select> -->
-          <template v-if="pageType === '차량번호'">
+            <!-- 준공검사 주석 -->
+          <!-- <template v-if="pageType === '차량번호'">
             <label for="sel002" class="sl-nm" style="width: 100px"
               >포함 숫자</label
             >
@@ -47,12 +48,12 @@
                 </option>
               </template>
             </select>
-          </template>
+          </template> -->
 
           <div class="wid4p tx-r">
             <legend>검색영역</legend>
-
-            <template v-if="pageType === '번호판' || true">
+            <!-- 준공검사 주석 -->
+            <!-- <template v-if="pageType === '번호판' || true">
               <label for="sel002" class="sl-nm">유형</label>
               <select id="sel002" class="select" v-model="search.nmrecgCd">
                 <option value="">전체</option>
@@ -69,7 +70,7 @@
               @click="onSearch(1)"
             >
               조회
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
@@ -217,13 +218,14 @@
             </div>
             <div class="label-bntBox">
               <div class="label-bntBox-l">
-                <button type="button" class="bt-ctl-op">
+                <!-- 준공검사 주석 -->
+                <!-- <button type="button" class="bt-ctl-op">
                   <em class="bt-up"></em>
                 </button>
                 <span id="label-opt" class="label-opt">밝기B</span>
                 <button type="button" class="bt-ctl-op">
                   <em class="bt-dw"></em>
-                </button>
+                </button> -->
               </div>
 
               <div class="label-bntBox-r">
@@ -299,6 +301,10 @@
             </template>
           </div>
 
+          <!-- <p class="st1-class">
+            <span class="cl-v" @click="onShowPop(true)">유형별 설명보기</span>
+          </p> -->
+
           <h2 class="ti-s mb10">
             라벨링 목록 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button class="btn btn-gnc" @click="onDelAll()">전체삭제</button>
@@ -329,6 +335,44 @@
         <!-- 영상학습 결과 [E] -->
       </div>
     </div>
+
+    <!-- 준공검사 -->
+    <!-- 라벨링 유형에 대한 설명 추가 -->
+    <!-- <div class="popup pop1" v-if="showPop" :style="`display:block;left:30%`">
+      <h1>라벨링 유형 설명</h1>
+
+      <div class="thumList-l1 pop-body scl">
+        <ul>
+          <template v-for="(item, index) in code.NGTP">
+            <li :key="index" class="flex">
+              <figure>
+                <img
+                  :src="`/v1/api/nmrecg-sample-info/data?cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="177"
+                  height="132"
+                />
+              </figure>
+              <div class="thm-box">
+                <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+                <p class="thm-cp">{{ item.cmmnDesc }}</p>
+              </div>
+            </li>
+          </template>
+        </ul>
+      </div>
+
+      <button type="button" class="pop-close" @click="onShowPop(false)">
+        닫기
+      </button>
+    </div>
+
+    <div
+      v-if="showPop"
+      @click="showPop = false"
+      class="mask"
+      style="display: block"
+    ></div> -->
   </layout>
 </template>
 
@@ -845,6 +889,9 @@ export default class extends Vue {
         this.labeler.remove(v.id);
       }
     });
+  }
+  onShowPop(show) {
+    this.showPop = show;
   }
 }
 </script>
