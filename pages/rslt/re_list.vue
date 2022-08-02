@@ -13,17 +13,17 @@
           <div class="engineSchBar">
             <label for="sel002" class="sl-nm">본부</label>
             <select id="sel002" class="select">
-              <option value="">전체</option>
+              <option value="">수도권</option>
             </select>
 
             <label for="sel002" class="sl-nm">지사</label>
             <select id="sel002" class="select">
-              <option value="">전체</option>
+              <option value="">수원</option>
             </select>
 
             <label for="sel002" class="sl-nm">영업소</label>
             <select id="sel002" class="select">
-              <option value="">전체</option>
+              <option value="">서울</option>
             </select>
 
             <label for="sel002" class="sl-nm">TCS/HIPASS</label>
@@ -38,7 +38,7 @@
             <br /><br />
             <label for="sel002" class="sl-nm">일시</label>
             <select id="sel002" class="select sel-calendar">
-              <option value="">2022-04-22</option>
+              <option value="">2022-07-22</option>
             </select>
             <label for="sel001" class="hidden">선택해주세요</label>
             <select id="sel001" class="select sel-time">
@@ -80,11 +80,11 @@
                   <tbody>
                     <tr class="st3tr" data-val="TD-20220305-0001">
                       <td class="tx-c">TD-20220305-0001</td>
-                      <td class="tx-c">344,023</td>
+                      <td class="tx-c">2022-07-02</td>
                     </tr>
                     <tr class="st3tr" data-val="TD-20220305-0002">
                       <td class="tx-c">TD-20220305-0002</td>
-                      <td class="tx-c">344,023</td>
+                      <td class="tx-c">2022-07-26</td>
                     </tr>
                   </tbody>
                 </table>
@@ -123,8 +123,8 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>일자</th>
-                      <th>총건수</th>
+                      <th>유형</th>
+                      <th>가중치ID</th>
                     </tr>
                   </thead>
                   <tbody>

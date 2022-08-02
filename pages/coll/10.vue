@@ -8,9 +8,10 @@
           <fieldset class="chart-ctl-sel">
             <legend>검색영역</legend>
             <label for="sel001" class="hidden">선택해주세요</label>
-            <select id="sel001" class="select">
+            <!-- 준공검사 주석 -->
+            <!-- <select id="sel001" class="select">
               <option value="">기간</option>
-            </select>
+            </select> -->
 
             <label for="sel002" class="hidden">선택해주세요</label>
             <select
