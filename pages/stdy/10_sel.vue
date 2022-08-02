@@ -177,10 +177,10 @@ export default class extends Vue {
   weight_id = "";
   created() {
     this.codeList();
-    const now = today();
-    const now1 = today("L");
-    console.log("now===", now);
-    console.log("now1===", now1);
+    // const now = today();
+    // const now1 = today("L");
+    // console.log("now===", now);
+    // console.log("now1===", now1);
   }
 
   onShowPop(show) {
