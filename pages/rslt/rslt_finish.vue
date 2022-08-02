@@ -17,7 +17,8 @@
           </div>
           <div class="chkbox2">
             <input type="checkbox" id="th001" />
-            <label for="th001" class="th_chk">확인 필요만 보기</label>
+            <!-- 준공검사 -->
+            <!-- <label for="th001" class="th_chk">확인 필요만 보기</label> -->
           </div>
         </div>
 
@@ -25,7 +26,7 @@
           <div class="ver-file_list">
             <div class="file-item" @click="onShowPop(true)">
               <figure>
-                <img src="/images/vi_ex.jpg" width="191" height="107" alt="" />
+                <img src="/images/ex1.jpg" width="191" height="107" alt="" />
               </figure>
               <!-- 결과가 동일시 -->
               <span class="ver-chk ver-checked">동일함</span>
@@ -34,7 +35,7 @@
             </div>
             <div class="file-item" @click="onShowPop(true)">
               <figure>
-                <img src="/images/vi_ex.jpg" width="191" height="107" alt="" />
+                <img src="/images/ex2.jpg" width="191" height="107" alt="" />
               </figure>
               <!-- 결과가 동일시 -->
               <span class="ver-chk ver-checked">동일함</span>
@@ -43,7 +44,7 @@
             </div>
             <div class="file-item" @click="onShowPop(true)">
               <figure>
-                <img src="/images/vi_ex.jpg" width="191" height="107" alt="" />
+                <img src="/images/ex3.jpg" width="191" height="107" alt="" />
               </figure>
               <!-- 결과가 동일시 -->
               <span class="ver-chk ver-exam">확인필요</span>
@@ -51,7 +52,7 @@
             </div>
             <div class="file-item" @click="onShowPop(true)">
               <figure>
-                <img src="/images/vi_ex.jpg" width="191" height="107" alt="" />
+                <img src="/images/ex4.jpg" width="191" height="107" alt="" />
               </figure>
               <!-- 결과가 동일시 -->
               <!-- <span class="ver-chk ver-exam">확인필요</span> -->
@@ -59,12 +60,147 @@
             </div>
             <div class="file-item" @click="onShowPop(true)">
               <figure>
-                <img src="/images/vi_ex.jpg" width="191" height="107" alt="" />
+                <img src="/images/ex5.jpg" width="191" height="107" alt="" />
               </figure>
               <!-- 결과가 동일시 -->
               <!-- <span class="ver-chk ver-exam">확인필요</span> -->
               <span class="ver-chk ver-confm">확인완료</span>
             </div>
+
+            <!--  -->
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex6.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex7.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex8.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex9.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-checked">동일함</span>
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex10.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-checked">동일함</span>
+            </div>
+
+            <!--  -->
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex11.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex12.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex13.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex14.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-checked">동일함</span>
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex15.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-checked">동일함</span>
+            </div>
+
+            <!--  -->
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex16.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex17.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-checked">동일함</span>
+              <!-- <span class="ver-chk ver-exam">확인필요</span>
+                                <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex18.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <span class="ver-chk ver-confm">확인완료</span>
+              <!-- <span class="ver-chk ver-confm">확인완료</span> -->
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex19.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-confm">확인완료</span>
+            </div>
+            <div class="file-item" @click="onShowPop(true)">
+              <figure>
+                <img src="/images/ex20.jpg" width="191" height="107" alt="" />
+              </figure>
+              <!-- 결과가 동일시 -->
+              <!-- <span class="ver-chk ver-exam">확인필요</span> -->
+              <span class="ver-chk ver-confm">확인완료</span>
+            </div>
+
+            
+            
           </div>
           <button type="button" class="file-nav file-prev">이전</button>
           <button type="button" class="file-nav file-next">다음</button>
@@ -84,11 +220,11 @@
     <div class="popup pop2" v-if="showPop" :style="`display:block;left:30%`">
       <div class="pop-body">
         <figure class="ver-m-img">
-          <img src="/images/vi_ex.jpg" width="666" height="373" alt="" />
+          <img src="/images/ex3.jpg" width="666" height="373" alt="" />
         </figure>
         <div class="ver-i-cont">
           <figure class="ver-s-img">
-            <img src="/images/vi_ex.jpg" width="232" height="129" alt="" />
+            <img src="/images/ex3.jpg" width="232" height="129" alt="" />
           </figure>
           <div class="table-v3 ver-s-cont">
             <table class="tx-c">
@@ -100,18 +236,18 @@
               <tbody>
                 <tr>
                   <th>라벨링 데이터</th>
-                  <td>서울04가1234</td>
+                  <td>45가1528</td>
                   <td>
-                    <button type="button" class="btn btn-sz2 btn-l-b-gn">
+                    <button type="button" class="btn btn-sz2 btn-l-b-gn" @click="onShowPop(false)">
                       정답
                     </button>
                   </td>
                 </tr>
                 <tr>
                   <th>라벨링 데이터</th>
-                  <td>서울04가1234</td>
+                  <td>46가1526</td>
                   <td>
-                    <button type="button" class="btn btn-sz2 btn-l-b-gn">
+                    <button type="button" class="btn btn-sz2 btn-l-b-gn" @click="onShowPop(false)">
                       정답
                     </button>
                   </td>
@@ -137,7 +273,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
-import Layout from "~/components/layout.vue";
+import Layout from "~/components/layout_sub.vue";
 @Component({ components: { Layout } })
 export default class extends Vue {
   showPop = false;

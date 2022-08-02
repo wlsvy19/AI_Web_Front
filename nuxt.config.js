@@ -15,7 +15,7 @@ export default {
    */
   pwa: { icon: { fileName: "favicon.ico?v1" } },
   head: {
-    title: "AILS",
+    title: "인공지능(A.I) 영상학습시스템",
     meta: [
       { charset: "utf-8" },
       {
@@ -44,7 +44,7 @@ export default {
   },
   server: {
     host: "0.0.0.0",
-    port: 7766, // default: 3000
+    port: 8080, // default: 3000
   },
   /*
    ** Customize the progress-bar color
@@ -89,7 +89,7 @@ export default {
   // 请求代理配置
   proxy: {
     "/v1": {
-      target: "http://127.0.0.1:8080",
+      target: "http://127.0.0.1:7766",
       changeOrigin: true,
       pathRewrite: {
         "^/v1": "",
