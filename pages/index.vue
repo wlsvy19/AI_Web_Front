@@ -28,6 +28,11 @@
           <div id="dsb-cont8"></div>
           <div id="dsb-cont9" class="mt30"></div>
         </div>
+        <div class="dashboard-cont">
+          <h1 class="ti">차로 유형별 인식률 변화</h1>
+          <div id="dsb-cont10"></div>
+          <div id="dsb-cont11" class="mt30"></div>
+        </div>
       </div>
     </div>
   </layout>
@@ -648,13 +653,13 @@ export default class extends Vue {
       xAxis: {
         type: "value",
         min: 0,
-        max: 300,
+        max: 600,
         interval: 50,
         boundaryGap: [0, 0.01],
       },
       yAxis: {
         type: "category",
-        data: ["용량"],
+        data: ["시간(초)"],
       },
       series: [
         {
@@ -716,13 +721,13 @@ export default class extends Vue {
       xAxis: {
         type: "value",
         min: 0,
-        max: 300,
+        max: 600,
         interval: 50,
         boundaryGap: [0, 0.01],
       },
       yAxis: {
         type: "category",
-        data: ["용량"],
+        data: ["시간(초)"],
       },
       series: [
         {
@@ -731,7 +736,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#ff7f00",
           },
-          data: [200],
+          data: [400],
         },
         {
           name: "소요시간",
@@ -749,6 +754,142 @@ export default class extends Vue {
     }
 
     window.addEventListener("resize", myChart9.resize);
+
+    var dom10 = document.getElementById("dsb-cont10");
+    var myChart10: any = echarts.init(dom10, null, {
+      renderer: "canvas",
+      useDirtyRect: false,
+    });
+
+    var option10;
+
+    option10 = {
+      title: {
+        text: "단차로/다차로",
+        left: "20",
+        top: "10",
+        textStyle: {
+          fontSize: 14,
+        },
+      },
+
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          type: "shadow",
+        },
+      },
+      legend: {},
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "3%",
+        containLabel: true,
+      },
+      xAxis: {
+        type: "value",
+        min: 90,
+        max: 100,
+        interval: 1,
+        boundaryGap: [0, 0.01],
+      },
+      yAxis: {
+        type: "category",
+        data: ["인식률(%)"],
+      },
+      series: [
+        {
+          name: "업데이트 전",
+          type: "bar",
+          itemStyle: {
+            color: "#fdd",
+          },
+          data: [99.5],
+        },
+        {
+          name: "업데이트 후",
+          type: "bar",
+          itemStyle: {
+            color: "#cfc",
+          },
+          data: [99.9],
+        },
+      ],
+    };
+
+    if (option10 && typeof option10 === "object") {
+      myChart10.setOption(option10);
+    }
+
+    window.addEventListener("resize", myChart10.resize);
+
+    var dom11 = document.getElementById("dsb-cont11");
+    var myChart11: any = echarts.init(dom11, null, {
+      renderer: "canvas",
+      useDirtyRect: false,
+    });
+
+    var option11;
+
+    option11 = {
+      title: {
+        text: "전면/후면",
+        left: "20",
+        top: "10",
+        textStyle: {
+          fontSize: 14,
+        },
+      },
+
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          type: "shadow",
+        },
+      },
+      legend: {},
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "3%",
+        containLabel: true,
+      },
+      xAxis: {
+        type: "value",
+        min: 90,
+        max: 100,
+        interval: 1,
+        boundaryGap: [0, 0.01],
+      },
+      yAxis: {
+        type: "category",
+        data: ["인식률(%)"],
+      },
+      series: [
+        {
+          name: "업데이트 전",
+          type: "bar",
+          itemStyle: {
+            color: "#fdd",
+          },
+          data: [99.0],
+        },
+        {
+          name: "업데이트 후",
+          type: "bar",
+          itemStyle: {
+            color: "#cfc",
+          },
+          data: [99.9],
+        },
+      ],
+    };
+
+    if (option11 && typeof option11 === "object") {
+      myChart11.setOption(option11);
+    }
+
+    window.addEventListener("resize", myChart11.resize);
   }
 }
 </script>
