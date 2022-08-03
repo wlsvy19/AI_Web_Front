@@ -55,10 +55,11 @@
             <progress
               class="cpu-memory"
               id="cpu-memory"
-              :value="serverInfo.cpuUsageRate"
+              :value="serverInfo.memUsageRate"
               min="0"
               max="100"
             ></progress>
+            <div class="txt-usage">{{ serverInfo.memUsage }}GB / {{ serverInfo.memSize }}GB</div>
             <div class="txt-memory">메모리 사용률</div>
           </div>
         </div>
@@ -69,16 +70,28 @@
             <progress
               class="gpu-memory"
               id="gpu-memory"
-              :value="serverInfo.gpuUsageRate"
+              :value="serverInfo.gpuRamUsageRate"
               min="0"
               max="100"
             ></progress>
-            <div class="txt-memory">메모리 사용률</div>
+            <div class="txt-usage">{{ serverInfo.gpuRamUsage }}MB / {{ serverInfo.gpuRamSize }}MB</div>
+            <div class="txt-memory">GPU 메모리 사용률</div>
           </div>
         </div>
 
         <div class="memChartBox">
           <div id="chart-mem"></div>
+          <div class="g-memory">
+            <progress
+              class="disk-usage"
+              id="disk-usage"
+              :value="serverInfo.diskUsageRate"
+              min="0"
+              max="100"
+            ></progress>
+            <div class="txt-usage">{{ serverInfo.diskUsage }}GB / {{ serverInfo.diskSize }}GB</div>
+            <div class="txt-memory">디스크 사용률</div>
+          </div>
         </div>
       </div>
       <!-- 오른쪽 차트 영역 [E] -->
@@ -140,11 +153,11 @@ export default class extends Vue {
       "/api/comb-dtst/info"
     );
     this.datasetInfo = data;
-    console.log("datasetInfo==", this.datasetInfo);
+    console.log("datasetInfo==", this.datasetInfo); 
   }
   async getServerStatusData() {
     const data = await commonService.request(
-      { workDate: this.dataset.workDate },
+      { server: "Training" },
       "/api/server-status/data"
     );
     this.serverInfo = data || {
@@ -475,7 +488,7 @@ export default class extends Vue {
           center: ["30%", "50%"],
           data: [
             {
-              value: this.serverInfo.gpuUsageRate, // DB 데이터 값
+              value: this.serverInfo.cpuUsageRate, // DB 데이터 값
               name: "사용률",
             },
           ],
@@ -580,7 +593,7 @@ export default class extends Vue {
 
     option5 = {
       title: {
-        text: "· MEM",
+        text: "· GPU Temp",
         left: "0%",
         top: "0%",
         textStyle: {
@@ -636,9 +649,10 @@ export default class extends Vue {
             formatter: "{value}C",
             offsetCenter: ["0", "5%"], // 위치
           },
+          center: ["30%", "50%"],
           data: [
             {
-              value: this.serverInfo.cpuTemp,
+              value: this.serverInfo.gpuTemperature,
               name: "현재온도",
             },
           ],

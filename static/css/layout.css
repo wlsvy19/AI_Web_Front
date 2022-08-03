@@ -1164,7 +1164,8 @@ nav ol > li > .subMenu > ul > li > a:hover {
   /* margin: 0 auto; */
 }
 .cpuChartBox,
-.gpuChartBox {
+.gpuChartBox,
+.memChartBox {
   position: relative;
 }
 .c-memory,
@@ -1175,17 +1176,33 @@ nav ol > li > .subMenu > ul > li > a:hover {
   margin: -10px 0 0 0;
   text-align: center;
 }
+
+.g-memory span {
+  position: absolute;
+  display: inline-block;
+  color: #fff;
+  text-align: right;
+}
+
 .cpu-memory,
-.gpu-memory {
+.gpu-memory,
+.disk-usage {
   appearance: none;
   width: 100px;
-  height: 20;
+  height: 20px;
 }
 .c-memory .txt-memory,
 .g-memory .txt-memory {
-  margin: 53px 0 0 0;
+  margin: 28px 0 0 0;
   color: var(--gray4);
 }
+.c-memory .txt-usage,
+.g-memory .txt-usage {
+  font-family: monospace;
+  font-weight: bold;
+  color: var(--gray4);
+}
+
 .cpu-memory::-webkit-progress-bar {
   background-color: #f1f1f1;
 }
@@ -1200,6 +1217,14 @@ nav ol > li > .subMenu > ul > li > a:hover {
 
 .gpu-memory::-webkit-progress-value {
   background-color: #6685f2;
+}
+
+.disk-usage::-webkit-progress-bar {
+  background-color: #f1f1f1;
+}
+
+.disk-usage::-webkit-progress-value {
+  background-color: #EC5353;
 }
 
 #chart-gpu {
