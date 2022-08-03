@@ -111,6 +111,7 @@ export default class extends Vue {
     gpuUsageRate: 0,
     memUsageRate: 0,
     cpuTemp: 0,
+    gpuTemperature: 0,
   };
   datasetInfo: any = {};
   dataset: any = {};
@@ -142,7 +143,8 @@ export default class extends Vue {
   //   if (data != null) this.learnInfo = data;
   //   console.log("==leanInfo==", data);
   // }
-  async getLeanInfo() {
+
+async getLeanInfo() {
     const dataset = this.dataset;
     const data = await commonService.request(
       {
@@ -154,9 +156,9 @@ export default class extends Vue {
       let i=0;
       var temp = {"lossRate": [], "mapValue":[], "iteration":[]}
       for (i=0;i<data.length;i++){
-        temp['lossRate'][i] = data[i].lossRate;
-        temp['mapValue'][i] = data[i].mapValue;
-        temp['iteration'][i] = data[i].iteration;
+        temp['lossRate'][i] = parseFloat(data[i].lossRate);
+        temp['mapValue'][i] = parseFloat(data[i].mapValue);
+        temp['iteration'][i] = parseInt(data[i].iteration);
       }
 
       this.learnInfo = temp; 
@@ -202,31 +204,24 @@ export default class extends Vue {
     commonService.deleteDataset();
     this.$emit("onRun", "");
   }
+
   init() {
-    const info = this.learnInfo;
-    const lossArr = info['lossRate'];
-    const mapArr = info['mapValue'];
-    const iterArr = info['iteration'];
+      const info = this.learnInfo;
+      const lossArr = info['lossRate'];
+      const mapArr = info['mapValue'];
+      const iterArr = info['iteration'];
+
+  //   const info = this.learnInfo;
+  //   const lossArr = [];
+  //   const iterArr = [];
+  //   for (let i = 0; i <= 10; i++) {
+  //     lossArr[i] = info["lossRate" + i] || 0;
+  //     iterArr[i] = info["mapValue" + i] || 0;
+  //   }
+  //   const loss0 = info.lossRate0 || 0;
+  //   const loss1 = info.lossRate1 || 0;
+  //   const loss2 = info.lossRate2 || 0;
     
-    
-    let max_loss = 0;
-    let max_map = 0;
-    let mean_map = 0;
-    for (let i = 0; i <= 10; i++) {
-      if (lossArr[i] > max_loss) max_loss = lossArr[i];
-      if (mapArr[i] > max_map) max_map = mapArr[i];
-      mean_map += mapArr[i];
-    }
-    mean_map = mean_map/mapArr.length;
-    // const lossArr = [];
-    // const iterArr = [];
-    // for (let i = 0; i <= 10; i++) {
-    //   lossArr[i] = info["lossRate" + i] || 0;
-    //   iterArr[i] = info["mapValue" + i] || 0;
-    // }
-    // const loss0 = info.lossRate0 || 0;
-    // const loss1 = info.lossRate1 || 0;
-    // const loss2 = info.lossRate2 || 0;
     var dom = document.getElementById("vsStatis1");
     var myChart = echarts.init(dom, null, {
       renderer: "canvas",
@@ -240,7 +235,7 @@ export default class extends Vue {
       title: {
         text: "Iteration",
         subtext: "loss",
-        left: "20",
+        left: "0",
         top: "23",
         textStyle: {
           fontSize: 14,
@@ -268,24 +263,24 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: max_loss,
-          interval: 2,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_loss,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: max_loss,
-          interval: 2,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_loss,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
       ],
 
@@ -345,7 +340,7 @@ export default class extends Vue {
       title: {
         text: "Iteration",
         subtext: "mAP",
-        left: "20",
+        left: "0",
         top: "23",
         textStyle: {
           fontSize: 14,
@@ -373,24 +368,24 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: max_map,
-          interval: mean_map,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_map,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: max_map,
-          interval: 0.01,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_map,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
       ],
 
@@ -502,7 +497,7 @@ export default class extends Vue {
           center: ["30%", "50%"],
           data: [
             {
-              value: this.serverInfo.gpuUsageRate, // DB 데이터 값
+              value: this.serverInfo.cpuUsageRate, // DB 데이터 값
               name: "사용률",
             },
           ],
@@ -607,7 +602,7 @@ export default class extends Vue {
 
     option5 = {
       title: {
-        text: "· MEM",
+        text: "· GPU Temp",
         left: "0%",
         top: "0%",
         textStyle: {
@@ -663,9 +658,10 @@ export default class extends Vue {
             formatter: "{value}C",
             offsetCenter: ["0", "5%"], // 위치
           },
+          center: ["30%", "50%"],
           data: [
             {
-              value: this.serverInfo.cpuTemp,
+              value: this.serverInfo.gpuTemperature,
               name: "현재온도",
             },
           ],
@@ -679,496 +675,6 @@ export default class extends Vue {
 
     window.addEventListener("resize", (myChart5 as any).resize);
   }
-  // 기존코드
-  // init() {
-  //   const info = this.learnInfo;
-  //   const lossArr = [];
-  //   const iterArr = [];
-  //   for (let i = 0; i <= 10; i++) {
-  //     lossArr[i] = info["lossRate" + i] || 0;
-  //     iterArr[i] = info["mapValue" + i] || 0;
-  //   }
-  //   const loss0 = info.lossRate0 || 0;
-  //   const loss1 = info.lossRate1 || 0;
-  //   const loss2 = info.lossRate2 || 0;
-    
-  //   var dom = document.getElementById("vsStatis1");
-  //   var myChart = echarts.init(dom, null, {
-  //     renderer: "canvas",
-  //     useDirtyRect: false,
-  //   });
-  //   var app = {};
-
-  //   var option;
-
-  //   option = {
-  //     title: {
-  //       text: "Iteration",
-  //       subtext: "loss",
-  //       left: "20",
-  //       top: "23",
-  //       textStyle: {
-  //         fontSize: 14,
-  //       },
-  //       subtextStyle: {
-  //         fontSize: 12,
-  //       },
-  //     },
-  //     color: ["#B7B7B7"],
-  //     tooltip: {
-  //       show: false,
-  //     },
-
-  //     xAxis: [
-  //       {
-  //         type: "category",
-  //         data: [
-  //           "0",
-  //           "01",
-  //           "02",
-  //           "03",
-  //           "04",
-  //           "05",
-  //           "06",
-  //           "07",
-  //           "08",
-  //           "09",
-  //           "10",
-  //         ],
-  //         axisPointer: {
-  //           type: "shadow",
-  //         },
-  //         nameTextStyle: {
-  //           color: "#B7B7B7",
-  //         },
-  //       },
-  //     ],
-  //     yAxis: [
-  //       {
-  //         type: "value",
-  //         name: "",
-  //         min: 0,
-  //         max: 20,
-  //         interval: 5,
-  //         axisLabel: {
-  //           formatter: "{value}",
-  //         },
-  //       },
-  //       {
-  //         type: "value",
-  //         name: "",
-  //         min: 0,
-  //         max: 20,
-  //         interval: 5,
-  //         axisLabel: {
-  //           formatter: "{value}",
-  //         },
-  //       },
-  //     ],
-
-  //     /*
-  //               필독!!  bar value값과 line value값 동일하게 삽입해야됨
-  //           */
-
-  //     series: [
-  //       {
-  //         name: "loss",
-  //         type: "bar",
-  //         itemStyle: {
-  //           color: "#EAF5DA",
-  //         },
-  //         tooltip: {
-  //           valueFormatter: function (value) {
-  //             return value;
-  //           },
-  //         },
-  //         data: lossArr,
-  //       },
-  //       {
-  //         name: "Iteration",
-  //         type: "line",
-  //         yAxisIndex: 1,
-  //         itemStyle: {
-  //           color: "#88BF3D",
-  //         },
-  //         label: {
-  //           show: true,
-  //           position: "top",
-  //           color: "#88BF3D",
-  //         },
-  //         lineStyle: {
-  //           type: "dotted",
-  //         },
-  //         tooltip: {
-  //           valueFormatter: function (value) {
-  //             // return value;
-  //             return "";
-  //           },
-  //         },
-  //         data: lossArr,
-  //       },
-  //     ],
-  //   };
-
-  //   var dom2 = document.getElementById("vsStatis2");
-  //   var myChart2 = echarts.init(dom2, null, {
-  //     renderer: "canvas",
-  //     useDirtyRect: false,
-  //   });
-
-  //   var option2;
-
-  //   option2 = {
-  //     title: {
-  //       text: "Iteration",
-  //       subtext: "mAP",
-  //       left: "20",
-  //       top: "23",
-  //       textStyle: {
-  //         fontSize: 14,
-  //       },
-  //       subtextStyle: {
-  //         fontSize: 12,
-  //       },
-  //     },
-  //     color: ["#B7B7B7"],
-  //     tooltip: {
-  //       show: false,
-  //     },
-
-  //     xAxis: [
-  //       {
-  //         type: "category",
-  //         data: [
-  //           "0",
-  //           "01",
-  //           "02",
-  //           "03",
-  //           "04",
-  //           "05",
-  //           "06",
-  //           "07",
-  //           "08",
-  //           "09",
-  //           "10",
-  //         ],
-  //         axisPointer: {
-  //           type: "shadow",
-  //         },
-  //         nameTextStyle: {
-  //           color: "#B7B7B7",
-  //         },
-  //       },
-  //     ],
-  //     yAxis: [
-  //       {
-  //         type: "value",
-  //         name: "",
-  //         min: 0,
-  //         max: 20,
-  //         interval: 5,
-  //         axisLabel: {
-  //           formatter: "{value}",
-  //         },
-  //       },
-  //       {
-  //         type: "value",
-  //         name: "",
-  //         min: 0,
-  //         max: 20,
-  //         interval: 5,
-  //         axisLabel: {
-  //           formatter: "{value}",
-  //         },
-  //       },
-  //     ],
-
-  //     /*
-  //               필독!!  bar value값과 line value값 동일하게 삽입해야됨
-  //           */
-
-  //     series: [
-  //       {
-  //         name: "loss",
-  //         type: "bar",
-  //         itemStyle: {
-  //           color: "#81DAD5",
-  //         },
-  //         label: {
-  //           show: true,
-  //           position: "top",
-  //         },
-  //         tooltip: {
-  //           valueFormatter: function (value) {
-  //             return value;
-  //           },
-  //         },
-  //         data: iterArr,
-  //       },
-  //     ],
-  //   };
-
-  //   if (option && typeof option === "object") {
-  //     myChart.setOption(option);
-  //   }
-
-  //   if (option2 && typeof option2 === "object") {
-  //     myChart2.setOption(option2);
-  //   }
-
-  //   window.addEventListener("resize", (myChart as any).resize);
-  //   window.addEventListener("resize", (myChart2 as any).resize);
-
-  //   // Gauge
-  //   var cpu = document.getElementById("chart-cpu");
-  //   var myChart3 = echarts.init(cpu, null, {
-  //     renderer: "canvas",
-  //     useDirtyRect: false,
-  //   });
-
-  //   var option3;
-
-  //   option3 = {
-  //     title: {
-  //       text: "· CPU",
-  //       left: "0%",
-  //       top: "0%",
-  //       textStyle: {
-  //         fontSize: 14,
-  //       },
-  //     },
-  //     series: [
-  //       {
-  //         type: "gauge",
-  //         progress: {
-  //           show: true,
-  //           width: 15, // 원(라인) 두께
-  //         },
-  //         itemStyle: {
-  //           color: "#F0C943",
-  //         },
-  //         axisLine: {
-  //           lineStyle: {
-  //             width: 15, // 원(라인) 두께
-  //             color: [[1, "#F1F1F1"]],
-  //           },
-  //         },
-  //         axisTick: {
-  //           show: false,
-  //         },
-  //         splitLine: {
-  //           length: 15,
-  //           lineStyle: {
-  //             width: 0,
-  //             color: "red",
-  //           },
-  //         },
-  //         axisLabel: {
-  //           distance: 25,
-  //           fontSize: 0,
-  //         },
-  //         pointer: {
-  //           show: false,
-  //         },
-  //         anchor: {
-  //           show: false,
-  //           showAbove: false,
-  //         },
-  //         title: {
-  //           // 게이지 하단 텍스트
-  //           show: true,
-  //           fontSize: 12,
-  //           offsetCenter: [0, "90%"], //텍스트 위치
-  //         },
-  //         detail: {
-  //           // 게이지 중앙 데이터
-  //           valueAnimation: false,
-  //           fontSize: 18,
-  //           color: "#F0C943", //색상
-  //           formatter: "{value}%", //값
-  //           offsetCenter: ["0", "5%"], // 위치
-  //         },
-  //         center: ["30%", "50%"],
-  //         data: [
-  //           {
-  //             value: this.serverInfo.cpuUsageRate, // DB 데이터 값
-  //             name: "사용률",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   if (option3 && typeof option3 === "object") {
-  //     myChart3.setOption(option3);
-  //   }
-
-  //   window.addEventListener("resize", (myChart3 as any).resize);
-
-  //   var gpu = document.getElementById("chart-gpu");
-  //   var myChart4 = echarts.init(gpu, null, {
-  //     renderer: "canvas",
-  //     useDirtyRect: false,
-  //   });
-
-  //   var option4;
-
-  //   option4 = {
-  //     title: {
-  //       text: "· GPU",
-  //       left: "0%",
-  //       top: "0%",
-  //       textStyle: {
-  //         fontSize: 14,
-  //       },
-  //     },
-  //     series: [
-  //       {
-  //         type: "gauge",
-  //         progress: {
-  //           show: true,
-  //           width: 15, // 원(라인) 두께
-  //         },
-  //         itemStyle: {
-  //           color: "#6685F2",
-  //         },
-  //         axisLine: {
-  //           lineStyle: {
-  //             width: 15,
-  //             color: [[1, "#F1F1F1"]],
-  //           },
-  //         },
-  //         axisTick: {
-  //           show: false,
-  //         },
-  //         splitLine: {
-  //           length: 15,
-  //           lineStyle: {
-  //             width: 0,
-  //             color: "red",
-  //           },
-  //         },
-  //         axisLabel: {
-  //           distance: 25,
-  //           fontSize: 0,
-  //         },
-  //         pointer: {
-  //           show: false,
-  //         },
-  //         anchor: {
-  //           show: false,
-  //           showAbove: false,
-  //         },
-  //         title: {
-  //           show: true,
-  //           fontSize: 12,
-  //           offsetCenter: [0, "90%"], //텍스트 위치
-  //         },
-  //         detail: {
-  //           valueAnimation: false,
-  //           fontSize: 18,
-  //           color: "#6685F2",
-  //           formatter: "{value}%",
-  //           offsetCenter: ["0", "5%"], // 위치
-  //         },
-  //         center: ["30%", "50%"],
-  //         data: [
-  //           {
-  //             value: this.serverInfo.gpuUsageRate,
-  //             name: "사용률",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   if (option4 && typeof option4 === "object") {
-  //     myChart4.setOption(option4);
-  //   }
-
-  //   window.addEventListener("resize", (myChart4 as any).resize);
-
-  //   var gpu = document.getElementById("chart-mem");
-  //   var myChart5 = echarts.init(gpu, null, {
-  //     renderer: "canvas",
-  //     useDirtyRect: false,
-  //   });
-
-  //   var option5;
-
-  //   option5 = {
-  //     title: {
-  //       text: "· GPU Temp",
-  //       left: "0%",
-  //       top: "0%",
-  //       textStyle: {
-  //         fontSize: 14,
-  //       },
-  //     },
-  //     series: [
-  //       {
-  //         type: "gauge",
-  //         progress: {
-  //           show: true,
-  //           width: 15,
-  //         },
-  //         itemStyle: {
-  //           color: "#EC5353",
-  //         },
-  //         axisLine: {
-  //           lineStyle: {
-  //             width: 15,
-  //             color: [[1, "#F1F1F1"]],
-  //           },
-  //         },
-  //         axisTick: {
-  //           show: false,
-  //         },
-  //         splitLine: {
-  //           length: 15,
-  //           lineStyle: {
-  //             width: 0,
-  //             color: "red",
-  //           },
-  //         },
-  //         pointer: {
-  //           show: false,
-  //         },
-  //         axisLabel: {
-  //           distance: 25,
-  //           fontSize: 0,
-  //         },
-  //         anchor: {
-  //           show: false,
-  //           showAbove: false,
-  //         },
-  //         title: {
-  //           show: true,
-  //           fontSize: 12,
-  //           offsetCenter: [0, "90%"], //텍스트 위치
-  //         },
-  //         detail: {
-  //           valueAnimation: false,
-  //           fontSize: 18,
-  //           color: "#EC5353",
-  //           formatter: "{value}C",
-  //           offsetCenter: ["0", "5%"], // 위치
-  //         },
-  //         center: ["30%", "50%"],
-  //         data: [
-  //           {
-  //             value: this.serverInfo.gpuTemperature,
-  //             name: "현재온도",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   console.log("aaaa====", this.serverInfo);
-  //   if (option5 && typeof option5 === "object") {
-  //     myChart5.setOption(option5);
-  //   }
-
-  //   window.addEventListener("resize", (myChart5 as any).resize);
-  // }
 }
 </script>
 <style scoped></style>
