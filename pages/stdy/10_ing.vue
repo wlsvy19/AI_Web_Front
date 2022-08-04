@@ -4,8 +4,7 @@
       <div class="tit-top flex flex-btw">
         <h2 class="ti wid2p">영상학습</h2>
         <div class="wid6p tx-c vc-locat">
-          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.learnDtstId
-          }}<span>&gt;</span>{{ dataset.weightId }}
+          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId}}<span>&gt;</span>{{ dataset.weightId }}
         </div>
         <div class="wid2p tx-r">
           <button
@@ -25,9 +24,9 @@
               comma(datasetInfo.totalCnt)
             }}개)</span
           >
-          현재까지의 평균 loss: <span class="c-val">23</span> 현재 Iteration:
-          <span class="c-val">12,123</span> 남은 시간:
-          <span class="c-val">00:00:22</span>
+          현재까지의 평균 loss: <span class="c-val">{{ this.mean_loss }}</span>
+          현재 Iteration: <span class="c-val">{{ this.iteration }}</span> 
+          남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
         </div>
       </div>
     </div>
@@ -115,7 +114,12 @@ export default class extends Vue {
   };
   datasetInfo: any = {};
   dataset: any = {};
+  statusInfo: any = {};
   learnInfo: any = {};
+  combDtstId = "";
+  combDtstType = "";
+  iteration = 0;
+  mean_loss = 0;
   comma(num) {
     return comma(num);
   }
@@ -124,44 +128,44 @@ export default class extends Vue {
   }
   async mounted() {
     await this.getServerStatusData();
-    await this.getDatasetInfo();
     await this.getLeanInfo();
+    await this.getDatasetInfo();
     this.init();
   }
-  // 기존 코드
-  // async getLeanInfo() {
-  //   const dataset = this.dataset;
-  //   const data = await commonService.request(
-  //     {
-  //       workDate: dataset.workDate,
-  //       learnDtstId: dataset.learnDtstId,
-  //       learnDtstType: dataset.learnDtstType,
-  //       weightId: dataset.weightId,
-  //     },
-  //     "/api/learn-status/data"
-  //   );
-  //   if (data != null) this.learnInfo = data;
-  //   console.log("==leanInfo==", data);
-  // }
 
-async getLeanInfo() {
-    const dataset = this.dataset;
+
+  async getLeanInfo() {
+    const infoData = await commonService.request(
+      {},
+      "/api/learn-status/data/ing"
+    );
+    this.statusInfo = infoData;
+    console.log("==statusInfo==", infoData);
+
+    this.combDtstId = infoData['combDtstId'];
+    this.combDtstType = infoData['engineType'];
+
     const data = await commonService.request(
       {
-        trainingId:"20220802094023"
+        trainingId:infoData['trainingId']
+        // trainingId:"20220802094023"
       },
       "/api/learn-status/data"
     );
     if (data != null) {
       let i=0;
-      var temp = {"lossRate": [], "mapValue":[], "iteration":[]}
+      let sum = 0;
+      let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
       for (i=0;i<data.length;i++){
         temp['lossRate'][i] = parseFloat(data[i].lossRate);
+        sum += data[i].lossRate
         temp['mapValue'][i] = parseFloat(data[i].mapValue);
         temp['iteration'][i] = parseInt(data[i].iteration);
       }
 
       this.learnInfo = temp; 
+      this.iteration = temp['iteration'].slice(-1)[0];
+      this.mean_loss = sum / data.length;
     }
 
     console.log("==leanInfo==", data);
@@ -169,12 +173,10 @@ async getLeanInfo() {
 
   async getDatasetInfo() {
     console.log("====dataset", this.dataset);
-    const dataset = this.dataset;
     const data = await commonService.request(
       {
-        workDate: dataset.workDate,
-        combDtstId: dataset.learnDtstId,
-        combDtstType: dataset.learnDtstType,
+        combDtstId: this.combDtstId,
+        combDtstType: this.combDtstType,
       },
       "/api/comb-dtst/info"
     );
@@ -206,22 +208,13 @@ async getLeanInfo() {
   }
 
   init() {
-      const info = this.learnInfo;
-      const lossArr = info['lossRate'];
-      const mapArr = info['mapValue'];
-      const iterArr = info['iteration'];
+    const info = this.learnInfo;
+    const lossArr = info['lossRate'];
+    const mapArr = info['mapValue'];
+    // const iterArr = info['iteration'];
+    let iterArr = [];
+    for(let i=1;i<=50; i++) iterArr.push(i);
 
-  //   const info = this.learnInfo;
-  //   const lossArr = [];
-  //   const iterArr = [];
-  //   for (let i = 0; i <= 10; i++) {
-  //     lossArr[i] = info["lossRate" + i] || 0;
-  //     iterArr[i] = info["mapValue" + i] || 0;
-  //   }
-  //   const loss0 = info.lossRate0 || 0;
-  //   const loss1 = info.lossRate1 || 0;
-  //   const loss2 = info.lossRate2 || 0;
-    
     var dom = document.getElementById("vsStatis1");
     var myChart = echarts.init(dom, null, {
       renderer: "canvas",
@@ -283,10 +276,6 @@ async getLeanInfo() {
           // },
         },
       ],
-
-      /*
-                필독!!  bar value값과 line value값 동일하게 삽입해야됨
-            */
 
       series: [
         {
@@ -388,11 +377,6 @@ async getLeanInfo() {
           // },
         },
       ],
-
-      /*
-                필독!!  bar value값과 line value값 동일하게 삽입해야됨
-            */
-
       series: [
         {
           name: "map",
