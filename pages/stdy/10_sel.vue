@@ -234,7 +234,7 @@ export default class extends Vue {
     );
     console.log("=====", weightList);
     this.weightList = weightList;
-    this.weightList.push({
+    this.weightList.unshift({
       iterationNo: null,
       weightId: "가중치 선택안함",
       weightType: combDtstTypeNm,
