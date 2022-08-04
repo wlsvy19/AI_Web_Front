@@ -116,6 +116,8 @@ export default class extends Vue {
     diskSize: 0,
     diskUsage: 0,
     gpuTemperature: 0,
+    cpuUsageRate: 0,
+    gpuUsageRate: 0,
   };
   datasetInfo: any = {};
   dataset: any = {};
@@ -125,6 +127,16 @@ export default class extends Vue {
   combDtstType = "";
   iteration = 0;
   mean_loss = 0;
+  LossChart = null;
+  LossChartOptions = null;
+  mAPChart = null;
+  mAPChartOptions = null;
+  CpuGaugeChart = null;
+  CpuGaugeChartOptions = null;
+  GpuGaugeChart = null;
+  GpuGaugeChartOptions = null;
+  GpuTempGaugeChart = null;
+  GpuTempGaugeChartOptions = null;
   comma(num) {
     return comma(num);
   }
@@ -171,6 +183,17 @@ export default class extends Vue {
       this.learnInfo = temp; 
       this.iteration = temp['iteration'].slice(-1)[0];
       this.mean_loss = sum / data.length;
+
+      // refresh chart
+      if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
+        this.LossChartOptions.series[0].data = this.learnInfo['lossRate'];
+        this.LossChart.setOption(this.LossChartOptions);
+      }
+
+      if (this.mAPChart && this.mAPChartOptions && typeof this.mAPChartOptions === "object") {
+        this.mAPChartOptions.series[0].data = this.learnInfo['mapValue'];
+        this.mAPChart.setOption(this.mAPChartOptions);
+      }
     }
 
     console.log("==leanInfo==", data);
@@ -205,6 +228,21 @@ export default class extends Vue {
       diskUsage: 0,
     };
     console.log("===serverInfo===", this.serverInfo);
+
+    if (this.CpuGaugeChart && this.CpuGaugeChartOptions && typeof this.CpuGaugeChartOptions === "object") {
+      this.CpuGaugeChartOptions.series[0].data[0].value = this.serverInfo.cpuUsageRate;
+      this.CpuGaugeChart.setOption(this.CpuGaugeChartOptions);
+    }
+
+    if (this.GpuGaugeChart && this.GpuGaugeChartOptions && typeof this.GpuGaugeChartOptions === "object") {
+      this.GpuGaugeChartOptions.series[0].data[0].value = this.serverInfo.gpuUsageRate;
+      this.GpuGaugeChart.setOption(this.GpuGaugeChartOptions);
+    }
+
+    if (this.GpuTempGaugeChart && this.GpuTempGaugeChartOptions && typeof this.GpuTempGaugeChartOptions === "object") {
+      this.GpuTempGaugeChartOptions.series[0].data[0].value = this.serverInfo.gpuTemperature;
+      this.GpuTempGaugeChart.setOption(this.GpuTempGaugeChartOptions);
+    }
   }
   async onStop() {
     const dataset = commonService.getDataset();
@@ -226,15 +264,13 @@ export default class extends Vue {
     for(let i=1;i<=50; i++) iterArr.push(i);
 
     var dom = document.getElementById("vsStatis1");
-    var myChart = echarts.init(dom, null, {
+    this.LossChart = echarts.init(dom, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
     var app = {};
 
-    var option;
-
-    option = {
+    this.LossChartOptions = {
       title: {
         text: "Iteration",
         subtext: "loss",
@@ -328,14 +364,12 @@ export default class extends Vue {
     };
 
     var dom2 = document.getElementById("vsStatis2");
-    var myChart2 = echarts.init(dom2, null, {
+    this.mAPChart = echarts.init(dom2, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option2;
-
-    option2 = {
+    this.mAPChartOptions = {
       title: {
         text: "Iteration",
         subtext: "mAP",
@@ -408,27 +442,25 @@ export default class extends Vue {
       ],
     };
 
-    if (option && typeof option === "object") {
-      myChart.setOption(option);
+    if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
+      this.LossChart.setOption(this.LossChartOptions);
     }
 
-    if (option2 && typeof option2 === "object") {
-      myChart2.setOption(option2);
+    if (this.mAPChart && this.mAPChartOptions && typeof this.mAPChartOptions === "object") {
+      this.mAPChart.setOption(this.mAPChartOptions);
     }
 
-    window.addEventListener("resize", (myChart as any).resize);
-    window.addEventListener("resize", (myChart2 as any).resize);
+    window.addEventListener("resize", (this.LossChart as any).resize);
+    window.addEventListener("resize", (this.mAPChart as any).resize);
 
     // Gauge
     var cpu = document.getElementById("chart-cpu");
-    var myChart3 = echarts.init(cpu, null, {
+    this.CpuGaugeChart = echarts.init(cpu, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option3;
-
-    option3 = {
+    this.CpuGaugeChartOptions = {
       title: {
         text: "· CPU",
         left: "0%",
@@ -498,21 +530,19 @@ export default class extends Vue {
         },
       ],
     };
-    if (option3 && typeof option3 === "object") {
-      myChart3.setOption(option3);
+    if (this.CpuGaugeChart && this.CpuGaugeChartOptions && typeof this.CpuGaugeChartOptions === "object") {
+      this.CpuGaugeChart.setOption(this.CpuGaugeChartOptions);
     }
 
-    window.addEventListener("resize", (myChart3 as any).resize);
+    window.addEventListener("resize", (this.CpuGaugeChart as any).resize);
 
     var gpu = document.getElementById("chart-gpu");
-    var myChart4 = echarts.init(gpu, null, {
+    this.GpuGaugeChart = echarts.init(gpu, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option4;
-
-    option4 = {
+    this.GpuGaugeChartOptions = {
       title: {
         text: "· GPU",
         left: "0%",
@@ -580,21 +610,19 @@ export default class extends Vue {
         },
       ],
     };
-    if (option4 && typeof option4 === "object") {
-      myChart4.setOption(option4);
+    if (this.GpuGaugeChart && this.GpuGaugeChartOptions && typeof this.GpuGaugeChartOptions === "object") {
+      this.GpuGaugeChart.setOption(this.GpuGaugeChartOptions);
     }
 
-    window.addEventListener("resize", (myChart4 as any).resize);
+    window.addEventListener("resize", (this.GpuGaugeChart as any).resize);
 
     var gpu = document.getElementById("chart-mem");
-    var myChart5 = echarts.init(gpu, null, {
+    this.GpuTempGaugeChart = echarts.init(gpu, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option5;
-
-    option5 = {
+    this.GpuTempGaugeChartOptions = {
       title: {
         text: "· GPU Temp",
         left: "0%",
@@ -663,13 +691,14 @@ export default class extends Vue {
       ],
     };
     console.log("aaaa====", this.serverInfo);
-    if (option5 && typeof option5 === "object") {
-      myChart5.setOption(option5);
+    if (this.GpuTempGaugeChart && this.GpuTempGaugeChartOptions && typeof this.GpuTempGaugeChartOptions === "object") {
+      this.GpuTempGaugeChart.setOption(this.GpuTempGaugeChartOptions);
     }
 
-    window.addEventListener("resize", (myChart5 as any).resize);
+    window.addEventListener("resize", (this.GpuTempGaugeChart as any).resize);
 
     setInterval(this.getServerStatusData, 5000);
+    setInterval(this.getLeanInfo, 5000);
   }
 }
 </script>
