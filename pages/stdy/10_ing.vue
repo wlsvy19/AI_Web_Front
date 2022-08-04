@@ -137,6 +137,8 @@ export default class extends Vue {
   GpuGaugeChartOptions = null;
   GpuTempGaugeChart = null;
   GpuTempGaugeChartOptions = null;
+  serverTimer = null;
+  learningTimer = null;
   comma(num) {
     return comma(num);
   }
@@ -148,6 +150,14 @@ export default class extends Vue {
     await this.getLeanInfo();
     await this.getDatasetInfo();
     this.init();
+
+    this.serverTimer= setInterval(this.getServerStatusData, 5000);
+    this.learningTimer= setInterval(this.getLeanInfo, 5000);
+  }
+
+  async destroyed() {
+    clearInterval(this.serverTimer);
+    clearInterval(this.learningTimer);
   }
 
 
@@ -697,8 +707,8 @@ export default class extends Vue {
 
     window.addEventListener("resize", (this.GpuTempGaugeChart as any).resize);
 
-    setInterval(this.getServerStatusData, 5000);
-    setInterval(this.getLeanInfo, 5000);
+    // setInterval(this.getServerStatusData, 5000);
+    // setInterval(this.getLeanInfo, 5000);
   }
 }
 </script>
