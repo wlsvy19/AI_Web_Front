@@ -280,7 +280,7 @@
             <div class="as-area0">
               <span style="font-size : 12pt;color : #FF0000; ">{{ selItem.labelDataText }}</span>
             </div>
-            <br></br>
+            <br/>
           </template>
 
           <h2 class="ti-s mb10">라벨링</h2>
@@ -451,8 +451,6 @@ export default class extends Vue {
     this.shapeID = 0;
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
-    this.onSearch(1);
-    //this.onNext(0);
   }
   async onSearch(pageNo) {
     if (pageNo < 1) pageNo = 1;
@@ -467,10 +465,17 @@ export default class extends Vue {
       },
       "/api/crgw-img-data/list/page"
     );
-    this.pageInfo = { ...data.page };
-    this.selImg = "";
-    this.imgDataList = data.list;
+    this.pageInfo = { ...data.page };    
+    const imgList = data.list;
+    this.imgDataList = imgList.map((v) => ({ ...v, newNmrecgCd: v.nmrecgCd }));
+    if (imgList.length === 0) {
+      this.selIndex = -1;
+      this.selItem = {};      
+    } else {
+      await this.onNext(0);
+    }
   }
+  
   async onSelImg(workDate, workNo, item, index) {
     console.log("item====", item);
     this.selDate = workDate;
