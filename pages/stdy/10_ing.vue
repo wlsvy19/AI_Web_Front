@@ -4,8 +4,7 @@
       <div class="tit-top flex flex-btw">
         <h2 class="ti wid2p">영상학습</h2>
         <div class="wid6p tx-c vc-locat">
-          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.learnDtstId
-          }}<span>&gt;</span>{{ dataset.weightId }}
+          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId}}<span>&gt;</span>{{ dataset.weightId }}
         </div>
         <div class="wid2p tx-r">
           <button
@@ -25,9 +24,9 @@
               comma(datasetInfo.totalCnt)
             }}개)</span
           >
-          현재까지의 평균 loss: <span class="c-val">23</span> 현재 Iteration:
-          <span class="c-val">12,123</span> 남은 시간:
-          <span class="c-val">00:00:22</span>
+          현재까지의 평균 loss: <span class="c-val">{{ this.mean_loss }}</span>
+          현재 Iteration: <span class="c-val">{{ this.iteration }}</span> 
+          남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
         </div>
       </div>
     </div>
@@ -116,10 +115,16 @@ export default class extends Vue {
     diskUsageRate: 0,
     diskSize: 0,
     diskUsage: 0,
+    gpuTemperature: 0,
   };
   datasetInfo: any = {};
   dataset: any = {};
+  statusInfo: any = {};
   learnInfo: any = {};
+  combDtstId = "";
+  combDtstType = "";
+  iteration = 0;
+  mean_loss = 0;
   comma(num) {
     return comma(num);
   }
@@ -128,32 +133,55 @@ export default class extends Vue {
   }
   async mounted() {
     await this.getServerStatusData();
-    await this.getDatasetInfo();
     await this.getLeanInfo();
+    await this.getDatasetInfo();
     this.init();
   }
+
+
   async getLeanInfo() {
-    const dataset = this.dataset;
+    const infoData = await commonService.request(
+      {},
+      "/api/learn-status/data/ing"
+    );
+    this.statusInfo = infoData;
+    console.log("==statusInfo==", infoData);
+
+    this.combDtstId = infoData['combDtstId'];
+    this.combDtstType = infoData['engineType'];
+
     const data = await commonService.request(
       {
-        workDate: dataset.workDate,
-        learnDtstId: dataset.learnDtstId,
-        learnDtstType: dataset.learnDtstType,
-        weightId: dataset.weightId,
+        trainingId:infoData['trainingId']
+        // trainingId:"20220802094023"
       },
       "/api/learn-status/data"
     );
-    if (data != null) this.learnInfo = data;
+    if (data != null) {
+      let i=0;
+      let sum = 0;
+      let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
+      for (i=0;i<data.length;i++){
+        temp['lossRate'][i] = parseFloat(data[i].lossRate);
+        sum += data[i].lossRate
+        temp['mapValue'][i] = parseFloat(data[i].mapValue);
+        temp['iteration'][i] = parseInt(data[i].iteration);
+      }
+
+      this.learnInfo = temp; 
+      this.iteration = temp['iteration'].slice(-1)[0];
+      this.mean_loss = sum / data.length;
+    }
+
     console.log("==leanInfo==", data);
   }
+
   async getDatasetInfo() {
     console.log("====dataset", this.dataset);
-    const dataset = this.dataset;
     const data = await commonService.request(
       {
-        workDate: dataset.workDate,
-        combDtstId: dataset.learnDtstId,
-        combDtstType: dataset.learnDtstType,
+        combDtstId: this.combDtstId,
+        combDtstType: this.combDtstType,
       },
       "/api/comb-dtst/info"
     );
@@ -188,17 +216,15 @@ export default class extends Vue {
     commonService.deleteDataset();
     this.$emit("onRun", "");
   }
+
   init() {
     const info = this.learnInfo;
-    const lossArr = [];
-    const iterArr = [];
-    for (let i = 0; i <= 10; i++) {
-      lossArr[i] = info["lossRate" + i] || 0;
-      iterArr[i] = info["mapValue" + i] || 0;
-    }
-    const loss0 = info.lossRate0 || 0;
-    const loss1 = info.lossRate1 || 0;
-    const loss2 = info.lossRate2 || 0;
+    const lossArr = info['lossRate'];
+    const mapArr = info['mapValue'];
+    // const iterArr = info['iteration'];
+    let iterArr = [];
+    for(let i=1;i<=50; i++) iterArr.push(i);
+
     var dom = document.getElementById("vsStatis1");
     var myChart = echarts.init(dom, null, {
       renderer: "canvas",
@@ -212,7 +238,7 @@ export default class extends Vue {
       title: {
         text: "Iteration",
         subtext: "loss",
-        left: "20",
+        left: "0",
         top: "23",
         textStyle: {
           fontSize: 14,
@@ -223,25 +249,13 @@ export default class extends Vue {
       },
       color: ["#B7B7B7"],
       tooltip: {
-        show: false,
+        show: true,
       },
 
       xAxis: [
         {
           type: "category",
-          data: [
-            "0",
-            "01",
-            "02",
-            "03",
-            "04",
-            "05",
-            "06",
-            "07",
-            "08",
-            "09",
-            "10",
-          ],
+          data: iterArr,
           axisPointer: {
             type: "shadow",
           },
@@ -252,30 +266,26 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: 20,
-          interval: 5,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_loss,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: 20,
-          interval: 5,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_loss,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
       ],
-
-      /*
-                필독!!  bar value값과 line value값 동일하게 삽입해야됨
-            */
 
       series: [
         {
@@ -299,12 +309,12 @@ export default class extends Vue {
             color: "#88BF3D",
           },
           label: {
-            show: true,
+            show: false,
             position: "top",
             color: "#88BF3D",
           },
           lineStyle: {
-            type: "dotted",
+            type: "line",
           },
           tooltip: {
             valueFormatter: function (value) {
@@ -329,7 +339,7 @@ export default class extends Vue {
       title: {
         text: "Iteration",
         subtext: "mAP",
-        left: "20",
+        left: "0",
         top: "23",
         textStyle: {
           fontSize: 14,
@@ -340,25 +350,13 @@ export default class extends Vue {
       },
       color: ["#B7B7B7"],
       tooltip: {
-        show: false,
+        show: true,
       },
 
       xAxis: [
         {
           type: "category",
-          data: [
-            "0",
-            "01",
-            "02",
-            "03",
-            "04",
-            "05",
-            "06",
-            "07",
-            "08",
-            "09",
-            "10",
-          ],
+          data: iterArr,
           axisPointer: {
             type: "shadow",
           },
@@ -369,40 +367,35 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: 20,
-          interval: 5,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_map,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
         {
-          type: "value",
-          name: "",
-          min: 0,
-          max: 20,
-          interval: 5,
-          axisLabel: {
-            formatter: "{value}",
-          },
+          // type: "value",
+          // name: "",
+          // min: 0,
+          // max: max_map,
+          // interval: "auto",
+          // axisLabel: {
+          //   formatter: "{value}",
+          // },
         },
       ],
-
-      /*
-                필독!!  bar value값과 line value값 동일하게 삽입해야됨
-            */
-
       series: [
         {
-          name: "loss",
+          name: "map",
           type: "bar",
           itemStyle: {
             color: "#81DAD5",
           },
           label: {
-            show: true,
+            show: false,
             position: "top",
           },
           tooltip: {
@@ -410,7 +403,7 @@ export default class extends Vue {
               return value;
             },
           },
-          data: iterArr,
+          data: mapArr,
         },
       ],
     };

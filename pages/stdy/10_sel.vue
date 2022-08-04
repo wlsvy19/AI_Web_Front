@@ -177,10 +177,10 @@ export default class extends Vue {
   weight_id = "";
   created() {
     this.codeList();
-    // const now = today();
-    // const now1 = today("L");
-    // console.log("now===", now);
-    // console.log("now1===", now1);
+    const now = today();
+    const now1 = today("L");
+    console.log("now===", now);
+    console.log("now1===", now1);
   }
 
   onShowPop(show) {
@@ -190,17 +190,36 @@ export default class extends Vue {
   async onStudy() {
     if (!this.learn_dtst_id) return await alert("데이터셋을 선택해주세요.");
     if (!this.weight_id) return await alert("가중치를 선택해주세요.");
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = ("0" + (now.getMonth()+1)).slice(-2)
+    const day = ('0' + now.getDate()).slice(-2);
+    const hours = ('0' + now.getHours()).slice(-2); 
+    const minutes = ('0' + now.getMinutes()).slice(-2);
+    const seconds = ('0' + now.getSeconds()).slice(-2); 
+
+    const trainingId = "" + year+month+day+hours+minutes+seconds
+    const startDttm = year + "-" + month + "-" + day+ " " + hours + ":" + minutes + ":" + seconds
+    
     const param = {
-      workDate: today(),
-      learnDtstId: this.learn_dtst_id,
-      weightId: this.weight_id,
-      learnDtstType: this.study.combDtstType,
-      learnDtstTypeNm: this.study.combDtstTypeNm,
-    };
+      trainingId: trainingId,
+      engineType: this.study.combDtstType,
+      combDtstId: this.learn_dtst_id,
+      weightId: this.weight_id || "",
+      startDttm: startDttm,
+    }
+    // const param = {
+    //   workDate: today(),
+    //   learnDtstId: this.learn_dtst_id,
+    //   weightId: this.weight_id,
+    //   learnDtstType: this.study.combDtstType,
+    //   learnDtstTypeNm: this.study.combDtstTypeNm,
+    // };
     const rs = await commonService.request(
       param,
-      "/api/learn-status/data/stop"
+      "/api/learn-status/data/start"
     );
+    param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
     localStorage.setItem("dataset", JSON.stringify(param));
     this.$emit("onRun", "RUN");
   }
