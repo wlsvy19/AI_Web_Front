@@ -107,10 +107,15 @@ import * as echarts from "echarts";
 @Component({ components: { Layout } })
 export default class extends Vue {
   serverInfo = {
-    cpuUsageRate: 0,
-    gpuUsageRate: 0,
     memUsageRate: 0,
-    cpuTemp: 0,
+    memSize: 0,
+    memUsage: 0,
+    gpuRamUsageRate: 0,
+    gpuRamSize: 0,
+    gpuRamUsage: 0,
+    diskUsageRate: 0,
+    diskSize: 0,
+    diskUsage: 0,
   };
   datasetInfo: any = {};
   dataset: any = {};
@@ -161,10 +166,15 @@ export default class extends Vue {
       "/api/server-status/data"
     );
     this.serverInfo = data || {
-      cpuUsageRate: 0,
-      gpuUsageRate: 0,
       memUsageRate: 0,
-      cpuTemp: 0,
+      memSize: 0,
+      memUsage: 0,
+      gpuRamUsageRate: 0,
+      gpuRamSize: 0,
+      gpuRamUsage: 0,
+      diskUsageRate: 0,
+      diskSize: 0,
+      diskUsage: 0,
     };
     console.log("===serverInfo===", this.serverInfo);
   }
@@ -665,6 +675,8 @@ export default class extends Vue {
     }
 
     window.addEventListener("resize", (myChart5 as any).resize);
+
+    setInterval(this.getServerStatusData, 5000);
   }
 }
 </script>

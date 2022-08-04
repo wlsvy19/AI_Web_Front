@@ -451,6 +451,8 @@ export default class extends Vue {
     this.shapeID = 0;
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
+    this.onSearch(1);
+    //this.onNext(0);
   }
   async onSearch(pageNo) {
     if (pageNo < 1) pageNo = 1;
