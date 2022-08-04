@@ -201,20 +201,14 @@ export default class extends Vue {
     const trainingId = "" + year+month+day+hours+minutes+seconds
     const startDttm = year + "-" + month + "-" + day+ " " + hours + ":" + minutes + ":" + seconds
     
+    if (this.weight_id == '가중치 선택안함') this.weight_id = "";
     const param = {
       trainingId: trainingId,
       engineType: this.study.combDtstType,
       combDtstId: this.learn_dtst_id,
-      weightId: this.weight_id || "",
+      weightId: this.weight_id,
       startDttm: startDttm,
     }
-    // const param = {
-    //   workDate: today(),
-    //   learnDtstId: this.learn_dtst_id,
-    //   weightId: this.weight_id,
-    //   learnDtstType: this.study.combDtstType,
-    //   learnDtstTypeNm: this.study.combDtstTypeNm,
-    // };
     const rs = await commonService.request(
       param,
       "/api/learn-status/data/start"
@@ -240,6 +234,12 @@ export default class extends Vue {
     );
     console.log("=====", weightList);
     this.weightList = weightList;
+    this.weightList.push({
+      iterationNo: null,
+      weightId: "가중치 선택안함",
+      weightType: combDtstTypeNm,
+      workDttm:null,
+    })
   }
   async codeList() {
     const codeList = await commonService.request(
