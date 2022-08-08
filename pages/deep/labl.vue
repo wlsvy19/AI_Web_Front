@@ -80,19 +80,19 @@
         <div class="vod-l">
           <div class="view-mini mb25">
             <figure>
-              <img v-if="pageType === '꺾임'"
+              <img v-if="pageType === '꺾임' && (selImg != '' && selImg != null)"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
                 :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              <img v-else-if="pageType === '차량번호'"
+              <img v-else-if="pageType === '차량번호' && (selImg != '' && selImg != null)"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
                 :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              <img v-else
+              <img v-else-if="selImg != '' && selImg != null"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
@@ -301,9 +301,9 @@
             </template>
           </div>
 
-          <!-- <p class="st1-class">
+          <p class="st1-class" v-if="pageType !== '차량번호'">
             <span class="cl-v" @click="onShowPop(true)">유형별 설명보기</span>
-          </p> -->
+          </p>
 
           <h2 class="ti-s mb10">
             라벨링 목록 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -338,16 +338,28 @@
 
     <!-- 준공검사 -->
     <!-- 라벨링 유형에 대한 설명 추가 -->
-    <!-- <div class="popup pop1" v-if="showPop" :style="`display:block;left:30%`">
+    <div class="popup pop1" v-if="showPop" :style="`display:block;left:30%`">
       <h1>라벨링 유형 설명</h1>
 
-      <div class="thumList-l1 pop-body scl">
+      <!-- <div class="thumList-l1 pop-body scl">
         <ul>
-          <template v-for="(item, index) in code.NGTP">
+          <template v-for="(item, index) in code.NUM_BTN">
             <li :key="index" class="flex">
               <figure>
-                <img
-                  :src="`/v1/api/nmrecg-sample-info/data?cmmnCd=${item.cmmnCd}`"
+                <img v-if="pageType === '번호판'"
+                  :src="`/v1/api/sample-info/data?grpCd=NUM_BTN&cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="177"
+                  height="132"
+                />
+                <img v-if="pageType === '꺾임'"
+                  :src="`/v1/api/sample-info/data?grpCd=LABEL_CN_BTN&cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="177"
+                  height="132"
+                />
+                <img v-if="pageType === '빛'"
+                  :src="`/v1/api/sample-info/data?grpCd=LABEL_BTN&cmmnCd=${item.cmmnCd}`"
                   :alt="item.cmmnCdNm"
                   width="177"
                   height="132"
@@ -357,6 +369,63 @@
                 <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
                 <p class="thm-cp">{{ item.cmmnDesc }}</p>
               </div>
+            </li>
+          </template>
+        </ul>
+      </div> -->
+      <div class="thumList-l1 pop-body scl" v-if="pageType === '번호판'">
+        <ul>
+          <template v-for="(item, index) in code.NUM_BTN">
+            <li :key="index" class="flex">
+            <figure>
+              <img
+              :src="`/v1/api/sample-info/data?grpCd=NUM_BTN&cmmnCd=${item.cmmnCd}`"
+              :alt="item.cmmnCdNm"
+              width="120"
+              height="90"
+              />
+            </figure>
+            <div class="thm-box">
+              <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+              <p class="thm-cp">{{ item.cmmnDesc }}</p>
+            </div>
+            </li>
+          </template>
+        </ul>
+      </div>
+      <div class="thumList-l1 pop-body scl" v-if="pageType === '꺾임'">
+        <ul>
+          <template v-for="(item, index) in code.LABEL_CN_BTN">
+            <li :key="index" class="flex">
+            <figure>
+              <img
+              :src="`/v1/api/sample-info/data?grpCd=LABEL_CN_BTN&cmmnCd=${item.cmmnCd}`"
+              :alt="item.cmmnCdNm"
+              width="120"
+              height="90"
+              />
+            </figure>
+            <div class="thm-box">
+              <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+              <p class="thm-cp">{{ item.cmmnDesc }}</p>
+            </div>
+            </li>
+          </template>
+        </ul>
+      </div>
+      <div class="thumList-l2 pop-body scl" v-if="pageType === '빛'">
+        <ul class="flex">
+          <template v-for="(item, index) in code.LABEL_BTN">
+            <li :key="index">
+            <figure>
+              <img
+              :src="`/v1/api/sample-info/data?grpCd=LABEL_BTN&cmmnCd=${item.cmmnCd}`"
+              :alt="item.cmmnCdNm"
+              width="177"
+              height="132"
+              />
+            </figure>
+            <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
             </li>
           </template>
         </ul>
@@ -372,7 +441,7 @@
       @click="showPop = false"
       class="mask"
       style="display: block"
-    ></div> -->
+    ></div>
   </layout>
 </template>
 

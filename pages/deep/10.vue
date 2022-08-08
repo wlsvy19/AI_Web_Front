@@ -222,7 +222,7 @@
             <li :key="index">
               <figure>
                 <img
-                  :src="`/v1/api/nmrecg-sample-info/data?cmmnCd=${item.cmmnCd}`"
+                  :src="`/v1/api/sample-info/data?grpCd=NMRECG_CD&cmmnCd=${item.cmmnCd}`"
                   :alt="item.cmmnCdNm"
                   width="177"
                   height="132"

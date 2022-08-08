@@ -137,7 +137,7 @@ export default class extends Vue {
           name: "수집건수",
           min: 0,
           // max: Math.max(),
-          interval: 5000,
+          interval: 20000,
           axisLabel: {
             formatter: "{value}",
           },
