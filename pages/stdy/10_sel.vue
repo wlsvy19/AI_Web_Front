@@ -130,10 +130,10 @@
             <li :key="index" class="flex">
               <figure>
                 <img
-                  :src="`/v1/api/nmrecg-sample-info/data?cmmnCd=${item.cmmnCd}`"
+                  :src="`/v1/api/sample-info/data?grpCd=NGTP&cmmnCd=${item.cmmnCd}`"
                   :alt="item.cmmnCdNm"
-                  width="177"
-                  height="132"
+                  width="120"
+                  height="90"
                 />
               </figure>
               <div class="thm-box">
