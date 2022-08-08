@@ -560,17 +560,32 @@ export default class extends Vue {
     if (this.selImg) {
       if (this.pageType === "꺾임") {
         console.log("onSelImg: " + `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        polygonStyle.normal.dotRadius = 2;
+        polygonStyle.active.dotRadius = 2;
+        polygonStyle.normal.lineWidth = 1;
+        polygonStyle.active.lineWidth = 2;
         this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else if (this.pageType === "차량번호") {
         console.log("onSelImg: " + `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        rectStyle.normal.dotRadius = 2;
+        rectStyle.active.dotRadius = 2;
+        rectStyle.normal.lineWidth = 1;
+        rectStyle.active.lineWidth = 2;
         this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else {
         console.log("onSelImg: " + `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
         this.labeler.load(`/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        polygonStyle.normal.dotRadius = 5;
+        polygonStyle.active.dotRadius = 5;
+        polygonStyle.normal.lineWidth = 2;
+        polygonStyle.active.lineWidth = 3;
+        rectStyle.normal.dotRadius = 5;
+        rectStyle.active.dotRadius = 5;
+        rectStyle.normal.lineWidth = 2;
+        rectStyle.active.lineWidth = 3;
       }
     }
-    
-
+  
     const label = await commonService.request(
       {
         workDate: item.workDate,

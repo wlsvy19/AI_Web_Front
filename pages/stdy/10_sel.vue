@@ -208,14 +208,21 @@ export default class extends Vue {
       combDtstId: this.learn_dtst_id,
       weightId: this.weight_id,
       startDttm: startDttm,
+      trainingYn: "Y"
     }
     const rs = await commonService.request(
       param,
       "/api/learn-status/data/start"
     );
-    param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
-    localStorage.setItem("dataset", JSON.stringify(param));
-    this.$emit("onRun", "RUN");
+    
+    if (rs == 1){
+      param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
+      localStorage.setItem("dataset", JSON.stringify(param));
+      this.$emit("onRun", "RUN");
+    }
+    else {
+      alert(rs);
+    }
   }
   comma(num) {
     return comma(num);

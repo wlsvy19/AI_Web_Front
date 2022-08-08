@@ -4,12 +4,12 @@
       <div class="tit-top flex flex-btw">
         <h2 class="ti wid2p">영상학습</h2>
         <div class="wid6p tx-c vc-locat">
-          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId}}<span>&gt;</span>{{ dataset.weightId }}
+          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId }}<span>&gt;</span>{{ dataset.weightId }}
         </div>
         <div class="wid2p tx-r">
           <button
             type="button"
-            @click="onStop()"
+            @click="onStop(0)"
             class="btn btn-sz1 btn-gr1 mr25"
           >
             학습중지
@@ -31,9 +31,9 @@
       </div>
     </div>
 
-    <div class="clmFlex mt15">
+    <div class="clmFlex mt15" style="flex-wrap:wrap;">
       <!-- 왼쪽 차트 영역 [S] -->
-      <div class="vc-statis-l">
+      <div v-if="this.status >=2" class="vc-statis-l">
         <div class="vc-statis-top mb15">
           <div id="vsStatis1"></div>
         </div>
@@ -42,6 +42,16 @@
           <div id="vsStatis2"></div>
         </div>
       </div>
+
+      <div v-if="this.status <=1" class='vod-c' style="display:flex; justify-content:center; align-items:center; align-content:center; flex-direction: column;">
+        <h1 v-if="this.progressValue<100" style="margin-bottom:3rem">데이터셋 준비중</h1>
+        <h1 v-else style="margin-bottom:3rem">데이터셋 준비완료</h1>
+        <div class='datsetProgress'>
+          <el-progress type="circle" :percentage="this.progressValue" :status="elStatus" :width="500" :stroke-width="30"/>
+        </div>
+        <!-- <ProgressBarCylinder :value="this.progressValue" :options="progressBarOptions"/> -->
+      </div>
+
       <!-- 왼쪽 차트 영역 [E] -->
 
       <!-- 오른쪽 차트 영역 [S] -->
@@ -94,6 +104,28 @@
         </div>
       </div>
       <!-- 오른쪽 차트 영역 [E] -->
+      <div v-if="this.status==3"
+        style="width: 100%;
+        margin-top: inherit;
+        padding: 3rem;
+        display: flex;
+        justify-content: space-between;
+        background: white;"
+      >
+        <h1 style="margin:auto;">{{ dataset.learnDtstTypeNm }} 학습이 완료되었습니다.</h1>
+        <button
+          type="button"
+          @click="onStop(2)"
+          class="btn btn-bg-gn"
+          style="width: 15%;
+                height: 100%;
+                padding-top: 20px;
+                padding-bottom: 20px;
+                font-size: x-large;"
+        >
+        완료
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -103,7 +135,9 @@ import Layout from "~/components/layout.vue";
 import commonService from "~/service/common-service";
 import { comma } from "~/utils/common";
 import * as echarts from "echarts";
-@Component({ components: { Layout } })
+import ProgressBarCylinder from '~/components/ProgressBarCylinder.vue'
+
+@Component({ components: { Layout, ProgressBarCylinder } })
 export default class extends Vue {
   serverInfo = {
     memUsageRate: 0,
@@ -139,6 +173,28 @@ export default class extends Vue {
   GpuTempGaugeChartOptions = null;
   serverTimer = null;
   learningTimer = null;
+
+  elStatus = null;
+  status = 0;
+  isInitChart = false;  
+  progressValue = 0;
+  progressBarOptions= {
+    progress: {
+      color: '#88bf3d',
+      backgroundColor: '#DBDBDB',
+      inverted: false
+    },
+    layout: {
+      height: 35,
+      width: 140,
+      verticalTextAlign: 43,
+      horizontalTextAlign: 45,
+      zeroOffset: 0,
+      strokeWidth: 30,
+      type: 'cylinder'
+    }
+  };
+
   comma(num) {
     return comma(num);
   }
@@ -162,6 +218,7 @@ export default class extends Vue {
 
 
   async getLeanInfo() {
+    // ====== status_info 테이블 ======
     const infoData = await commonService.request(
       {},
       "/api/learn-status/data/ing"
@@ -172,41 +229,58 @@ export default class extends Vue {
     this.combDtstId = infoData['combDtstId'];
     this.combDtstType = infoData['engineType'];
 
-    const data = await commonService.request(
-      {
-        trainingId:infoData['trainingId']
-        // trainingId:"20220802094023"
-      },
-      "/api/learn-status/data"
-    );
-    if (data != null) {
-      let i=0;
-      let sum = 0;
-      let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
-      for (i=0;i<data.length;i++){
-        temp['lossRate'][i] = parseFloat(data[i].lossRate);
-        sum += data[i].lossRate
-        temp['mapValue'][i] = parseFloat(data[i].mapValue);
-        temp['iteration'][i] = parseInt(data[i].iteration);
+    this.status = parseInt(infoData['trainingStep']);
+    this.progressValue = parseInt(infoData['progress']);
+    if (this.progressValue == 100) this.elStatus='success';
+    else this.elStatus=null;
+    if (this.status <= 1)  this.isInitChart = false;
+
+    // ======== status 테이블  ====== 
+    // 학습 중일 때만 조회
+    if (this.status >= 2) {
+      const data = await commonService.request(
+        {
+          trainingId:infoData['trainingId']
+          // trainingId:"20220802094023"
+        },
+        "/api/learn-status/data"
+      );
+      
+      if (data != null) {
+        let i=0;
+        let sum = 0;
+        let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
+        for (i=0;i<data.length;i++){
+          temp['lossRate'][i] = parseFloat(data[i].lossRate);
+          sum += data[i].lossRate
+          temp['mapValue'][i] = parseFloat(data[i].mapValue);
+          temp['iteration'][i] = parseInt(data[i].iteration);
+        }
+
+        this.learnInfo = temp; 
+        this.iteration = temp['iteration'].slice(-1)[0];
+        this.mean_loss = sum / data.length;
+
+        
+        if (this.isInitChart){
+          // refresh chart
+          if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
+            this.LossChartOptions.series[0].data = this.learnInfo['lossRate'];
+            this.LossChart.setOption(this.LossChartOptions);
+          }
+
+          if (this.mAPChart && this.mAPChartOptions && typeof this.mAPChartOptions === "object") {
+            this.mAPChartOptions.series[0].data = this.learnInfo['mapValue'];
+            this.mAPChart.setOption(this.mAPChartOptions);
+          }
+        }
+
+        if (!this.isInitChart && this.status >= 2) {
+          this.initLearningChart();
+        }     
       }
-
-      this.learnInfo = temp; 
-      this.iteration = temp['iteration'].slice(-1)[0];
-      this.mean_loss = sum / data.length;
-
-      // refresh chart
-      if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
-        this.LossChartOptions.series[0].data = this.learnInfo['lossRate'];
-        this.LossChart.setOption(this.LossChartOptions);
-      }
-
-      if (this.mAPChart && this.mAPChartOptions && typeof this.mAPChartOptions === "object") {
-        this.mAPChartOptions.series[0].data = this.learnInfo['mapValue'];
-        this.mAPChart.setOption(this.mAPChartOptions);
-      }
-    }
-
-    console.log("==leanInfo==", data);
+      console.log("==leanInfo==", data);
+    }    
   }
 
   async getDatasetInfo() {
@@ -254,31 +328,40 @@ export default class extends Vue {
       this.GpuTempGaugeChart.setOption(this.GpuTempGaugeChartOptions);
     }
   }
-  async onStop() {
+  async onStop(flag: number) {
     const dataset = commonService.getDataset();
     console.log("dataset", dataset);
-    const data = await commonService.request(
-      dataset,
-      "/api/learn-status/data/stop"
-    );
+    let param: any = {}
+    if (flag == 0) {
+      const data = await commonService.request(
+        param,
+        "/api/learn-status/data/stop"
+      );
+    }
+    else {
+      const data = await commonService.request(
+        dataset,
+        "/api/learn-status/data/complete"
+      );
+    }
     commonService.deleteDataset();
     this.$emit("onRun", "");
   }
 
-  init() {
+  async initLearningChart() {
+    this.isInitChart = true;
     const info = this.learnInfo;
     const lossArr = info['lossRate'];
     const mapArr = info['mapValue'];
     // const iterArr = info['iteration'];
     let iterArr = [];
     for(let i=1;i<=50; i++) iterArr.push(i);
-
+    
     var dom = document.getElementById("vsStatis1");
     this.LossChart = echarts.init(dom, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
-    var app = {};
 
     this.LossChartOptions = {
       title: {
@@ -312,24 +395,8 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          // type: "value",
-          // name: "",
-          // min: 0,
-          // max: max_loss,
-          // interval: "auto",
-          // axisLabel: {
-          //   formatter: "{value}",
-          // },
         },
         {
-          // type: "value",
-          // name: "",
-          // min: 0,
-          // max: max_loss,
-          // interval: "auto",
-          // axisLabel: {
-          //   formatter: "{value}",
-          // },
         },
       ],
 
@@ -364,7 +431,6 @@ export default class extends Vue {
           },
           tooltip: {
             valueFormatter: function (value) {
-              // return value;
               return "";
             },
           },
@@ -411,24 +477,8 @@ export default class extends Vue {
       ],
       yAxis: [
         {
-          // type: "value",
-          // name: "",
-          // min: 0,
-          // max: max_map,
-          // interval: "auto",
-          // axisLabel: {
-          //   formatter: "{value}",
-          // },
         },
         {
-          // type: "value",
-          // name: "",
-          // min: 0,
-          // max: max_map,
-          // interval: "auto",
-          // axisLabel: {
-          //   formatter: "{value}",
-          // },
         },
       ],
       series: [
@@ -462,6 +512,10 @@ export default class extends Vue {
 
     window.addEventListener("resize", (this.LossChart as any).resize);
     window.addEventListener("resize", (this.mAPChart as any).resize);
+  }
+
+
+  init() {
 
     // Gauge
     var cpu = document.getElementById("chart-cpu");
