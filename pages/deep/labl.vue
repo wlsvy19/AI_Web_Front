@@ -284,7 +284,8 @@
           </template>
 
           <h2 class="ti-s mb10">라벨링</h2>
-          <div class="lb-chc-box as-area1">
+          <!-- <div class="lb-chc-box as-area1"> -->
+          <div :class="[pageType === '차량번호' ? 'lb-chc-box2 as-area1': 'lb-chc-box as-area1']">
             <template v-for="(item, index) in labelTypeList">
               <input
                 @click="onCheckLabel(item.cmmnCd)"
@@ -457,17 +458,17 @@ const COLORS = ['red', 'blue','mediumslateblue', 'cyan', 'lime', 'orchid'];
 const rectStyle = {
   normal: {
     dotColor: "aqua", 
-    dotRadius: 5, 
+    dotRadius: 1, 
     lineColor: "#c30", 
-    lineWidth: 2, 
+    lineWidth: 1, 
     fillColor: "transparent", 
     opacity: 0.1,
   },
   active: {
     dotColor: "yellow", 
-    dotRadius: 5,
+    dotRadius: 3,
     lineColor: "yellow", 
-    lineWidth: 3, 
+    lineWidth: 1, 
     fillColor: "yellow", 
     opacity: 0.2,
   },
@@ -476,21 +477,22 @@ const rectStyle = {
 const polygonStyle = {
   normal: {
     dotColor: "green", 
-    dotRadius: 5, 
+    dotRadius: 1, 
     lineColor: "#c30", 
-    lineWidth: 2, 
+    lineWidth: 1, 
     fillColor: "orange", 
     opacity: 0.1,
   },
   active: {
     dotColor: "yellow", 
-    dotRadius: 5,
+    dotRadius: 3,
     lineColor: "yellow", 
-    lineWidth: 3, 
+    lineWidth: 1, 
     fillColor: "yellow", 
     opacity: 0.2,
   },
 };
+
 
 @Component({ components: { Layout } })
 export default class extends Vue {
@@ -855,7 +857,7 @@ export default class extends Vue {
       const pageNo = this.pageInfo.pageNo;
       this.selIndex = 0;
       await this.onSearch(pageNo - 1);
-      this.onNext(0);
+      this.onNext(9);
     }
   }
   async onNextImage() {
@@ -876,6 +878,8 @@ export default class extends Vue {
       this.onNextImage();
     } else if (event.key === "ArrowLeft") {
       this.onBeforeImage();
+    } else if (event.key === "Escape") {
+      this.setSelection();
     }
   }
   nonActive() {
