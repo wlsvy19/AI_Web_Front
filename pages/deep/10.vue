@@ -7,15 +7,15 @@
             {{ ((currentMenu || {}).subMenu || {}).MENU_NM }}
           </h2>
           <!-- 준공검사 주석 -->
-          <!-- <el-date-picker
+          <el-date-picker
             v-model="search.workDate"
             value-format="yyyy-MM-dd"
             type="date"
             placeholder="검색날짜"
           >
-          </el-date-picker> -->
-          <!-- <div class="wid4p tx-r">
-            <label for="sel002" class="sl-nm">엔진 종류</label>
+          </el-date-picker>
+          <div class="wid4p tx-r">
+            <!-- <label for="sel002" class="sl-nm">엔진 종류</label>
             <select id="sel002" class="select" v-model="search.learnDtstType">
               <option value="">선택</option>
               <template v-for="(item, index) in code.NGTP">
@@ -23,7 +23,7 @@
                   {{ item.cmmnCdNm }}
                 </option>
               </template>
-            </select>
+            </select> -->
             <button
               type="button"
               class="btn btn-sz2 btn-gn fc1 mr25"
@@ -31,7 +31,7 @@
             >
               조회
             </button>
-          </div> -->
+          </div>
         </div>
       </div>
 
@@ -300,7 +300,10 @@ export default class extends Vue {
     if (pageNo < 1) pageNo = 1;
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
-      { ...this.search, ...newpage },
+      { 
+        searchDate: this.search.workDate,
+        ...this.search, ...newpage 
+      },
       "/api/crgw-img-data/list"
     );
     console.log(data);
@@ -383,7 +386,7 @@ export default class extends Vue {
       const pageNo = this.pageInfo.pageNo;
       this.selIndex = 0;
       await this.onSearch(pageNo - 1);
-      this.onNext(0);
+      this.onNext(9);
     }
   }
   async onNextImage() {

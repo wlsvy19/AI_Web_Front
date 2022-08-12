@@ -845,6 +845,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
   flex-wrap: wrap;
   align-content: flex-start;
 }
+
 .lb-chc-box label {
   display: block;
   width: 74px;
@@ -863,7 +864,40 @@ nav ol > li > .subMenu > ul > li > a:hover {
   top: -9999px;
   left: -9999px;
 }
+
 .lb-chc-box input[type="checkbox"]:checked + label {
+  border: 1px solid var(--base);
+  background-color: var(--green3);
+  color: var(--base);
+}
+
+.lb-chc-box2 {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.lb-chc-box2 label {
+  display: block;
+  width: 36px;
+  height: 28px;
+  margin: 3px 0 0 0;
+  padding: 7px 0 0 0;
+  border: 1px solid var(--gray1);
+  border-radius: 3px;
+  background-color: var(--white2);
+  color: var(--gray4);
+  text-align: center;
+}
+
+.lb-chc-box2 input[type="checkbox"] {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+.lb-chc-box2 input[type="checkbox"]:checked + label {
   border: 1px solid var(--base);
   background-color: var(--green3);
   color: var(--base);
