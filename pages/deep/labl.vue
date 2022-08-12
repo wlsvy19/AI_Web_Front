@@ -786,8 +786,9 @@ export default class extends Vue {
         workDate: item.workDate,
         workNo: item.workNo,
         delYn: delYn,
+        pageType: this.pageType,
       },
-      "/api/crgw-img-data/del"
+      "/api/label-rslt/data/del"
     );
     item.delYn = delYn;
     alert("완료");
