@@ -280,7 +280,7 @@
             <div class="as-area0">
               <span style="font-size : 12pt;color : #FF0000; ">{{ selItem.labelDataText }}</span>
             </div>
-            <br></br>
+            <br/>
           </template>
 
           <h2 class="ti-s mb10">라벨링</h2>
@@ -522,8 +522,6 @@ export default class extends Vue {
     this.shapeID = 0;
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
-    this.onSearch(1);
-    //this.onNext(0);
   }
   async onSearch(pageNo) {
     if (pageNo < 1) pageNo = 1;
@@ -538,10 +536,17 @@ export default class extends Vue {
       },
       "/api/crgw-img-data/list/page"
     );
-    this.pageInfo = { ...data.page };
-    this.selImg = "";
-    this.imgDataList = data.list;
+    this.pageInfo = { ...data.page };    
+    const imgList = data.list;
+    this.imgDataList = imgList.map((v) => ({ ...v, newNmrecgCd: v.nmrecgCd }));
+    if (imgList.length === 0) {
+      this.selIndex = -1;
+      this.selItem = {};      
+    } else {
+      await this.onNext(0);
+    }
   }
+  
   async onSelImg(workDate, workNo, item, index) {
     console.log("item====", item);
     this.selDate = workDate;
@@ -557,17 +562,32 @@ export default class extends Vue {
     if (this.selImg) {
       if (this.pageType === "꺾임") {
         console.log("onSelImg: " + `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        polygonStyle.normal.dotRadius = 2;
+        polygonStyle.active.dotRadius = 2;
+        polygonStyle.normal.lineWidth = 1;
+        polygonStyle.active.lineWidth = 2;
         this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else if (this.pageType === "차량번호") {
         console.log("onSelImg: " + `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        rectStyle.normal.dotRadius = 2;
+        rectStyle.active.dotRadius = 2;
+        rectStyle.normal.lineWidth = 1;
+        rectStyle.active.lineWidth = 2;
         this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
       } else {
         console.log("onSelImg: " + `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
         this.labeler.load(`/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        polygonStyle.normal.dotRadius = 5;
+        polygonStyle.active.dotRadius = 5;
+        polygonStyle.normal.lineWidth = 2;
+        polygonStyle.active.lineWidth = 3;
+        rectStyle.normal.dotRadius = 5;
+        rectStyle.active.dotRadius = 5;
+        rectStyle.normal.lineWidth = 2;
+        rectStyle.active.lineWidth = 3;
       }
     }
-    
-
+  
     const label = await commonService.request(
       {
         workDate: item.workDate,
