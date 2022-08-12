@@ -19,7 +19,7 @@ export default class extends Vue {
   mounted() {
     this.dataset = commonService.getDataset();
     console.log("==dataset===", this.dataset);
-    if (this.dataset?.weightId) {
+    if (this.dataset?.trainingYn == "Y") {
       this.isRun = "RUN";
     }
   }
