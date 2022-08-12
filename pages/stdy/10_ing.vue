@@ -134,9 +134,8 @@ import Layout from "~/components/layout.vue";
 import commonService from "~/service/common-service";
 import { comma } from "~/utils/common";
 import * as echarts from "echarts";
-import ProgressBarCylinder from '~/components/ProgressBarCylinder.vue'
 
-@Component({ components: { Layout, ProgressBarCylinder } })
+@Component({ components: { Layout } })
 export default class extends Vue {
   serverInfo = {
     memUsageRate: 0,
