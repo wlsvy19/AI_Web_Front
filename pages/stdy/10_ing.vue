@@ -4,7 +4,7 @@
       <div class="tit-top flex flex-btw">
         <h2 class="ti wid2p">영상학습</h2>
         <div class="wid6p tx-c vc-locat">
-          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId }}<span>&gt;</span>{{ dataset.weightId }}
+          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId }}<span v-if="dataset.weightId !=''">&gt;</span>{{ dataset.weightId }}
         </div>
         <div class="wid2p tx-r">
           <button
@@ -47,9 +47,8 @@
         <h1 v-if="this.progressValue<100" style="margin-bottom:3rem">데이터셋 준비중</h1>
         <h1 v-else style="margin-bottom:3rem">데이터셋 준비완료</h1>
         <div class='datsetProgress'>
-          <el-progress type="circle" :percentage="this.progressValue" :status="elStatus" :width="500" :stroke-width="30"/>
+          <el-progress type="circle" :percentage="this.progressValue" :status="elStatus" :width="500" :stroke-width="40" />
         </div>
-        <!-- <ProgressBarCylinder :value="this.progressValue" :options="progressBarOptions"/> -->
       </div>
 
       <!-- 왼쪽 차트 영역 [E] -->
@@ -231,8 +230,12 @@ export default class extends Vue {
 
     this.status = parseInt(infoData['trainingStep']);
     this.progressValue = parseInt(infoData['progress']);
-    if (this.progressValue == 100) this.elStatus='success';
-    else this.elStatus=null;
+    if (infoData["errorMsg"] != "") this.elStatus="exception";
+    else {
+      if (this.progressValue == 100) this.elStatus='success';
+      else this.elStatus=null;
+    }
+
     if (this.status <= 1)  this.isInitChart = false;
 
     // ======== status 테이블  ====== 
@@ -256,7 +259,7 @@ export default class extends Vue {
           temp['mapValue'][i] = parseFloat(data[i].mapValue);
           temp['iteration'][i] = parseInt(data[i].iteration);
         }
-
+        
         this.learnInfo = temp; 
         this.iteration = temp['iteration'].slice(-1)[0];
         this.mean_loss = sum / data.length;
@@ -266,6 +269,7 @@ export default class extends Vue {
           // refresh chart
           if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
             this.LossChartOptions.series[0].data = this.learnInfo['lossRate'];
+            this.LossChartOptions.series[1].data = this.learnInfo['lossRate'];
             this.LossChart.setOption(this.LossChartOptions);
           }
 
