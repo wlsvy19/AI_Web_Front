@@ -116,13 +116,17 @@
             </select>
           </div> -->
           <div class="vod-box">
-            <img
+            <!-- <img
               width="100%"
               height="100%"
               v-if="selImg != ''"
               :src="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
+            /> -->
+            <image-bright
+              :url="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
             />
           </div>
+
           <div class="vod-btn tx-c">
             <template v-if="selIndex >= 0">
               <button
@@ -153,7 +157,7 @@
           <div class="vod-result">
             {{ codeNm(selItem.nmrecgCd) }}
           </div>
-          
+
           <div class="tx-c" @click="onShowPop(true)" style="cursor: pointer">
             <span class="cl-v">유형별 설명보기</span>
           </div>
@@ -187,7 +191,6 @@
                 </option>
               </template>
             </select> -->
-
           </fieldset>
 
           <!-- 팝업오픈 이벤트 걸려 있음 -->
@@ -254,7 +257,8 @@ import Layout from "~/components/layout.vue";
 import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import { notification } from "~/utils/common";
-@Component({ components: { Layout } })
+import ImageBright from "~/components/ImageBright.vue";
+@Component({ components: { Layout, ImageBright } })
 export default class extends Vue {
   selDate = "";
   sel1 = "";
@@ -290,7 +294,11 @@ export default class extends Vue {
     this.code.NMRECG_CD = this.code.NMRECG_CD.map((v) => ({
       ...v,
       // checked: v.cmmnCd === item.nmrecgCd,
-      checked: v.cmmnCd === ((item.dtrmNmrecgCd === "" || item.dtrmNmrecgCd === null) ? item.nmrecgCd : item.dtrmNmrecgCd)
+      checked:
+        v.cmmnCd ===
+        (item.dtrmNmrecgCd === "" || item.dtrmNmrecgCd === null
+          ? item.nmrecgCd
+          : item.dtrmNmrecgCd),
     }));
   }
   onShowPop(show) {
@@ -300,9 +308,10 @@ export default class extends Vue {
     if (pageNo < 1) pageNo = 1;
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
-      { 
+      {
         searchDate: this.search.workDate,
-        ...this.search, ...newpage 
+        ...this.search,
+        ...newpage,
       },
       "/api/crgw-img-data/list"
     );
