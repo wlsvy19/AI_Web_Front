@@ -46,13 +46,23 @@ import * as echarts from "echarts";
 @Component({ components: { Layout } })
 export default class extends Vue {
   data: any = {};
+  nmrecgList = [];
   comma(num) {
     return comma(num);
   }
   async mounted() {
+    const nmrecgList = await commonService.request(
+      {},
+      "/api/dashboard/nmrecg"
+    );
+    this.nmrecgList = nmrecgList;
     this.init();
   }
   init() {
+    const nmrecgNm = this.nmrecgList.map((v) => v.NMRECG_NM);
+    const nmrecgCnt = this.nmrecgList.map((v) => v.CNT);
+    const nmrecgSize = this.nmrecgList.map((v) => v.SIZE);
+
     var dom = document.getElementById("dsb-cont1");
     var myChart: any = echarts.init(dom, null, {
       renderer: "canvas",
@@ -63,7 +73,7 @@ export default class extends Vue {
 
     option = {
       title: {
-        text: "미, 오인식 유형분류 건수(누적)",
+        text: "미, 오인식 유형분류 건수",
         left: "20",
         top: "10",
         textStyle: {
@@ -78,13 +88,16 @@ export default class extends Vue {
       xAxis: [
         {
           type: "category",
-          data: ["밝음", "어두움", "꺾임", "훼손", "가림", "기타"],
+          data: [...nmrecgNm],
           axisPointer: {
             type: "shadow",
           },
           nameTextStyle: {
             color: "#B7B7B7",
           },
+          axisLabel: {
+            interval: 0,
+          }
         },
       ],
       yAxis: [
@@ -92,8 +105,8 @@ export default class extends Vue {
           type: "value",
           name: "",
           min: 0,
-          max: 5000,
-          interval: 500,
+          //max: 5000,
+          interval: 10000,
           axisLabel: {
             formatter: "{value}",
           },
@@ -119,7 +132,7 @@ export default class extends Vue {
               return value;
             },
           },
-          data: [1000, 1009, 1500, 1100, 1300, 700],
+          data: [...nmrecgCnt],
         },
       ],
     };
@@ -140,7 +153,7 @@ export default class extends Vue {
 
     option2 = {
       title: {
-        text: "미, 오인식 유형분류 용량(누적)",
+        text: "미, 오인식 유형분류 용량(GB)",
         left: "20",
         top: "10",
         textStyle: {
@@ -155,13 +168,16 @@ export default class extends Vue {
       xAxis: [
         {
           type: "category",
-          data: ["밝음", "어두움", "꺾임", "훼손", "가림", "기타"],
+          data: [...nmrecgNm],
           axisPointer: {
             type: "shadow",
           },
           nameTextStyle: {
             color: "#B7B7B7",
           },
+          axisLabel: {
+            interval: 0,
+          }
         },
       ],
       yAxis: [
@@ -169,8 +185,8 @@ export default class extends Vue {
           type: "value",
           name: "",
           min: 0,
-          max: 120,
-          interval: 20,
+          //max: 120,
+          interval: 2,
           axisLabel: {
             formatter: "{value}",
           },
@@ -196,7 +212,7 @@ export default class extends Vue {
               return value;
             },
           },
-          data: [10, 19, 15, 11, 13, 7],
+          data: [...nmrecgSize],
         },
       ],
     };
@@ -241,8 +257,8 @@ export default class extends Vue {
       xAxis: {
         type: "value",
         min: 0,
-        max: 120000,
-        interval: 20000,
+        max: 100000,
+        interval: 10000,
         boundaryGap: [0, 0.01],
       },
       yAxis: {
@@ -256,7 +272,7 @@ export default class extends Vue {
           itemStyle: {
             color: "green",
           },
-          data: [18203],
+          data: [0],
         },
         {
           name: "전체",
@@ -264,7 +280,7 @@ export default class extends Vue {
           itemStyle: {
             color: "blue",
           },
-          data: [19325],
+          data: [0],
         },
       ],
     };
@@ -315,7 +331,7 @@ export default class extends Vue {
       },
       yAxis: {
         type: "category",
-        data: ["용량"],
+        data: ["용량\n(GB)"],
       },
       series: [
         {
@@ -324,7 +340,7 @@ export default class extends Vue {
           itemStyle: {
             color: "green",
           },
-          data: [100],
+          data: [0],
         },
         {
           name: "전체",
@@ -332,7 +348,7 @@ export default class extends Vue {
             color: "blue",
           },
           type: "bar",
-          data: [200],
+          data: [0],
         },
       ],
     };
@@ -419,12 +435,12 @@ export default class extends Vue {
           },
           center: ["50%", "40%"], //가로 세로 위치
           data: [
-            { value: 10, name: "문자/숫자2" },
-            { value: 10, name: "번호판 탐색" },
-            { value: 10, name: "문자/숫자3" },
-            { value: 10, name: "스미어" },
-            { value: 20, name: "꺽임/훼손" },
-            { value: 30, name: "문자/숫자1" },
+            { value: 0, name: "문자/숫자2" },
+            { value: 0, name: "번호판 탐색" },
+            { value: 0, name: "문자/숫자3" },
+            { value: 0, name: "스미어" },
+            { value: 0, name: "꺽임/훼손" },
+            { value: 0, name: "문자/숫자1" },
           ],
         },
       ],
@@ -511,12 +527,12 @@ export default class extends Vue {
           },
           center: ["50%", "40%"], //가로 세로 위치
           data: [
-            { value: 10, name: "문자/숫자2" },
-            { value: 10, name: "번호판 탐색" },
-            { value: 10, name: "문자/숫자3" },
-            { value: 10, name: "스미어" },
-            { value: 20, name: "꺽임/훼손" },
-            { value: 30, name: "문자/숫자1" },
+            { value: 0, name: "문자/숫자2" },
+            { value: 0, name: "번호판 탐색" },
+            { value: 0, name: "문자/숫자3" },
+            { value: 0, name: "스미어" },
+            { value: 0, name: "꺽임/훼손" },
+            { value: 0, name: "문자/숫자1" },
           ],
         },
       ],
@@ -603,12 +619,12 @@ export default class extends Vue {
           },
           center: ["50%", "40%"], //가로 세로 위치
           data: [
-            { value: 10, name: "문자/숫자2" },
-            { value: 10, name: "번호판 탐색" },
-            { value: 10, name: "문자/숫자3" },
-            { value: 10, name: "스미어" },
-            { value: 20, name: "꺽임/훼손" },
-            { value: 30, name: "문자/숫자1" },
+            { value: 0, name: "문자/숫자2" },
+            { value: 0, name: "번호판 탐색" },
+            { value: 0, name: "문자/숫자3" },
+            { value: 0, name: "스미어" },
+            { value: 0, name: "꺽임/훼손" },
+            { value: 0, name: "문자/숫자1" },
           ],
         },
       ],
@@ -668,7 +684,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#ff7f00",
           },
-          data: [200],
+          data: [0],
         },
         {
           name: "소요시간",
@@ -676,7 +692,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#8b00ff",
           },
-          data: [100],
+          data: [0],
         },
       ],
     };
@@ -736,7 +752,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#ff7f00",
           },
-          data: [400],
+          data: [0],
         },
         {
           name: "소요시간",
@@ -744,7 +760,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#8b00ff",
           },
-          data: [100],
+          data: [0],
         },
       ],
     };
@@ -788,9 +804,9 @@ export default class extends Vue {
       },
       xAxis: {
         type: "value",
-        min: 90,
+        min: 98,
         max: 100,
-        interval: 1,
+        interval: 0.5,
         boundaryGap: [0, 0.01],
       },
       yAxis: {
@@ -804,7 +820,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#fdd",
           },
-          data: [99.5],
+          data: [0],
         },
         {
           name: "업데이트 후",
@@ -812,7 +828,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#cfc",
           },
-          data: [99.9],
+          data: [0],
         },
       ],
     };
@@ -856,9 +872,9 @@ export default class extends Vue {
       },
       xAxis: {
         type: "value",
-        min: 90,
+        min: 98,
         max: 100,
-        interval: 1,
+        interval: 0.5,
         boundaryGap: [0, 0.01],
       },
       yAxis: {
@@ -872,7 +888,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#fdd",
           },
-          data: [99.0],
+          data: [0],
         },
         {
           name: "업데이트 후",
@@ -880,7 +896,7 @@ export default class extends Vue {
           itemStyle: {
             color: "#cfc",
           },
-          data: [99.9],
+          data: [0],
         },
       ],
     };
