@@ -24,8 +24,8 @@
               comma(datasetInfo.totalCnt)
             }}개)</span
           >
-          현재까지의 평균 loss: <span class="c-val">{{ this.mean_loss }}</span>
-          현재 Iteration: <span class="c-val">{{ this.iteration }}</span> 
+          현재까지의 평균 loss: <span class="c-val">{{ mean_loss }}</span>
+          현재 Iteration: <span class="c-val">{{ iteration }}</span> 
           남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
         </div>
       </div>
@@ -33,7 +33,37 @@
 
     <div class="clmFlex mt15" style="flex-wrap:wrap;">
       <!-- 왼쪽 차트 영역 [S] -->
-      <div v-if="this.status >=2" class="vc-statis-l">
+      <div v-if="this.status <=1" class='vc-status'>
+        <h1 v-if="this.progressValue<100" style="margin-bottom:3rem">데이터셋 준비중</h1>
+        <h1 v-else style="margin-bottom:3rem">데이터셋 준비완료</h1>
+        <div class='datsetProgress'>
+          <el-progress type="circle" :percentage="this.progressValue" :status="elStatus" :width="500" :stroke-width="40" />
+        </div>
+      </div>
+
+      <div v-else-if="this.status==4">
+        <div class='vc-status'>
+          <div id="nf404" style="margin: 0 auto 0 auto;">
+            <p>학습 진행중 에러가 발생했습니다.</p>
+            <strong style="word-break: break-all;">에러 메세지: {{ errMsg }}</strong>
+            <div>
+              <button
+                type="button"
+                @click="onStop(2)"
+                class="btn btn-bg-gn"
+                style="width: 30%;
+                      height: 100%;
+                      margin-top: 3rem;
+                      font-size: 20px;"
+              >
+              확인
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="vc-statis-l">
         <div class="vc-statis-top mb15">
           <div id="vsStatis1"></div>
         </div>
@@ -43,13 +73,6 @@
         </div>
       </div>
 
-      <div v-if="this.status <=1" class='vod-c' style="display:flex; justify-content:center; align-items:center; align-content:center; flex-direction: column;">
-        <h1 v-if="this.progressValue<100" style="margin-bottom:3rem">데이터셋 준비중</h1>
-        <h1 v-else style="margin-bottom:3rem">데이터셋 준비완료</h1>
-        <div class='datsetProgress'>
-          <el-progress type="circle" :percentage="this.progressValue" :status="elStatus" :width="500" :stroke-width="40" />
-        </div>
-      </div>
 
       <!-- 왼쪽 차트 영역 [E] -->
 
@@ -176,22 +199,7 @@ export default class extends Vue {
   status = 0;
   isInitChart = false;  
   progressValue = 0;
-  progressBarOptions= {
-    progress: {
-      color: '#88bf3d',
-      backgroundColor: '#DBDBDB',
-      inverted: false
-    },
-    layout: {
-      height: 35,
-      width: 140,
-      verticalTextAlign: 43,
-      horizontalTextAlign: 45,
-      zeroOffset: 0,
-      strokeWidth: 30,
-      type: 'cylinder'
-    }
-  };
+  errMsg = "";
 
   comma(num) {
     return comma(num);
@@ -229,7 +237,10 @@ export default class extends Vue {
 
     this.status = parseInt(infoData['trainingStep']);
     this.progressValue = parseInt(infoData['progress']);
-    if (infoData["errorMsg"] != "") this.elStatus="exception";
+    if (infoData["errorMsg"] != "") {
+      this.elStatus="exception";
+      this.errMsg = infoData["errorMsg"];
+    } 
     else {
       if (this.progressValue == 100) this.elStatus='success';
       else this.elStatus=null;

@@ -1174,6 +1174,18 @@ nav ol > li > .subMenu > ul > li > a:hover {
   background-color: var(--white1);
 }
 
+.vc-status {
+  width: 848px;
+  padding: 24px;
+  background-color: var(--white1);
+  display:flex; 
+  justify-content:center;
+  align-items:center; 
+  align-content:center; 
+  flex-direction: column; 
+  height: 100%;
+}
+
 .vc-statis-l .vc-statis-top,
 .vc-statis-l .vc-statis-bottom {
   width: 848px;
