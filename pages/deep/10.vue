@@ -361,10 +361,16 @@ export default class extends Vue {
     console.log(event);
     if (event.key === "Enter") {
       this.onOk(this.selItem.dtrmYn === "Y" ? "N" : "Y");
-    } else if (event.key === "ArrowRight") {
+    } else if (event.key === "ArrowDown") {
       this.onNextImage();
-    } else if (event.key === "ArrowLeft") {
+    } else if (event.key === "ArrowUp") {
       this.onBeforeImage();
+    } else if (event.key === "Delete") {
+      if (this.selItem.delYn !== "Y") {
+        this.updateDel("Y");
+      } else {
+        this.updateDel("N");
+      }
     }
   }
   async onOk(dtrmYn) {
@@ -420,7 +426,7 @@ export default class extends Vue {
       "/api/crgw-img-data/del"
     );
     item.delYn = delYn;
-    alert("완료");
+    // alert("완료");
     this.onNext(this.selIndex + 1);
   }
   codeNm(cd) {
