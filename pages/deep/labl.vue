@@ -688,9 +688,11 @@ export default class extends Vue {
     //await commonService.request(saveData, "/api/crgw-img-data/save");
     await commonService.request(saveData, "/api/label-rslt/data/save");
     this.selItem.dtrmYn = dtrmYn;
-    this.$util.notification("저장완료");
+    this.$util.notification("처리완료");
     const newIndex = this.selIndex + 1;
-    this.onNext(newIndex);
+    if (dtrmYn === "Y") {
+      this.onNext(newIndex);
+    }
   }
   async onNext(newIndex) {
     let imgDataList = this.imgDataList;
