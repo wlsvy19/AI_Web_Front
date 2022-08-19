@@ -4,9 +4,9 @@
       <div class="tit-top flex flex-btw">
         <h2 class="ti wid2p">영상학습</h2>
         <div class="wid6p tx-c vc-locat">
-          {{ dataset.learnDtstTypeNm }}<span>&gt;</span>{{ dataset.trainingId }}<span v-if="dataset.weightId !=''">&gt;</span>{{ dataset.weightId }}
+          {{ datasetInfo.learnDtstTypeNm }}<span>&gt;</span>{{ statusInfo.trainingId }}<span>&gt;</span>{{ baseWeightId }}
         </div>
-        <div class="wid2p tx-r">
+        <div v-if="this.status<3" class="wid2p tx-r">
           <button
             type="button"
             @click="onStop(0)"
@@ -24,9 +24,16 @@
               comma(datasetInfo.totalCnt)
             }}개)</span
           >
-          현재까지의 평균 loss: <span class="c-val">{{ mean_loss }}</span>
+          현재 mAP: <span class="c-val">{{ mAP }}</span>
+          현재 Loss: <span class="c-val">{{ loss }}</span>
           현재 Iteration: <span class="c-val">{{ iteration }}</span> 
           남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
+          |
+          최적: 
+          Iteration <span class="c-val">{{ bestIteration }}</span>
+          Loss <span class="c-val">{{ bestLoss }}</span>
+          mAP <span class="c-val">{{ bestMAP }}</span>
+
         </div>
       </div>
     </div>
@@ -46,15 +53,27 @@
           <div id="nf404" style="margin: 0 auto 0 auto;">
             <p>학습 진행중 에러가 발생했습니다.</p>
             <strong style="word-break: break-all;">에러 메세지: {{ errMsg }}</strong>
-            <div>
+            <div style="margin-top:1rem;">
+              <button v-if="isInitChart=true"
+                type="button"
+                @click="moveBefore()"
+                class="btn btn-bg-gn"
+                style="font-size: 20px;
+                      width: 25%;
+                      height: 100%;
+                      margin-right: 1rem;
+                      background-color: #909399;"
+              >
+              이전화면
+              </button>
               <button
                 type="button"
                 @click="onStop(2)"
                 class="btn btn-bg-gn"
-                style="width: 30%;
+                style="font-size: 20px;
+                      width: 25%;
                       height: 100%;
-                      margin-top: 3rem;
-                      font-size: 20px;"
+                      margin-right: 1rem;"
               >
               확인
               </button>
@@ -63,17 +82,75 @@
         </div>
       </div>
 
+      <div v-else-if="this.status==3">
+        <div class='vc-status'>
+          <div id="nf404" style="margin: 0 auto 0 auto;">
+            <p>{{ datasetInfo.learnDtstTypeNm }} 학습이 완료되었습니다.</p>
+            <button v-if="isInitChart=true"
+                type="button"
+                @click="moveBefore()"
+                class="btn btn-bg-gn"
+                style="width: 40%;
+                      height: 60%;
+                      font-size: 20px;
+                      margin-right: 1rem;
+                      background-color: #909399;"
+              >
+              학습 그래프
+            </button>
+            <button
+              type="button"
+              @click="onStop(2)"
+              class="btn btn-bg-gn"
+              style="width: 40%;
+                    height: 60%;
+                    font-size: 20px;
+                    margin-right: 1rem;"
+            >
+            완료
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div v-else class="vc-statis-l">
+        <div v-if="this.isInitChart==false" style="position:relative;top:45%">
+          <div class="spinner"></div>  
+        </div>        
         <div class="vc-statis-top mb15">
-          <div id="vsStatis1"></div>
+          <div v-if="this.status==5" class="error-btn-div">    
+            <button
+              type="button"
+              @click="moveBefore()"
+              class="btn btn-bg-gn"
+              style="width: 15%;
+                    height: 100%;
+                    font-size: 15px;
+                    margin-right: 1rem;
+                    background-color: #909399;"
+            >
+            돌아가기
+            </button>
+            <button
+              type="button"
+              @click="onStop(2)"
+              class="btn btn-bg-gn"
+              style="width: 15%;
+                    height: 100%;
+                    font-size: 15px;
+                    margin-right: 1rem;"
+            >
+            확인
+            </button>
+          </div>
+          <div id="vsStatis1">            
+          </div>
         </div>
 
         <div class="vc-statis-bottom">
           <div id="vsStatis2"></div>
-        </div>
+        </div>        
       </div>
-
-
       <!-- 왼쪽 차트 영역 [E] -->
 
       <!-- 오른쪽 차트 영역 [S] -->
@@ -126,28 +203,7 @@
         </div>
       </div>
       <!-- 오른쪽 차트 영역 [E] -->
-      <div v-if="this.status==3"
-        style="width: 100%;
-        margin-top: inherit;
-        padding: 3rem;
-        display: flex;
-        justify-content: space-between;
-        background: white;"
-      >
-        <h1 style="margin:auto;">{{ dataset.learnDtstTypeNm }} 학습이 완료되었습니다.</h1>
-        <button
-          type="button"
-          @click="onStop(2)"
-          class="btn btn-bg-gn"
-          style="width: 15%;
-                height: 100%;
-                padding-top: 20px;
-                padding-bottom: 20px;
-                font-size: x-large;"
-        >
-        완료
-        </button>
-      </div>
+
     </div>
   </div>
 </template>
@@ -180,8 +236,13 @@ export default class extends Vue {
   learnInfo: any = {};
   combDtstId = "";
   combDtstType = "";
+  learnDtstTypeNm = "";
   iteration = 0;
-  mean_loss = 0;
+  loss = 999999;
+  mAP = 0;
+  bestIteration = 0;
+  bestLoss = 999999;
+  bestMAP = 0;
   LossChart = null;
   LossChartOptions = null;
   mAPChart = null;
@@ -200,13 +261,16 @@ export default class extends Vue {
   isInitChart = false;  
   progressValue = 0;
   errMsg = "";
+  isStop = false;
+  beforeStatus = 0;
+  baseWeightId = "";
 
-  comma(num) {
+  comma(num: any) {
     return comma(num);
   }
-  async created() {
-    this.dataset = commonService.getDataset();
-  }
+  // async created() {
+  //   this.dataset = commonService.getDataset();
+  // }
   async mounted() {
     await this.getServerStatusData();
     await this.getLeanInfo();
@@ -222,7 +286,17 @@ export default class extends Vue {
     clearInterval(this.learningTimer);
   }
 
-
+  async moveBefore() {
+    this.isStop = true;
+    if(this.status <= 4) {
+      this.isInitChart = false;
+      this.beforeStatus = this.status
+      this.status = 5;
+    }
+    else {
+      this.status = this.beforeStatus;
+    }
+  }
   async getLeanInfo() {
     // ====== status_info 테이블 ======
     const infoData = await commonService.request(
@@ -232,10 +306,20 @@ export default class extends Vue {
     this.statusInfo = infoData;
     console.log("==statusInfo==", infoData);
 
+    // base 가중치 표시용
+    if (this.statusInfo['weightId'] == "") this.baseWeightId = "base 가중치 없음";
+    else this.baseWeightId = this.serverInfo['weightId'];
+
+    // 에러나거나 학습완료시 이전화면 보기용
+    if(!(this.isStop && parseInt(infoData['trainingStep']) >= 3 && parseInt(infoData['trainingStep']) <= 4)){
+      this.isStop = false;
+      this.status = parseInt(infoData['trainingStep']);
+    }
+
     this.combDtstId = infoData['combDtstId'];
     this.combDtstType = infoData['engineType'];
-
-    this.status = parseInt(infoData['trainingStep']);
+    
+    // 데이터셋 준비중일때 프로그래스 바 값+상태
     this.progressValue = parseInt(infoData['progress']);
     if (infoData["errorMsg"] != "") {
       this.elStatus="exception";
@@ -246,7 +330,7 @@ export default class extends Vue {
       else this.elStatus=null;
     }
 
-    if (this.status <= 1)  this.isInitChart = false;
+    if (this.status == 0) this.onStop(2);
 
     // ======== status 테이블  ====== 
     // 학습 중일 때만 조회
@@ -261,35 +345,62 @@ export default class extends Vue {
       
       if (data != null) {
         let i=0;
-        let sum = 0;
         let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
+        let lossRate = 0;
+        let mapValue = 0;
+        let iter = 0;
         for (i=0;i<data.length;i++){
-          temp['lossRate'][i] = parseFloat(data[i].lossRate);
-          sum += data[i].lossRate
-          temp['mapValue'][i] = parseFloat(data[i].mapValue);
-          temp['iteration'][i] = parseInt(data[i].iteration);
+          lossRate = parseFloat(data[i].lossRate);
+          mapValue = parseFloat(data[i].mapValue);
+          iter = parseInt(data[i].iteration);
+          temp['lossRate'][i] = lossRate;
+          temp['mapValue'][i] = mapValue;
+          temp['iteration'][i] = iter;
+          debugger;
+          if (mapValue > this.bestMAP ) {
+            this.bestMAP = parseFloat(mapValue.toFixed(3));
+            this.bestLoss = parseFloat(lossRate.toFixed(3));
+            this.bestIteration = iter;
+            console.log('a')
+          }
+          else if (mapValue == this.bestMAP ) {
+            if(lossRate <= this.bestLoss) {
+              this.bestMAP = parseFloat(mapValue.toFixed(3));
+              this.bestLoss = parseFloat(lossRate.toFixed(3));
+              this.bestIteration = iter;
+              console.log('b')
+            }
+          }
+          else {
+          }
         }
         
         this.learnInfo = temp; 
         this.iteration = temp['iteration'].slice(-1)[0];
-        this.mean_loss = sum / data.length;
+        this.loss = parseFloat((temp['lossRate'].slice(-1)[0]).toFixed(3));
+        this.mAP = parseFloat((temp['mapValue'].slice(-1)[0]).toFixed(3));
 
-        
         if (this.isInitChart){
           // refresh chart
+          let iterArr = [];
+          let range = (Math.floor((this.learnInfo['iteration'].length-1) / 100) + 1) * 100;
+          for(let i=1;i<=range; i++) iterArr.push(i);
+
           if (this.LossChart && this.LossChartOptions && typeof this.LossChartOptions === "object") {
             this.LossChartOptions.series[0].data = this.learnInfo['lossRate'];
             this.LossChartOptions.series[1].data = this.learnInfo['lossRate'];
+            this.LossChartOptions.xAxis[0].data = iterArr;
             this.LossChart.setOption(this.LossChartOptions);
           }
 
           if (this.mAPChart && this.mAPChartOptions && typeof this.mAPChartOptions === "object") {
             this.mAPChartOptions.series[0].data = this.learnInfo['mapValue'];
+            this.mAPChartOptions.xAxis[0].data = iterArr;
             this.mAPChart.setOption(this.mAPChartOptions);
           }
         }
 
-        if (!this.isInitChart && this.status >= 2) {
+        if (!this.isInitChart && this.status >= 2 && this.status != 4) {
           this.initLearningChart();
         }     
       }
@@ -298,7 +409,11 @@ export default class extends Vue {
   }
 
   async getDatasetInfo() {
-    console.log("====dataset", this.dataset);
+    const ngtpCode = await commonService.request(
+      {},
+      "/api/cmmn-cd-info/ngtp"
+    );
+    console.log("ngtpCode==", ngtpCode); 
     const data = await commonService.request(
       {
         combDtstId: this.combDtstId,
@@ -307,6 +422,8 @@ export default class extends Vue {
       "/api/comb-dtst/info"
     );
     this.datasetInfo = data;
+
+    this.datasetInfo['learnDtstTypeNm'] = ngtpCode[data['combDtstType']];
     console.log("datasetInfo==", this.datasetInfo); 
   }
   async getServerStatusData() {
@@ -351,26 +468,34 @@ export default class extends Vue {
         param,
         "/api/learn-status/data/stop"
       );
+      localStorage.setItem("isStop", "stop");
     }
     else {
       const data = await commonService.request(
         dataset,
         "/api/learn-status/data/complete"
       );
+      localStorage.setItem("isStop", "");
     }
     commonService.deleteDataset();
     this.$emit("onRun", "");
   }
 
   async initLearningChart() {
+    console.log('initChart@@@@')
     this.isInitChart = true;
     const info = this.learnInfo;
     const lossArr = info['lossRate'];
     const mapArr = info['mapValue'];
-    // const iterArr = info['iteration'];
     let iterArr = [];
-    for(let i=1;i<=50; i++) iterArr.push(i);
     
+    if (info.length == 0){
+      for(let i=1;i<=100; i++) iterArr.push(i);
+    }
+    else {
+      let range = (Math.floor((info['iteration'].length-1) / 100) + 1) * 100;
+      for(let i=1;i<=range; i++) iterArr.push(i);
+    }
     var dom = document.getElementById("vsStatis1");
     this.LossChart = echarts.init(dom, null, {
       renderer: "canvas",
@@ -422,7 +547,7 @@ export default class extends Vue {
             color: "#EAF5DA",
           },
           tooltip: {
-            valueFormatter: function (value) {
+            valueFormatter: function (value: any) {
               return value;
             },
           },
@@ -443,11 +568,11 @@ export default class extends Vue {
           lineStyle: {
             type: "line",
           },
-          tooltip: {
-            valueFormatter: function (value) {
-              return "";
-            },
-          },
+          // tooltip: {
+          //   valueFormatter: function (value: any) {
+          //     return "";
+          //   },
+          // },
           data: lossArr,
         },
       ],
@@ -507,7 +632,7 @@ export default class extends Vue {
             position: "top",
           },
           tooltip: {
-            valueFormatter: function (value) {
+            valueFormatter: function (value: any) {
               return value;
             },
           },
