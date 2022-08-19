@@ -15,14 +15,14 @@ import sel from "./10_sel.vue";
 @Component({ components: { Layout, dtl, sel } })
 export default class extends Vue {
   isRun = "";
-  dataset: any = {};
-  mounted() {
-    this.dataset = commonService.getDataset();
-    console.log("==dataset===", this.dataset);
-    if (this.dataset?.trainingYn == "Y") {
-      this.isRun = "RUN";
-    }
-  }
+  // dataset: any = {};
+  // mounted() {
+  //   this.dataset = commonService.getDataset();
+  //   console.log("==dataset===", this.dataset);
+  //   if (this.dataset?.trainingYn == "Y") {
+  //     this.isRun = "RUN";
+  //   }
+  // }
   onRun(run) {
     this.isRun = run;
   }
