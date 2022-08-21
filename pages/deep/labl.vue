@@ -16,7 +16,7 @@
                 </option>
               </template>
             </select> -->
-            <!-- 준공검사 주석 -->
+          <!-- 준공검사 주석 -->
           <!-- <template v-if="pageType === '차량번호'">
             <label for="sel002" class="sl-nm" style="width: 100px"
               >포함 숫자</label
@@ -80,19 +80,24 @@
         <div class="vod-l">
           <div class="view-mini mb25">
             <figure>
-              <img v-if="pageType === '꺾임' && (selImg != '' && selImg != null)"
+              <img
+                v-if="pageType === '꺾임' && selImg != '' && selImg != null"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
                 :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              <img v-else-if="pageType === '차량번호' && (selImg != '' && selImg != null)"
+              <img
+                v-else-if="
+                  pageType === '차량번호' && selImg != '' && selImg != null
+                "
                 alt="번호판 이미지"
                 width="152"
                 height="88"
                 :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
               />
-              <img v-else-if="selImg != '' && selImg != null"
+              <img
+                v-else-if="selImg != '' && selImg != null"
                 alt="번호판 이미지"
                 width="152"
                 height="88"
@@ -175,7 +180,13 @@
             </div>
             <div class="label-v-ctl">
               <div class="flex lb-btn">
-                <button type="button" class="bt-lb-potin" @click="setSelection()">선택</button>
+                <button
+                  type="button"
+                  class="bt-lb-potin"
+                  @click="setSelection()"
+                >
+                  선택
+                </button>
                 <button
                   v-if="pageType === '빛' || pageType === '꺾임'"
                   type="button"
@@ -206,6 +217,20 @@
               <figure>
                 <!-- <div id="img-view" style="width: 800px; height: 462px"></div> -->
                 <!-- <img src="/images/vi_ex.jpg" width="800" height="462" alt="" /> -->
+                <!-- <image-bright
+                  id="img-view"
+                  :url="url"
+                  style="width: 800"
+                ></image-bright> -->
+                <input
+                  style="display: none"
+                  type="range"
+                  max="255"
+                  min="-255"
+                  :value="lightValue"
+                  id="brightI"
+                  @mouseup="brightnessAdjustment()"
+                />
                 <div id="img-view" style="width: 800px">
                   <!-- <img
                     width="100%"
@@ -226,6 +251,17 @@
                 <button type="button" class="bt-ctl-op">
                   <em class="bt-dw"></em>
                 </button> -->
+                <button
+                  type="button"
+                  class="bt-ctl-op"
+                  @click="onUpDown('DOWN')"
+                >
+                  <em class="bt-up"></em>
+                </button>
+                <span id="label-opt" class="label-opt">밝기B</span>
+                <button type="button" class="bt-ctl-op" @click="onUpDown('UP')">
+                  <em class="bt-dw"></em>
+                </button>
               </div>
 
               <div class="label-bntBox-r">
@@ -274,18 +310,26 @@
 
         <!-- 영상학습 결과 [S] -->
         <!-- 필독 사이즈 변동있으면 연락주세요!! -->
-         <div class="labeling-r">
+        <div class="labeling-r">
           <template v-if="pageType === '차량번호'">
-          <h2 class="ti-s mb10">라벨링 데이터</h2>
+            <h2 class="ti-s mb10">라벨링 데이터</h2>
             <div class="as-area0">
-              <span style="font-size : 12pt;color : #FF0000; ">{{ selItem.labelDataText }}</span>
+              <span style="font-size: 12pt; color: #ff0000">{{
+                selItem.labelDataText
+              }}</span>
             </div>
-            <br/>
+            <br />
           </template>
 
           <h2 class="ti-s mb10">라벨링</h2>
           <!-- <div class="lb-chc-box as-area1"> -->
-          <div :class="[pageType === '차량번호' ? 'lb-chc-box2 as-area1': 'lb-chc-box as-area1']">
+          <div
+            :class="[
+              pageType === '차량번호'
+                ? 'lb-chc-box2 as-area1'
+                : 'lb-chc-box as-area1',
+            ]"
+          >
             <template v-for="(item, index) in labelTypeList">
               <input
                 @click="onCheckLabel(item.cmmnCd)"
@@ -315,8 +359,16 @@
             v-if="typeof labeler.getShapeList == 'function'"
           >
             <template v-for="(item, index) in labeler.getShapeList()">
-              <div class="lb-as-l" :key="index" :class="sel2 === item.id ? 'active' : ''">
-                <button type="button" class="width70" @click="onActiveLabel(index)">
+              <div
+                class="lb-as-l"
+                :key="index"
+                :class="sel2 === item.id ? 'active' : ''"
+              >
+                <button
+                  type="button"
+                  class="width70"
+                  @click="onActiveLabel(index)"
+                >
                   <span class="lb-l-nm">{{
                     item.data ? labelNm(item.data) : "-"
                   }}</span>
@@ -378,18 +430,18 @@
         <ul>
           <template v-for="(item, index) in code.NUM_BTN">
             <li :key="index" class="flex">
-            <figure>
-              <img
-              :src="`/v1/api/sample-info/data?grpCd=NUM_BTN&cmmnCd=${item.cmmnCd}`"
-              :alt="item.cmmnCdNm"
-              width="120"
-              height="90"
-              />
-            </figure>
-            <div class="thm-box">
-              <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
-              <p class="thm-cp">{{ item.cmmnDesc }}</p>
-            </div>
+              <figure>
+                <img
+                  :src="`/v1/api/sample-info/data?grpCd=NUM_BTN&cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="120"
+                  height="90"
+                />
+              </figure>
+              <div class="thm-box">
+                <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+                <p class="thm-cp">{{ item.cmmnDesc }}</p>
+              </div>
             </li>
           </template>
         </ul>
@@ -398,18 +450,18 @@
         <ul>
           <template v-for="(item, index) in code.LABEL_CN_BTN">
             <li :key="index" class="flex">
-            <figure>
-              <img
-              :src="`/v1/api/sample-info/data?grpCd=LABEL_CN_BTN&cmmnCd=${item.cmmnCd}`"
-              :alt="item.cmmnCdNm"
-              width="120"
-              height="90"
-              />
-            </figure>
-            <div class="thm-box">
-              <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
-              <p class="thm-cp">{{ item.cmmnDesc }}</p>
-            </div>
+              <figure>
+                <img
+                  :src="`/v1/api/sample-info/data?grpCd=LABEL_CN_BTN&cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="120"
+                  height="90"
+                />
+              </figure>
+              <div class="thm-box">
+                <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+                <p class="thm-cp">{{ item.cmmnDesc }}</p>
+              </div>
             </li>
           </template>
         </ul>
@@ -418,15 +470,15 @@
         <ul class="flex">
           <template v-for="(item, index) in code.LABEL_BTN">
             <li :key="index">
-            <figure>
-              <img
-              :src="`/v1/api/sample-info/data?grpCd=LABEL_BTN&cmmnCd=${item.cmmnCd}`"
-              :alt="item.cmmnCdNm"
-              width="177"
-              height="132"
-              />
-            </figure>
-            <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
+              <figure>
+                <img
+                  :src="`/v1/api/sample-info/data?grpCd=LABEL_BTN&cmmnCd=${item.cmmnCd}`"
+                  :alt="item.cmmnCdNm"
+                  width="177"
+                  height="132"
+                />
+              </figure>
+              <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
             </li>
           </template>
         </ul>
@@ -454,45 +506,44 @@ import commonService from "~/service/common-service";
 import { IPageInfoModel } from "~/models/common-model";
 
 // 2022.07.29. design.song
-const COLORS = ['red', 'blue','mediumslateblue', 'cyan', 'lime', 'orchid'];
+const COLORS = ["red", "blue", "mediumslateblue", "cyan", "lime", "orchid"];
 const rectStyle = {
   normal: {
-    dotColor: "aqua", 
-    dotRadius: 1, 
-    lineColor: "#c30", 
-    lineWidth: 1, 
-    fillColor: "transparent", 
+    dotColor: "aqua",
+    dotRadius: 1,
+    lineColor: "#c30",
+    lineWidth: 1,
+    fillColor: "transparent",
     opacity: 0.1,
   },
   active: {
-    dotColor: "yellow", 
+    dotColor: "yellow",
     dotRadius: 3,
-    lineColor: "yellow", 
-    lineWidth: 1, 
-    fillColor: "yellow", 
+    lineColor: "yellow",
+    lineWidth: 1,
+    fillColor: "yellow",
     opacity: 0.2,
   },
 };
 
 const polygonStyle = {
   normal: {
-    dotColor: "green", 
-    dotRadius: 1, 
-    lineColor: "#c30", 
-    lineWidth: 1, 
-    fillColor: "orange", 
+    dotColor: "green",
+    dotRadius: 1,
+    lineColor: "#c30",
+    lineWidth: 1,
+    fillColor: "orange",
     opacity: 0.1,
   },
   active: {
-    dotColor: "yellow", 
+    dotColor: "yellow",
     dotRadius: 3,
-    lineColor: "yellow", 
-    lineWidth: 1, 
-    fillColor: "yellow", 
+    lineColor: "yellow",
+    lineWidth: 1,
+    fillColor: "yellow",
     opacity: 0.2,
   },
 };
-
 
 @Component({ components: { Layout } })
 export default class extends Vue {
@@ -503,7 +554,7 @@ export default class extends Vue {
   currentMenu: any = {};
   selDate = "";
   sel1 = "";
-  sel2 = "";  // 2022.07.29. design.song
+  sel2 = ""; // 2022.07.29. design.song
   selIndex = -1;
   selItem: any = {};
   selLabel = "";
@@ -515,8 +566,28 @@ export default class extends Vue {
   dataset: any = { learnDtstType: "" };
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
   labelTypeList: any = [];
-  shapeID : 0;
+  shapeID: 0;
   // labelWorkList: any = [];
+
+  url = ""; // 2022.08.21 fqj
+  // 입력 캔버스 관련
+  lightValue: any = 0;
+  outCanvas: any = "";
+  outCtx: any = "";
+  inFile: any = "";
+  // 캔버스에는 한점한점이 안찍힘. 대신 캔버스에 종이를 붙임.
+  inPaper: any = "";
+  outPaper: any = "";
+  // 입력 파일 및 배열
+  inImgArr: any = [];
+  outImgArr: any = [];
+  // 입력 이미지의 폭과 높이
+  inWidth: any = "";
+  inHeight: any = "";
+  outWidth: any = "";
+  outHeight: any = "";
+  imgURL: any = "";
+
   created() {
     console.log("====pageType====", this.pageType);
     this.shapeID = 0;
@@ -536,17 +607,159 @@ export default class extends Vue {
       },
       "/api/crgw-img-data/list/page"
     );
-    this.pageInfo = { ...data.page };    
+    this.pageInfo = { ...data.page };
     const imgList = data.list;
     this.imgDataList = imgList.map((v) => ({ ...v, newNmrecgCd: v.nmrecgCd }));
     if (imgList.length === 0) {
       this.selIndex = -1;
-      this.selItem = {};      
+      this.selItem = {};
     } else {
       await this.onNext(0);
     }
   }
-  
+
+  onUpDown(type) {
+    if (type === "UP") {
+      if (this.lightValue + 30 > 255) this.lightValue = 255;
+      else this.lightValue += 30;
+    } else {
+      if (this.lightValue - 30 < -255) this.lightValue = -255;
+      else this.lightValue -= 30;
+    }
+    this.brightnessAdjustment();
+  }
+
+  //이미지 열기
+  openImage() {
+    let inImg = new Image(); //이미지 객체 생성
+    console.log("this.url==", this.url);
+    inImg.src = this.url;
+    const _this: any = this;
+    inImg.onload = function () {
+      console.log("======111111");
+      _this.outCanvas = document.querySelector("#img-view canvas");
+      _this.outCtx = _this.outCanvas.getContext("2d");
+      _this.inWidth = 800;
+      _this.inHeight = 462;
+
+      //캔버스 크기
+      _this.outCanvas.width = _this.inWidth;
+      _this.outCanvas.height = _this.inHeight;
+      _this.outCtx.drawImage(inImg, 0, 0, _this.inWidth, _this.inHeight);
+
+      //3차원 배열 만들기
+      _this.inImgArr = new Array(3);
+      for (let i = 0; i < 3; i++) {
+        _this.inImgArr[i] = new Array(_this.inHeight); // 2차원 배열 생성
+        for (let k = 0; k < _this.inHeight; k++)
+          _this.inImgArr[i][k] = new Array(_this.inWidth);
+      }
+
+      let imgData = _this.outCtx.getImageData(
+        0,
+        0,
+        _this.inWidth,
+        _this.inHeight
+      );
+      let pixelImg = imgData.data;
+      let R, G, B;
+      for (let h = 0; h < _this.inHeight; h++) {
+        for (let j = 0; j < _this.inWidth; j++) {
+          let px = (h * _this.inWidth + j) * 4; //1pixel = 4byte(r, g, b, alpha)
+          R = pixelImg[px + 0];
+          G = pixelImg[px + 1];
+          B = pixelImg[px + 2];
+
+          _this.inImgArr[0][h][j] = String.fromCharCode(R);
+          _this.inImgArr[1][h][j] = String.fromCharCode(G);
+          _this.inImgArr[2][h][j] = String.fromCharCode(B);
+        }
+      }
+    };
+  }
+
+  //3차원 배열 만들 때 쓰기 위한 함수
+  threeDimensionArr() {
+    //이미지 크기
+    this.outHeight = this.inHeight;
+    this.outWidth = this.inWidth;
+
+    //배열 준비
+    this.outImgArr = new Array(3); //1차원 배열 3개
+
+    for (let i = 0; i < 3; i++) {
+      this.outImgArr[i] = new Array(this.outHeight); //1차원 배열
+      for (let k = 0; k < this.outHeight; k++) {
+        this.outImgArr[i][k] = new Array(this.outWidth);
+      }
+    }
+  }
+  //이미지 화면 출력
+  displayImg() {
+    //크기 지정
+    this.outCanvas.height = this.inHeight;
+    this.outCanvas.width = this.inWidth;
+
+    let R, G, B;
+    let outPaper = this.outCtx.createImageData(this.outWidth, this.outHeight);
+
+    for (let i = 0; i < this.outHeight; i++) {
+      for (let k = 0; k < this.outWidth; k++) {
+        //byte 문자를 숫자로 변경
+        R = this.outImgArr[0][i][k].charCodeAt(0);
+        G = this.outImgArr[1][i][k].charCodeAt(0);
+        B = this.outImgArr[2][i][k].charCodeAt(0);
+
+        outPaper.data[(i * this.outWidth + k) * 4 + 0] = R;
+        outPaper.data[(i * this.outWidth + k) * 4 + 1] = G;
+        outPaper.data[(i * this.outWidth + k) * 4 + 2] = B;
+        outPaper.data[(i * this.outWidth + k) * 4 + 3] = 255;
+      }
+    }
+    this.outCtx.putImageData(outPaper, 0, 0);
+  }
+  //본래 이미지 보기
+  returnToFirstImg() {
+    if (this.inFile == null || this.inFile == "") {
+      alert("이미지 파일을 선택해주세요.");
+    } else {
+      this.threeDimensionArr();
+      for (let rgb = 0; rgb < 3; rgb++) {
+        for (let i = 0; i < this.inHeight; i++) {
+          for (let k = 0; k < this.inWidth; k++) {
+            this.outImgArr[rgb][i][k] = this.inImgArr[rgb][i][k];
+          }
+        }
+      }
+      this.displayImg();
+      console.log("본래 이미지임");
+    }
+  }
+  brightnessAdjustment() {
+    let value = parseInt((document.getElementById("brightI") as any).value);
+    console.log(value);
+
+    this.threeDimensionArr();
+    for (let rgb = 0; rgb < 3; rgb++) {
+      for (let i = 0; i < this.inHeight; i++) {
+        for (let k = 0; k < this.inWidth; k++) {
+          let pixel = this.inImgArr[rgb][i][k].charCodeAt(0); //문자에서 숫자로 변경
+          //예외처리
+          if (pixel + value > 255) {
+            pixel = 255;
+          } else if (pixel + value < 0) {
+            pixel = 0;
+          } else {
+            pixel += value;
+          }
+          this.outImgArr[rgb][i][k] = String.fromCharCode(pixel); //숫자에서 문자로 변경
+        }
+      }
+    }
+    this.displayImg();
+    console.log("변경 완료");
+  }
+
   async onSelImg(workDate, workNo, item, index) {
     console.log("item====", item);
     this.selDate = workDate;
@@ -561,22 +774,41 @@ export default class extends Vue {
     }));
     if (this.selImg) {
       if (this.pageType === "꺾임") {
-        console.log("onSelImg: " + `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        console.log(
+          "onSelImg: " +
+            `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
         polygonStyle.normal.dotRadius = 2;
         polygonStyle.active.dotRadius = 2;
         polygonStyle.normal.lineWidth = 1;
         polygonStyle.active.lineWidth = 2;
-        this.labeler.load(`/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
+        this.labeler.load(
+          `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
+        this.url = `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
       } else if (this.pageType === "차량번호") {
-        console.log("onSelImg: " + `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        console.log(
+          "onSelImg: " +
+            `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
         rectStyle.normal.dotRadius = 2;
         rectStyle.active.dotRadius = 2;
         rectStyle.normal.lineWidth = 1;
         rectStyle.active.lineWidth = 2;
-        this.labeler.load(`/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);  
+        this.labeler.load(
+          `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
+        this.url = `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
       } else {
-        console.log("onSelImg: " + `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
-        this.labeler.load(`/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`);
+        console.log(
+          "onSelImg: " +
+            `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
+        this.labeler.load(
+          `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+        );
+        this.url = `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
+        this.openImage();
         polygonStyle.normal.dotRadius = 5;
         polygonStyle.active.dotRadius = 5;
         polygonStyle.normal.lineWidth = 2;
@@ -587,7 +819,7 @@ export default class extends Vue {
         rectStyle.active.lineWidth = 3;
       }
     }
-  
+
     const label = await commonService.request(
       {
         workDate: item.workDate,
@@ -600,11 +832,10 @@ export default class extends Vue {
     if (label && label.labelJson) {
       console.log(label.labelJson);
       const labelArr = JSON.parse(label.labelJson);
-      
+
       // 2022.07.29. design.song
       let typeName = "";
-      switch(this.pageType)
-      {
+      switch (this.pageType) {
         case "꺾임":
         case "빛":
           typeName = "Polygon";
@@ -721,7 +952,7 @@ export default class extends Vue {
       height: 600,
       bgColor: `#000`, // black
     });
-    
+
     // 2022.07.29. design.song
     // 웹에서 신규 박스 그릴 시 아래 등록된 정보로 그려진다.
     labeler.register("polygon", {
@@ -741,8 +972,9 @@ export default class extends Vue {
     });
 
     labeler.on("click", (obj) => {
-      if(obj.ante.currentTarget == null) return;  // design.song
+      if (obj.ante.currentTarget == null) return; // design.song
       const data = obj.ante.currentTarget.data;
+      console.log("data===>11", data);
       this.sel2 = obj.ante.currentTarget.id;
       this.onSelLabel(data);
     });
@@ -841,17 +1073,17 @@ export default class extends Vue {
     alert(JSON.stringify(lis));
   }
   setSelection() {
-    console.log('setSelection');
+    console.log("setSelection");
     this.labeler.labelOff();
     this.nonActive();
   }
   setLabel(type: string) {
-    console.log('setLabel: ' + type);
+    console.log("setLabel: " + type);
     this.nonActive();
     this.labeler.label(type);
   }
   reDraw() {
-    console.log('reDraw');
+    console.log("reDraw");
     this.labeler.labelOff();
   }
   onSelLabel(val) {
@@ -895,9 +1127,9 @@ export default class extends Vue {
     console.log(event);
     if (event.key === "Enter") {
       this.onSave();
-    } else if (event.key === "ArrowRight") {
+    } else if (event.key === "ArrowDown") {
       this.onNextImage();
-    } else if (event.key === "ArrowLeft") {
+    } else if (event.key === "ArrowUp") {
       this.onBeforeImage();
     } else if (event.key === "Escape") {
       this.setSelection();
@@ -910,31 +1142,30 @@ export default class extends Vue {
     });
     this.labeler.render();
   }
-  
+
   add(type: string, tag) {
     this.shapeID++;
     let Shape = LabelImg.Shape;
 
     if (type === "rect") {
       const shape = new Shape({
-        type: 'Rect',
+        type: "Rect",
         registerID: String(this.shapeID),
-        name: 'rect',
+        name: "rect",
         positions: [
           [533, 229],
           [712, 229],
           [712, 426],
           [533, 426],
         ],
-        style: rectStyle
+        style: rectStyle,
       } as IShapeOptions);
       this.labeler.addShape(shape);
-    } 
-    else {
+    } else {
       const shape = new Shape({
-        type: 'Polygon',
+        type: "Polygon",
         registerID: String(this.shapeID),
-        name: 'polygon',
+        name: "polygon",
         positions: [
           [214.37, 69.615],
           [194.48, 117.13],
@@ -944,7 +1175,7 @@ export default class extends Vue {
           [427.635, 64.09],
           [236.47, 51.935],
         ],
-        style: polygonStyle
+        style: polygonStyle,
       } as IShapeOptions);
       this.labeler.addShape(shape);
     }
@@ -965,6 +1196,7 @@ export default class extends Vue {
   }
   onActiveLabel(index) {
     this.labeler.getShapeList().map((v, idx) => {
+      console.log("===111", v.data);
       if (idx === index) {
         this.sel2 = v.id;
         console.log(v);
