@@ -1043,7 +1043,7 @@ export default class extends Vue {
       "/api/label-rslt/data/del"
     );
     item.delYn = delYn;
-    alert("완료");
+    // alert("완료");
   }
   labelNm(cd) {
     const cds = this.labelTypeList || [];
@@ -1133,6 +1133,12 @@ export default class extends Vue {
       this.onBeforeImage();
     } else if (event.key === "Escape") {
       this.setSelection();
+    } else if (event.key === "Delete") {
+      if (this.selItem.delYn !== "Y") {
+        this.updateDel("Y");
+      } else {
+        this.updateDel("N");
+      }
     }
   }
   nonActive() {
