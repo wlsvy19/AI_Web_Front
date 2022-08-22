@@ -444,12 +444,6 @@ export default class extends Vue {
           ...this.dataset.datasetList.map((v) => {
             return [v.name, v.unitCnt, v.allCnt];
           }),
-          // ["번호판 탐색", 43.3, 85.8)],
-          // ["문자/숫자1", 83.1, 73.4, 55.1],
-          // ["문자/숫자2", 86.4, 65.2, 82.5],
-          // ["문자/숫자3", 72.4, 53.9, 39.1],
-          // ["꺽임/훼손", 72.4, 53.9, 39.1],
-          // ["스미어", 72.4, 53.9, 39.1],
         ],
       },
       xAxis: { type: "category" },
