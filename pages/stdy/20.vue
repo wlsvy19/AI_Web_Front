@@ -65,7 +65,7 @@
                     </th>
                     <th>
                       <span class="sort" @click="onOrder('bset_weight')"
-                        >Best 가중치</span
+                        >최적 가중치</span
                       >
                     </th>
                     <th>

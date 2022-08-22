@@ -16,7 +16,7 @@
           </button>
         </div>
       </div>
-      <div class="tit-bottom">
+      <div class="tit-bottom" style="display:flex">
         <div class="tit-bm-cont">
           대상 데이터 셋:
           <span class="c-val"
@@ -29,11 +29,12 @@
           현재 Iteration: <span class="c-val">{{ iteration }}</span> 
           남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
           |
+        </div>
+        <div class="tit-bm-cont">
           최적: 
           Iteration <span class="c-val">{{ bestIteration }}</span>
           Loss <span class="c-val">{{ bestLoss }}</span>
           mAP <span class="c-val">{{ bestMAP }}</span>
-
         </div>
       </div>
     </div>
@@ -356,7 +357,6 @@ export default class extends Vue {
           temp['lossRate'][i] = lossRate;
           temp['mapValue'][i] = mapValue;
           temp['iteration'][i] = iter;
-          debugger;
           if (mapValue > this.bestMAP ) {
             this.bestMAP = parseFloat(mapValue.toFixed(3));
             this.bestLoss = parseFloat(lossRate.toFixed(3));
@@ -505,7 +505,7 @@ export default class extends Vue {
     this.LossChartOptions = {
       title: {
         text: "Iteration",
-        subtext: "loss",
+        subtext: "Loss",
         left: "0",
         top: "23",
         textStyle: {
@@ -518,8 +518,8 @@ export default class extends Vue {
       color: ["#B7B7B7"],
       tooltip: {
         show: true,
-      },
-
+        trigger: 'axis',
+      },    
       xAxis: [
         {
           type: "category",
@@ -541,7 +541,7 @@ export default class extends Vue {
 
       series: [
         {
-          name: "loss",
+          name: "Loss",
           type: "bar",
           itemStyle: {
             color: "#EAF5DA",
@@ -568,11 +568,11 @@ export default class extends Vue {
           lineStyle: {
             type: "line",
           },
-          // tooltip: {
-          //   valueFormatter: function (value: any) {
-          //     return "";
-          //   },
-          // },
+          tooltip: {
+            valueFormatter: function (value: any) {
+              return "";
+            },
+          },
           data: lossArr,
         },
       ],
@@ -600,6 +600,7 @@ export default class extends Vue {
       color: ["#B7B7B7"],
       tooltip: {
         show: true,
+        trigger: 'axis'
       },
 
       xAxis: [
