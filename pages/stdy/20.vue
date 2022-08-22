@@ -64,8 +64,8 @@
                       >
                     </th>
                     <th>
-                      <span class="sort" @click="onOrder('base_weight')"
-                        >Base 가중치</span
+                      <span class="sort" @click="onOrder('bset_weight')"
+                        >Best 가중치</span
                       >
                     </th>
                     <th>
@@ -81,7 +81,7 @@
                       <td>{{ codeName(item.learnDtstType) }}</td>
                       <td>{{ item.learnDtstId }}</td>
                       <td>{{ comma(item.learnDtstCnt) }}</td>
-                      <td>{{ item.baseWeight }}</td>
+                      <td>{{ item.bestWeight }}</td>
                       <td>{{ item.map }}</td>
                     </tr>
                   </template>
