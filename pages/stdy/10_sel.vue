@@ -175,6 +175,9 @@ export default class extends Vue {
   isRun = false;
   learn_dtst_id = "";
   weight_id = "";
+  statusTimer = null;
+  isStop = "";
+
   created() {
     this.codeList();
     const now = today();
@@ -183,10 +186,33 @@ export default class extends Vue {
     console.log("now1===", now1);
   }
 
+  async mounted() {
+    await this.getStatusInfo();
+    this.statusTimer= setInterval(this.getStatusInfo, 5000);
+  }
+
+  async destroyed() {
+    clearInterval(this.statusTimer);
+  }
+
   onShowPop(show) {
     // const wid = (this.$refs.pop as any).offsetWidth;
     this.showPop = show;
   }
+  async getStatusInfo() {
+    // ====== status_info 테이블 ======
+    const infoData = await commonService.request(
+      {},
+      "/api/learn-status/data/ing"
+    );
+    console.log("==statusInfo==", infoData);
+    this.isStop = localStorage.getItem("isStop");
+    
+    if (infoData['trainingYn'] == "Y" && this.isStop != "stop") {
+      this.$emit("onRun", "RUN");
+    }
+  }
+
   async onStudy() {
     if (!this.learn_dtst_id) return await alert("데이터셋을 선택해주세요.");
     if (!this.weight_id) return await alert("가중치를 선택해주세요.");
@@ -216,8 +242,8 @@ export default class extends Vue {
     );
     
     if (rs == 1){
-      param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
-      localStorage.setItem("dataset", JSON.stringify(param));
+      // param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
+      // localStorage.setItem("dataset", JSON.stringify(param));
       this.$emit("onRun", "RUN");
     }
     else {

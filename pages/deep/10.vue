@@ -391,7 +391,9 @@ export default class extends Vue {
       );
       this.$util.notification("처리완료");
       this.selItem.nmrecgCd = item.newNmrecgCd;
-      this.onNextImage();
+      if (dtrmYn === "Y") {
+        this.onNextImage();
+      }
     }
   }
   async onBeforeImage() {
