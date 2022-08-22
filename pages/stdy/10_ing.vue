@@ -343,6 +343,7 @@ export default class extends Vue {
         },
         "/api/learn-status/data"
       );
+      console.log("==leanInfo==", data);
       
       if (data != null) {
         let i=0;
@@ -361,14 +362,12 @@ export default class extends Vue {
             this.bestMAP = parseFloat(mapValue.toFixed(3));
             this.bestLoss = parseFloat(lossRate.toFixed(3));
             this.bestIteration = iter;
-            console.log('a')
           }
           else if (mapValue == this.bestMAP ) {
             if(lossRate <= this.bestLoss) {
               this.bestMAP = parseFloat(mapValue.toFixed(3));
               this.bestLoss = parseFloat(lossRate.toFixed(3));
               this.bestIteration = iter;
-              console.log('b')
             }
           }
           else {
@@ -404,7 +403,6 @@ export default class extends Vue {
           this.initLearningChart();
         }     
       }
-      console.log("==leanInfo==", data);
     }    
   }
 
@@ -554,7 +552,6 @@ export default class extends Vue {
           data: lossArr,
         },
         {
-          name: "Iteration",
           type: "line",
           yAxisIndex: 1,
           itemStyle: {
@@ -569,9 +566,7 @@ export default class extends Vue {
             type: "line",
           },
           tooltip: {
-            valueFormatter: function (value: any) {
-              return "";
-            },
+            show: false,
           },
           data: lossArr,
         },
