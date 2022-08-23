@@ -63,31 +63,31 @@
                 </table>
               </div> -->
               <div class="table-l1 tb-op1 tb-ov1">
-              <table class="tx-c">
-                <thead>
-                  <tr>
-                    <th class="tx-c">생성일자</th>
-                    <th class="tx-c">통합데이터셋ID</th>
-                    <th class="tx-c">단위데이터셋 개수</th>
-                    <th class="tx-c">학습데이터 개수</th>
-                    <!-- <th class="tx-c">삭제</th> -->
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-for="(item, index) in data">
-                    <tr :key="index">
-                      <td>{{ item.workDate }}</td>
-                      <td>{{ item.combDtstId }}</td>
-                      <td>{{ item.unitDtstCnt }}</td>
-                      <td>{{ item.totalCnt }}</td>
-                      <!-- <td><button type="button">삭제</button></td> -->
+                <table class="tx-c">
+                  <thead>
+                    <tr>
+                      <th class="tx-c">생성일자</th>
+                      <th class="tx-c">통합데이터셋ID</th>
+                      <th class="tx-c">단위데이터셋 개수</th>
+                      <th class="tx-c">학습데이터 개수</th>
+                      <!-- <th class="tx-c">삭제</th> -->
                     </tr>
-                  </template>
-                  <tr v-if="data.length == 0">
-                    <td colspan="7">조회된 데이터가 없습니다.</td>
-                  </tr>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <template v-for="(item, index) in data">
+                      <tr :key="index">
+                        <td>{{ item.workDate }}</td>
+                        <td>{{ item.combDtstId }}</td>
+                        <td>{{ item.unitDtstCnt }}</td>
+                        <td>{{ item.totalCnt }}</td>
+                        <!-- <td><button type="button">삭제</button></td> -->
+                      </tr>
+                    </template>
+                    <tr v-if="data.length == 0">
+                      <td colspan="7">조회된 데이터가 없습니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               <!-- <div class="paging mt40">
@@ -153,24 +153,24 @@
                 <a href="#">맨마지막</a>
               </div> -->
               <div class="table-l1 tb-op1 tb-ov1">
-              <table class="tx-c">
-                <thead>
-                  <tr>
-                    <th class="tx-c">생성일자</th>
-                    <th class="tx-c">단위데이터셋ID</th>
-                    <th class="tx-c">학습데이터 개수</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-for="(item, index) in data2">
-                    <tr :key="index">
-                      <td>{{ item.workDate }}</td>
-                      <td>{{ item.unitDtstId }}</td>
-                      <td>{{ item.totalCnt }}</td>
+                <table class="tx-c">
+                  <thead>
+                    <tr>
+                      <th class="tx-c">생성일자</th>
+                      <th class="tx-c">단위데이터셋ID</th>
+                      <th class="tx-c">학습데이터 개수</th>
                     </tr>
-                  </template>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <template v-for="(item, index) in data2">
+                      <tr :key="index">
+                        <td>{{ item.workDate }}</td>
+                        <td>{{ item.unitDtstId }}</td>
+                        <td>{{ item.totalCnt }}</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
               </div>
               <pagination
                 :pageInfo="pageInfo2"
@@ -183,6 +183,7 @@
                 type="button"
                 id="newConbBtn"
                 class="btn btn-sz2 btn-gn newConbBtn"
+                @click="onShowPop(true)"
               >
                 생성하기
               </button>
@@ -191,6 +192,29 @@
         </div>
       </div>
     </div>
+
+    <!-- 팝업 [S] -->
+    <div
+      v-if="showPop"
+      class="popup pop1"
+      :style="`width:900px;display:block;left:30%;pading:'35px 0 4px'`"
+    >
+      <h1>통합데이터 셋 생성</h1>
+
+      <dataset />
+
+      <button type="button" class="pop-close" @click="onShowPop(false)">
+        닫기
+      </button>
+    </div>
+    <!-- 팝업 [E] -->
+
+    <div
+      v-if="showPop"
+      @click="showPop = false"
+      class="mask"
+      style="display: block"
+    ></div>
   </layout>
 </template>
 <script lang="ts">
@@ -200,21 +224,27 @@ import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import { comma } from "~/utils/common";
 import * as echarts from "echarts";
-@Component({ components: { Layout } })
+import dataset from "./dataset.vue";
+@Component({ components: { Layout, dataset } })
 export default class extends Vue {
   data = {};
   data2 = {};
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
-    search = {
+  showPop = false;
+  dsList = [];
+  search = {
     combDtstType: "A",
     ordfield: "work_dttm",
     order: "ASC",
-  }
+  };
   pageInfo2: IPageInfoModel = commonService.getPageInitInfo();
-    search2 = {
+  search2 = {
     combDtstId: "TD-20220720-001",
     ordfield: "work_dttm",
     order: "ASC",
+  };
+  onShowPop(show) {
+    this.showPop = show;
   }
   mounted() {
     this.init();
@@ -227,7 +257,7 @@ export default class extends Vue {
     var target_el;
 
     el.addEventListener("click", function () {
-      openLayerPopup();
+      // openLayerPopup();
     });
 
     // chart area
@@ -300,6 +330,14 @@ export default class extends Vue {
 
     window.addEventListener("resize", myChart.resize);
   }
+  async datasetList() {
+    const data = await commonService.request(
+      { weightType: "ALL" },
+      "/api/algo-info/list"
+    );
+    console.log(data);
+    this.dsList = data;
+  }
   async onSearch(pageNo: number) {
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
@@ -313,7 +351,7 @@ export default class extends Vue {
   async onSubSearch(pageNo: number) {
     const newpage2 = { ...this.pageInfo2, pageNo };
     const data2 = await commonService.request(
-      { ...this.search2, ...newpage2, },
+      { ...this.search2, ...newpage2 },
       "/api/unit-dtst/list/id"
     );
     newpage2.totalCount = data2.page.totalCount;
@@ -321,6 +359,7 @@ export default class extends Vue {
     this.pageInfo2 = { ...newpage2 };
   }
   created() {
+    this.datasetList();
     this.onSearch(1);
     this.onSubSearch(1);
   }

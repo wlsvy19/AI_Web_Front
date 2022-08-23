@@ -15,7 +15,7 @@
               <li><button type="button">문자/숫자1</button></li>
               <li><button type="button">문자/숫자2</button></li>
               <li><button type="button">문자/숫자3</button></li>
-              <li><button type="button">꺾임/회손</button></li>
+              <li><button type="button">꺾임/훼손</button></li>
               <li><button type="button">스미어/비차량</button></li>
             </ul>
           </div>

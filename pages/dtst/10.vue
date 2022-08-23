@@ -10,120 +10,160 @@
       <div class="clmFlex mt15">
         <div class="clmBox-416 bg-wht">
           <h1 class="ti-s">라벨링 확정 데이터 현황</h1>
-          <div class="total-label-data">총 345,234,000</div>
+          <div class="total-label-data">
+            총 {{ comma(dataset.labelConfirmSum) }} 개
+          </div>
 
           <div class="label-decide">
-            <!-- 각 라벨링 확정 데이터 [S]-->
-            <div class="label-de lb-red">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">번호판 탐색</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+            <template v-for="(item, index) in dataset.labelConfirmList">
+              <!-- 각 라벨링 확정 데이터 [S]-->
+              <div
+                :key="index"
+                class="label-de lb-red"
+                v-if="item.name === '번호판'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">번호판</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="30"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
-            <!-- 각 라벨링 확정 데이터 [E]-->
+              <!-- 각 라벨링 확정 데이터 [E]-->
 
-            <!-- 각 라벨링 확정 데이터 [S]-->
-            <div class="label-de lb-blue">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">문자/숫자2</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">4,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+              <!-- 각 라벨링 확정 데이터 [S]-->
+              <div
+                class="label-de lb-blue"
+                :key="index"
+                v-if="item.name === '문자/숫자1'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">문자/숫자1</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="40"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
-            <!-- 각 라벨링 확정 데이터 [E]-->
+              <!-- 각 라벨링 확정 데이터 [E]-->
 
-            <div class="label-de lb-yellow">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">문자/숫자1</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">5,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+              <div
+                class="label-de lb-yellow"
+                :key="index"
+                v-if="item.name === '문자/숫자2'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">문자/숫자2</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="50"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
 
-            <div class="label-de lb-mint">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">문자/숫자3</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">1,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+              <div
+                class="label-de lb-mint"
+                :key="index"
+                v-if="item.name === '문자/숫자3'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">문자/숫자3</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="10"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
 
-            <div class="label-de lb-green">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">꺾임/훼손</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">2,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+              <div
+                class="label-de lb-green"
+                :key="index"
+                v-if="item.name === '꺾임/훼손'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">꺾임/훼손</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="20"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
 
-            <div class="label-de lb-dark">
-              <!-- 진행률 progress bar -->
-              <div class="flex flex-btw">
-                <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                <div class="car-labelNm">스미어</div>
-                <div class="tx-r">
-                  <strong class="prgs-ing">3,000</strong>
-                  <span class="prgs-val">/ 10,000</span>
+              <div
+                class="label-de lb-dark"
+                :key="index"
+                v-if="item.name === '빛반사/비차량'"
+              >
+                <!-- 진행률 progress bar -->
+                <div class="flex flex-btw">
+                  <!-- progress value에 데이터 값 넣으면 됩니다. -->
+                  <div class="car-labelNm">빛반사/비차량</div>
+                  <div class="tx-r">
+                    <strong class="prgs-ing">{{
+                      comma(item.confirmDataCnt)
+                    }}</strong>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
+                  </div>
                 </div>
+                <progress
+                  class="prog-bar"
+                  min="0"
+                  :value="item.confirmDataCnt"
+                  :max="item.stdDatasetCnt"
+                ></progress>
               </div>
-              <progress
-                class="prog-bar"
-                value="30"
-                min="10"
-                max="100"
-              ></progress>
-            </div>
+            </template>
           </div>
         </div>
 
@@ -146,19 +186,35 @@
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
 import * as echarts from "echarts";
+import commonService from "~/service/common-service";
+import { comma } from "~/utils/common";
 @Component({ components: { Layout } })
 export default class extends Vue {
-  mounted() {
+  dataset: any = {};
+  created() {}
+  async dataInfo() {
+    const data = await commonService.request({}, "/api/dtst/study/info");
+    console.log("data===", data);
+    this.dataset = data;
+  }
+  comma(num) {
+    return comma(num);
+  }
+  async mounted() {
+    //this.$nextTick(() => this.init());
+    await this.dataInfo();
     this.init();
   }
   init() {
+    const dataset = this.dataset;
+    console.log("=======>11111l", dataset);
     var dom = document.getElementById("chart-lbData1");
     var colorPalette = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart: any = echarts.init(dom, null, {
@@ -167,11 +223,11 @@ export default class extends Vue {
     });
 
     var option;
-
     option = {
       title: {
         text: "라벨링데이터 현황",
-        subtext: "총 234,000",
+        //subtext: "총 " + comma(dataset.labelAllSum),
+        subtext: "총 " + comma(dataset.labelConfirmSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -214,25 +270,21 @@ export default class extends Vue {
             length: 1,
           },
           center: ["160%", "60%"], //가로 세로 위치
-          data: [
-            { value: 1048, name: "문자/숫자2" },
-            { value: 735, name: "꺽임/훼손" },
-            { value: 580, name: "문자/숫자1" },
-            { value: 484, name: "번호판 탐색" },
-            { value: 300, name: "문자/숫자3" },
-            { value: 200, name: "스미어" },
-          ],
+          data: dataset.labelConfirmList.map((v) => ({
+            value: v.confirmDataCnt,
+            name: v.name,
+          })),
         },
       ],
     };
 
     var dom2 = document.getElementById("chart-lbData2");
     var colorPalette2 = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart2: any = echarts.init(dom2, null, {
@@ -245,7 +297,7 @@ export default class extends Vue {
     option2 = {
       title: {
         text: "단위데이터 셋 현황",
-        subtext: "총 12,300",
+        subtext: "총 " + comma(dataset.datasetUnitSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -288,25 +340,21 @@ export default class extends Vue {
             length: 1,
           },
           center: ["160%", "60%"], //가로 세로 위치
-          data: [
-            { value: 1048, name: "문자/숫자2" },
-            { value: 735, name: "꺽임/훼손" },
-            { value: 580, name: "문자/숫자1" },
-            { value: 484, name: "번호판 탐색" },
-            { value: 300, name: "문자/숫자3" },
-            { value: 200, name: "스미어" },
-          ],
+          data: dataset.datasetList.map((v) => ({
+            value: v.unitDatasetCnt,
+            name: v.name,
+          })),
         },
       ],
     };
 
     var dom3 = document.getElementById("chart-lbData3");
     var colorPalette3 = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart3: any = echarts.init(dom3, null, {
@@ -319,7 +367,7 @@ export default class extends Vue {
     option3 = {
       title: {
         text: "통합데이터 셋 현황",
-        subtext: "총 104",
+        subtext: "총 " + comma(dataset.datasetAllSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -360,14 +408,10 @@ export default class extends Vue {
             length: 1,
           },
           center: ["160%", "60%"], //가로 세로 위치
-          data: [
-            { value: 1048, name: "문자/숫자2" },
-            { value: 735, name: "꺽임/훼손" },
-            { value: 580, name: "문자/숫자1" },
-            { value: 484, name: "번호판 탐색" },
-            { value: 300, name: "문자/숫자3" },
-            { value: 200, name: "스미어" },
-          ],
+          data: dataset.datasetList.map((v) => ({
+            value: v.combDatasetCnt,
+            name: v.name,
+          })),
         },
       ],
     };
@@ -380,6 +424,9 @@ export default class extends Vue {
     });
 
     var option4;
+
+    const barInfo = (name) =>
+      this.dataset.datasetList.filter((v) => v.name === name);
 
     option4 = {
       title: {
@@ -394,16 +441,13 @@ export default class extends Vue {
       tooltip: {},
       dataset: {
         source: [
-          ["product", "단위데이터 셋 포함", "단위데이터 셋 미포함"],
-          ["번호판 탐색", 43.3, 85.8],
-          ["문자/숫자1", 83.1, 73.4, 55.1],
-          ["문자/숫자2", 86.4, 65.2, 82.5],
-          ["문자/숫자3", 72.4, 53.9, 39.1],
-          ["꺽임/훼손", 72.4, 53.9, 39.1],
-          ["스미어", 72.4, 53.9, 39.1],
+          ["product", "단위데이터 셋", "통합데이터 셋"],
+          ...this.dataset.datasetList.map((v) => {
+            return [v.name, v.unitDatasetCnt, v.combDatasetCnt];
+          }),
         ],
       },
-      xAxis: { type: "category" },
+      xAxis: { type: "category", axisLabel: {interval: 0,} },
       yAxis: {},
       series: [{ type: "bar" }, { type: "bar" }],
     };
