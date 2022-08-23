@@ -11,7 +11,7 @@
         <div class="clmBox-416 bg-wht">
           <h1 class="ti-s">라벨링 확정 데이터 현황</h1>
           <div class="total-label-data">
-            총 {{ comma(dataset.labelConfirmSum) }}
+            총 {{ comma(dataset.labelConfirmSum) }} 개
           </div>
 
           <div class="label-decide">
@@ -20,24 +20,24 @@
               <div
                 :key="index"
                 class="label-de lb-red"
-                v-if="item.name === '번호판탐색'"
+                v-if="item.name === '번호판'"
               >
                 <!-- 진행률 progress bar -->
                 <div class="flex flex-btw">
                   <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                  <div class="car-labelNm">번호판 탐색</div>
+                  <div class="car-labelNm">번호판</div>
                   <div class="tx-r">
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
               <!-- 각 라벨링 확정 데이터 [E]-->
@@ -56,14 +56,14 @@
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
               <!-- 각 라벨링 확정 데이터 [E]-->
@@ -81,14 +81,14 @@
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
 
@@ -105,14 +105,14 @@
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
 
@@ -129,38 +129,38 @@
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
 
               <div
                 class="label-de lb-dark"
                 :key="index"
-                v-if="item.name === '스미어'"
+                v-if="item.name === '빛반사/비차량'"
               >
                 <!-- 진행률 progress bar -->
                 <div class="flex flex-btw">
                   <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                  <div class="car-labelNm">스미어</div>
+                  <div class="car-labelNm">빛반사/비차량</div>
                   <div class="tx-r">
                     <strong class="prgs-ing">{{
                       comma(item.confirmDataCnt)
                     }}</strong>
-                    <span class="prgs-val">/ {{ comma(item.allDataCnt) }}</span>
+                    <span class="prgs-val">/ {{ comma(item.stdDatasetCnt) }}</span>
                   </div>
                 </div>
                 <progress
                   class="prog-bar"
                   min="0"
                   :value="item.confirmDataCnt"
-                  :max="item.allDataCnt"
+                  :max="item.stdDatasetCnt"
                 ></progress>
               </div>
             </template>
@@ -210,11 +210,11 @@ export default class extends Vue {
     console.log("=======>11111l", dataset);
     var dom = document.getElementById("chart-lbData1");
     var colorPalette = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart: any = echarts.init(dom, null, {
@@ -226,7 +226,8 @@ export default class extends Vue {
     option = {
       title: {
         text: "라벨링데이터 현황",
-        subtext: "총 " + comma(dataset.labelAllSum),
+        //subtext: "총 " + comma(dataset.labelAllSum),
+        subtext: "총 " + comma(dataset.labelConfirmSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -270,7 +271,7 @@ export default class extends Vue {
           },
           center: ["160%", "60%"], //가로 세로 위치
           data: dataset.labelConfirmList.map((v) => ({
-            value: v.allDataCnt,
+            value: v.confirmDataCnt,
             name: v.name,
           })),
         },
@@ -279,11 +280,11 @@ export default class extends Vue {
 
     var dom2 = document.getElementById("chart-lbData2");
     var colorPalette2 = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart2: any = echarts.init(dom2, null, {
@@ -296,7 +297,7 @@ export default class extends Vue {
     option2 = {
       title: {
         text: "단위데이터 셋 현황",
-        subtext: "총 " + comma(dataset.datasetUnitSum),
+        subtext: "총 " + comma(dataset.datasetUnitSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -340,7 +341,7 @@ export default class extends Vue {
           },
           center: ["160%", "60%"], //가로 세로 위치
           data: dataset.datasetList.map((v) => ({
-            value: v.unitCnt,
+            value: v.unitDatasetCnt,
             name: v.name,
           })),
         },
@@ -349,11 +350,11 @@ export default class extends Vue {
 
     var dom3 = document.getElementById("chart-lbData3");
     var colorPalette3 = [
-      "#4a89dc",
-      "#8cc152",
-      "#f6bb42",
       "#ea2237",
+      "#4a89dc",
+      "#f6bb42",
       "#37bc9b",
+      "#8cc152",
       "#434a54",
     ];
     var myChart3: any = echarts.init(dom3, null, {
@@ -366,7 +367,7 @@ export default class extends Vue {
     option3 = {
       title: {
         text: "통합데이터 셋 현황",
-        subtext: "총 " + comma(dataset.datasetAllSum),
+        subtext: "총 " + comma(dataset.datasetAllSum) + " 개",
         left: "10",
         top: "20",
         textStyle: {
@@ -408,7 +409,7 @@ export default class extends Vue {
           },
           center: ["160%", "60%"], //가로 세로 위치
           data: dataset.datasetList.map((v) => ({
-            value: v.allCnt,
+            value: v.combDatasetCnt,
             name: v.name,
           })),
         },
@@ -440,13 +441,13 @@ export default class extends Vue {
       tooltip: {},
       dataset: {
         source: [
-          ["product", "단위데이터 셋 포함", "통합데이터 셋"],
+          ["product", "단위데이터 셋", "통합데이터 셋"],
           ...this.dataset.datasetList.map((v) => {
-            return [v.name, v.unitCnt, v.allCnt];
+            return [v.name, v.unitDatasetCnt, v.combDatasetCnt];
           }),
         ],
       },
-      xAxis: { type: "category" },
+      xAxis: { type: "category", axisLabel: {interval: 0,} },
       yAxis: {},
       series: [{ type: "bar" }, { type: "bar" }],
     };
