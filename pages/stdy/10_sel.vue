@@ -205,10 +205,11 @@ export default class extends Vue {
       {},
       "/api/learn-status/data/ing"
     );
-    console.log("==statusInfo==", infoData);
+    console.log("=statusInfo=", infoData);
     this.isStop = localStorage.getItem("isStop");
     
     if (infoData['trainingYn'] == "Y" && this.isStop != "stop") {
+      clearInterval(this.statusTimer);
       this.$emit("onRun", "RUN");
     }
   }

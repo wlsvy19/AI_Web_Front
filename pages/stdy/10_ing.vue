@@ -16,7 +16,7 @@
           </button>
         </div>
       </div>
-      <div class="tit-bottom">
+      <div class="tit-bottom" style="display:flex">
         <div class="tit-bm-cont">
           대상 데이터 셋:
           <span class="c-val"
@@ -29,11 +29,12 @@
           현재 Iteration: <span class="c-val">{{ iteration }}</span> 
           남은 시간: <span class="c-val">{{ statusInfo.remainTime || ""}}</span>
           |
+        </div>
+        <div class="tit-bm-cont">
           최적: 
           Iteration <span class="c-val">{{ bestIteration }}</span>
           Loss <span class="c-val">{{ bestLoss }}</span>
           mAP <span class="c-val">{{ bestMAP }}</span>
-
         </div>
       </div>
     </div>
@@ -233,7 +234,7 @@ export default class extends Vue {
   datasetInfo: any = {};
   dataset: any = {};
   statusInfo: any = {};
-  learnInfo: any = {};
+  learnInfo: any = {"lossRate": [], "mapValue":[], "iteration":[]};
   combDtstId = "";
   combDtstType = "";
   learnDtstTypeNm = "";
@@ -342,13 +343,15 @@ export default class extends Vue {
         },
         "/api/learn-status/data"
       );
+      console.log("==leanInfo==", data);
       
-      if (data != null) {
+      if (data != null && data.length != 0) {
         let i=0;
         let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
         let lossRate = 0;
         let mapValue = 0;
         let iter = 0;
+        
         for (i=0;i<data.length;i++){
           lossRate = parseFloat(data[i].lossRate);
           mapValue = parseFloat(data[i].mapValue);
@@ -356,25 +359,21 @@ export default class extends Vue {
           temp['lossRate'][i] = lossRate;
           temp['mapValue'][i] = mapValue;
           temp['iteration'][i] = iter;
-          debugger;
           if (mapValue > this.bestMAP ) {
             this.bestMAP = parseFloat(mapValue.toFixed(3));
             this.bestLoss = parseFloat(lossRate.toFixed(3));
             this.bestIteration = iter;
-            console.log('a')
           }
           else if (mapValue == this.bestMAP ) {
             if(lossRate <= this.bestLoss) {
               this.bestMAP = parseFloat(mapValue.toFixed(3));
               this.bestLoss = parseFloat(lossRate.toFixed(3));
               this.bestIteration = iter;
-              console.log('b')
             }
           }
           else {
           }
         }
-        
         this.learnInfo = temp; 
         this.iteration = temp['iteration'].slice(-1)[0];
         this.loss = parseFloat((temp['lossRate'].slice(-1)[0]).toFixed(3));
@@ -404,7 +403,9 @@ export default class extends Vue {
           this.initLearningChart();
         }     
       }
-      console.log("==leanInfo==", data);
+      else {
+        this.initLearningChart();
+      }
     }    
   }
 
@@ -488,8 +489,8 @@ export default class extends Vue {
     const lossArr = info['lossRate'];
     const mapArr = info['mapValue'];
     let iterArr = [];
-    
-    if (info.length == 0){
+        
+    if (info['iteration'].length == 0){
       for(let i=1;i<=100; i++) iterArr.push(i);
     }
     else {
@@ -505,7 +506,7 @@ export default class extends Vue {
     this.LossChartOptions = {
       title: {
         text: "Iteration",
-        subtext: "loss",
+        subtext: "Loss",
         left: "0",
         top: "23",
         textStyle: {
@@ -518,8 +519,8 @@ export default class extends Vue {
       color: ["#B7B7B7"],
       tooltip: {
         show: true,
-      },
-
+        trigger: 'axis',
+      },    
       xAxis: [
         {
           type: "category",
@@ -541,7 +542,7 @@ export default class extends Vue {
 
       series: [
         {
-          name: "loss",
+          name: "Loss",
           type: "bar",
           itemStyle: {
             color: "#EAF5DA",
@@ -554,7 +555,6 @@ export default class extends Vue {
           data: lossArr,
         },
         {
-          name: "Iteration",
           type: "line",
           yAxisIndex: 1,
           itemStyle: {
@@ -568,11 +568,9 @@ export default class extends Vue {
           lineStyle: {
             type: "line",
           },
-          // tooltip: {
-          //   valueFormatter: function (value: any) {
-          //     return "";
-          //   },
-          // },
+          tooltip: {
+            show: false,
+          },
           data: lossArr,
         },
       ],
@@ -600,6 +598,7 @@ export default class extends Vue {
       color: ["#B7B7B7"],
       tooltip: {
         show: true,
+        trigger: 'axis'
       },
 
       xAxis: [

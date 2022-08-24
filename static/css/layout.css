@@ -1661,3 +1661,15 @@ nav ol > li > .subMenu > ul > li > a:hover {
   padding-bottom: 20px !important;
   font-size: x-large !important;
 }
+
+.del-his {
+  width: 100%;
+  height:100%;
+  padding: 24px;
+  background-color: var(--white1);
+  display:flex; 
+  justify-content:center;
+  align-items:center; 
+  align-content:center; 
+  flex-direction: column; 
+}

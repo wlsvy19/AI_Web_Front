@@ -14,9 +14,9 @@
           <fieldset>
             <legend>정렬영역</legend>
             <label for="sel002" class="sl-nm">본부</label>
-            <select id="sel002" class="select">
+            <select id="sel002" class="select" @change="onChange($event)">
               <option value="">전체</option>
-              <option value="수도권">수도권</option>
+              <option :key="index" :value='item' v-for="(item, index) in hdqrList">{{ item }}</option>
             </select>
           </fieldset>
 
@@ -82,7 +82,7 @@
 
           <pagination
             :pageInfo="pageInfo"
-            @pagination="(p) => onSearch(p.pageNo)"
+            @pagination="(p) => onSearch(p.pageNo, hdqrSelect)"
           />
         </div>
         <!-- step2. [E] -->
@@ -207,6 +207,9 @@ export default class extends Vue {
   serverList = [];
   dsList = [];
   selDataset = "";
+  hdqrList = [];
+  hdqrSelect = "";
+
   onShowPop(show) {
     this.showPop = show;
   }
@@ -222,8 +225,10 @@ export default class extends Vue {
     );
     console.log(data);
     this.dsList = data;
+
   }
   created() {
+    this.getHdqrList();
     this.onSearch(1);
     this.datasetList();
   }
@@ -231,15 +236,31 @@ export default class extends Vue {
     this.selDataset = item.algoVer;
     this.showPop = false;
   }
-  async onSearch(pageNo: number) {
+  async onChange(event) {
+    // console.log(event.target.value);
+    this.hdqrSelect = event.target.value;
+    this.onSearch(1, this.hdqrSelect);
+  }
+
+  async onSearch(pageNo: number, hdqrNm: string="") {
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
-      { startDate: "", endDate: "", ...newpage },
+      { hdqrNm, ...newpage },
       "/api/updt/list"
     );
     newpage.totalCount = data.page.totalCount;
     this.serverList = data.list;
     this.pageInfo = { ...newpage };
+  }
+  async getHdqrList() {
+    const data = await commonService.request(
+      {},
+      "/api/updt/hdqr/list"
+    );
+    data.forEach((value, index) => {
+      this.hdqrList.push(value.hdqr_nm);
+    });
+    console.log(this.hdqrList);
   }
 }
 </script>
