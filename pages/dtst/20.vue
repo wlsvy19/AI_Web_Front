@@ -11,17 +11,32 @@
         <div class="clmFlex clmBox-col2 mt15">
           <div class="tab mb15">
             <ul class="tabList">
-              <li class="active"><button type="button">번호판탐색</button></li>
-              <li><button type="button">문자/숫자1</button></li>
-              <li><button type="button">문자/숫자2</button></li>
-              <li><button type="button">문자/숫자3</button></li>
-              <li><button type="button">꺾임/훼손</button></li>
-              <li><button type="button">스미어/비차량</button></li>
+              <template v-for="(item, index) in code.NGTP">
+                <li
+                  :class="`${
+                    item.cmmnCd === search.unitDtstType ? 'active' : ''
+                  }`"
+                  :key="index"
+                >
+                  <button @click="onSearchTopMenu(item)" type="button">
+                    {{ item.cmmnCdNm }}
+                  </button>
+                </li>
+              </template>
             </ul>
           </div>
 
           <div class="clmBox">
-            <h1 class="ti-s">번호판 라벨링 데이터 현황</h1>
+            <h1 class="ti-s">{{ search.unitDtstNm }} 라벨링 데이터 현황</h1>
+            <button
+              type="button"
+              class="ti-s btn-bg-gn mt20"
+              style="width: 100px; padding: '5px 0'; margin-left: 450px"
+              @click="onCreateDataset()"
+            >
+              데이터 셋 생성
+            </button>
+
             <div class="clm-body4">
               <div class="local-dataSet flex flex-btw">
                 <!-- chart Area [S]-->
@@ -34,103 +49,80 @@
                     <!-- 진행률 progress bar -->
                     <div class="flex flex-btw">
                       <!-- progress value에 데이터 값 넣으면 됩니다. -->
-                      <div class="car-labelNm">문자/숫자1</div>
+                      <div class="car-labelNm">{{ search.unitDtstNm }}</div>
                       <div class="tx-r">
-                        <strong class="prgs-ing">3,210</strong>
-                        <span class="prgs-val">/ 10,000</span>
+                        <strong class="prgs-ing">{{
+                          comma(data?.confirmDataset?.confirmDataCnt)
+                        }}</strong>
+                        <span class="prgs-val"
+                          >/ {{ comma(data?.confirmDataset?.allDataCnt) }}</span
+                        >
                       </div>
                     </div>
                     <progress
                       class="prog-bar mt5"
-                      value="30"
-                      min="10"
-                      max="100"
+                      min="0"
+                      :value="data?.confirmDataset?.confirmDataCnt"
+                      :max="data?.confirmDataset?.allDataCnt"
                     ></progress>
                   </div>
 
                   <div class="lc-dataset mt30">
                     자동 데이터 셋 생성 기준 :
-                    <input type="text" class="inp2 wid50x" placeholder="200" />
+                    <input
+                      type="text"
+                      class="inp2 wid50x"
+                      placeholder="200"
+                      :value="data.stdDtstCnt"
+                    />
                     <!-- 준공검사 -->
-                    <!-- <button type="button" class="btn-bg-gn mt10 wid80x">
-                      생성
-                    </button> -->
+                    <button
+                      type="button"
+                      class="btn-bg-gn mt20"
+                      style="width: 40px; padding: '5px 0'"
+                      @click="onSetStdDtst()"
+                    >
+                      설정
+                    </button>
                   </div>
                 </div>
                 <!-- data input Area [E]-->
               </div>
 
-              <!-- <div class="table-l1 mt30">
-                <table>
+              <div class="table-l1 tb-op1 tb-ov1">
+                <table class="tx-c">
                   <thead>
                     <tr>
-                      <th>생성 시간</th>
-                      <th>단위데이터<br />셋 ID</th>
-                      <th>번호판 유형</th>
-                      <th>데이터 개수</th>
-                      <th>상세보기</th>
+                      <th class="tx-c">생성일자</th>
+                      <th class="tx-c">단위데이터셋ID</th>
+                      <th class="tx-c">학습데이터 개수</th>
+                      <th class="tx-c">상세 보기</th>
                       <th>삭제</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td class="tx-c">번호판 탐색</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c"><button type="button">보기</button></td>
-                      <td class="tx-c"><button type="button">삭제</button></td>
-                    </tr>
-                    <tr>
-                      <td class="tx-c">번호판 탐색</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c"><button type="button">보기</button></td>
-                      <td class="tx-c"><button type="button">삭제</button></td>
-                    </tr>
-                    <tr>
-                      <td class="tx-c">번호판 탐색</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c">WP-004</td>
-                      <td class="tx-c"><button type="button">보기</button></td>
-                      <td class="tx-c"><button type="button">삭제</button></td>
-                    </tr>
+                    <template v-for="(item, index) in dataList">
+                      <tr :key="index">
+                        <td>{{ item.workDate }}</td>
+                        <td>{{ item.unitDtstId }}</td>
+                        <td>{{ item.totalCnt }}</td>
+                        <td>
+                          <button
+                            type="button"
+                            @click="onShowDatasetDetail(item)"
+                          >
+                            상세보기
+                          </button>
+                        </td>
+                        <td>
+                          <button type="button" @click="onDelDataset(item)">
+                            삭제
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
-              </div>
-              <div class="paging mt40">
-                <a href="#">맨처음</a>
-                <a href="#">이전</a>
-                <a href="#">1</a>
-                <a href="#">2</a>
-                <strong>3</strong>
-                <a href="#">4</a>
-                <a href="#">다음</a>
-                <a href="#">맨마지막</a>
-              </div> -->
-              <div class="table-l1 tb-op1 tb-ov1">
-              <table class="tx-c">
-                <thead>
-                  <tr>
-                    <th class="tx-c">생성일자</th>
-                    <th class="tx-c">단위데이터셋ID</th>
-                    <th class="tx-c">학습데이터 개수</th>
-                    <!-- <th>삭제</th> -->
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-for="(item, index) in data">
-                    <tr :key="index">
-                      <td>{{ item.workDate }}</td>
-                      <td>{{ item.unitDtstId }}</td>
-                      <td>{{ item.totalCnt }}</td>
-                      <!-- <td><button type="button">삭제</button></td> -->
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
               </div>
               <pagination
                 :pageInfo="pageInfo"
@@ -139,7 +131,7 @@
             </div>
           </div>
           <div class="clmBox">
-            <h1 class="ti-s">선택된 가중치</h1>
+            <h1 class="ti-s">라벨링 클라스별 데이터 현황</h1>
             <div class="clm-body4">
               <!-- chart Area [S]-->
               <div id="chart-localData2"></div>
@@ -157,19 +149,79 @@ import Layout from "~/components/layout.vue";
 import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import * as echarts from "echarts";
+import { comma } from "~/utils/common";
 @Component({ components: { Layout } })
 export default class extends Vue {
-  data = {};
+  dataList = {};
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
-    search = {
+  search = {
     unitDtstType: "A",
+    unitDtstNm: "번호판",
     ordfield: "work_dttm",
     order: "ASC",
+  };
+  code: any = {};
+  data: any = {};
+  async codeInfo() {
+    const codeList = await commonService.request(
+      ["NGTP"],
+      "/api/common/code/list"
+    );
+    console.log("===>code==>", codeList);
+    this.code = codeList;
   }
-  mounted() {
-    this.init();
+  async dataInfo(code) {
+    const data = await commonService.request({ code }, "/api/dtst/unit/info");
+    console.log("data===", data);
+    this.data = data;
+
+    await this.onSearch(1);
+  }
+  async onSetStdDtst() {
+    console.log("설정저장.");
+    await commonService.request(
+      { stdDtstCnt: this.data.stdDtstCnt },
+      "/api/dtst/unit/save/stddtst"
+    );
+  }
+  async onCreateDataset() {
+    if (
+      await this.$confirm(
+        "현재까지 확정된 데이터로 단위데이터 셋을 생성하시겠습니까?"
+      )
+    ) {
+      console.log("데이터 셋 생성");
+      await commonService.request({}, "/api/dtst/unit/new/dataset");
+      await this.onSearch(1);
+    }
+  }
+  async onShowDatasetDetail(item) {
+    console.log(item);
+  }
+  async onDelDataset(item) {
+    console.log(item);
+  }
+  async onSearchTopMenu(item) {
+    console.log("onSearchTopMenu...");
+    const search = {
+      ...this.search,
+      unitDtstType: item.cmmnCd,
+      unitDtstNm: item.cmmnCdNm,
+    };
+    this.dataInfo(item.cmmnCd);
+    this.search = search;
+  }
+  comma(num) {
+    return comma(num);
+  }
+  async mounted() {
+    await this.codeInfo();
+    await this.dataInfo(this.search.unitDtstType);
+    await this.init();
   }
   init() {
+    const labelList = this.data.labelList;
+    const labelClassDataList = this.data.labelClassDataList;
     var dom = document.getElementById("chart-localData");
     var colorPalette = [
       "#4a89dc",
@@ -179,7 +231,7 @@ export default class extends Vue {
       "#37bc9b",
       "#434a54",
     ];
-    var myChart:any = echarts.init(dom, null, {
+    var myChart: any = echarts.init(dom, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
@@ -189,8 +241,7 @@ export default class extends Vue {
     option = {
       title: {
         // text: "라벨링데이터 현황",
-        subtext: "총 12,300개",
-        left: "10",
+        subtext: "총 " + comma(this.data.sum) + " 개",
         top: "20",
         // textStyle: {
         //     fontSize: 14
@@ -232,14 +283,7 @@ export default class extends Vue {
             length: 1,
           },
           center: ["100%", "60%"], //가로 세로 위치
-          data: [
-            { value: 1048, name: "P2" },
-            { value: 735, name: "P1" },
-            { value: 580, name: "P3" },
-            { value: 484, name: "P0" },
-            { value: 300, name: "P5" },
-            { value: 200, name: "P9" },
-          ],
+          data: [...labelList.map((v) => ({ value: v.cnt, name: v.name }))],
         },
       ],
     };
@@ -251,7 +295,7 @@ export default class extends Vue {
     window.addEventListener("resize", myChart.resize);
 
     var dom2 = document.getElementById("chart-localData2");
-    var myChart2:any = echarts.init(dom2, null, {
+    var myChart2: any = echarts.init(dom2, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
@@ -281,13 +325,13 @@ export default class extends Vue {
       },
       yAxis: {
         type: "category",
-        data: ["A", "B", "C", "D", "E", "F"],
+        data: labelClassDataList.map((v) => v.code),
       },
       series: [
         {
           // name: '2012',
           type: "bar",
-          data: [19325, 32451, 31000, 2222, 134141, 12322],
+          data: labelClassDataList.map((v) => v.cnt),
         },
       ],
     };
@@ -301,11 +345,11 @@ export default class extends Vue {
   async onSearch(pageNo: number) {
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
-      { ...this.search, ...newpage, },
+      { ...this.search, ...newpage },
       "/api/unit-dtst/list"
     );
     newpage.totalCount = data.page.totalCount;
-    this.data = data.list;
+    this.dataList = data.list;
     this.pageInfo = { ...newpage };
   }
   created() {
