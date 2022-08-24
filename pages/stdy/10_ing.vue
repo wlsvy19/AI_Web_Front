@@ -234,7 +234,7 @@ export default class extends Vue {
   datasetInfo: any = {};
   dataset: any = {};
   statusInfo: any = {};
-  learnInfo: any = {};
+  learnInfo: any = {"lossRate": [], "mapValue":[], "iteration":[]};
   combDtstId = "";
   combDtstType = "";
   learnDtstTypeNm = "";
@@ -345,12 +345,13 @@ export default class extends Vue {
       );
       console.log("==leanInfo==", data);
       
-      if (data != null) {
+      if (data != null && data.length != 0) {
         let i=0;
         let temp = {"lossRate": [], "mapValue":[], "iteration":[]}
         let lossRate = 0;
         let mapValue = 0;
         let iter = 0;
+        
         for (i=0;i<data.length;i++){
           lossRate = parseFloat(data[i].lossRate);
           mapValue = parseFloat(data[i].mapValue);
@@ -373,7 +374,6 @@ export default class extends Vue {
           else {
           }
         }
-        
         this.learnInfo = temp; 
         this.iteration = temp['iteration'].slice(-1)[0];
         this.loss = parseFloat((temp['lossRate'].slice(-1)[0]).toFixed(3));
@@ -402,6 +402,9 @@ export default class extends Vue {
         if (!this.isInitChart && this.status >= 2 && this.status != 4) {
           this.initLearningChart();
         }     
+      }
+      else {
+        this.initLearningChart();
       }
     }    
   }
@@ -486,8 +489,8 @@ export default class extends Vue {
     const lossArr = info['lossRate'];
     const mapArr = info['mapValue'];
     let iterArr = [];
-    
-    if (info.length == 0){
+        
+    if (info['iteration'].length == 0){
       for(let i=1;i<=100; i++) iterArr.push(i);
     }
     else {
