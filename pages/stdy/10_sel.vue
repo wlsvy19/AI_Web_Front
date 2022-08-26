@@ -71,6 +71,12 @@
                   </template>
                 </tbody>
               </table>
+              <pagination
+                :pageInfo="combPageInfo"
+                :layout="'total, sizes, prev, pager, next'"
+                style="scale: 0.9em;"
+                @pagination="(p) => onSearchCombDtstList(p.pageNo)"
+              />
             </div>
           </div>
         </div>
@@ -108,6 +114,12 @@
                   </template>
                 </tbody>
               </table>
+              <pagination
+                :pageInfo="weightPageInfo"            
+                :layout="'total, sizes, prev, pager, next'"
+                style="scale: 0.9em;"
+                @pagination="(p) => onSearchWeightList(p.pageNo)"
+              />
             </div>
           </div>
         </div>
@@ -161,6 +173,7 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
+import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import { comma, today } from "~/utils/common";
 import dtl from "./10_ing.vue";
@@ -178,6 +191,9 @@ export default class extends Vue {
   statusTimer = null;
   isStop = "";
 
+  combPageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  weightPageInfo: IPageInfoModel = commonService.getPageInitInfo();
+
   created() {
     this.codeList();
     const now = today();
@@ -193,6 +209,7 @@ export default class extends Vue {
 
   async destroyed() {
     clearInterval(this.statusTimer);
+    localStorage.removeItem('isStop');
   }
 
   onShowPop(show) {
@@ -243,8 +260,6 @@ export default class extends Vue {
     );
     
     if (rs == 1){
-      // param['learnDtstTypeNm'] = this.study.combDtstTypeNm;
-      // localStorage.setItem("dataset", JSON.stringify(param));
       this.$emit("onRun", "RUN");
     }
     else {
@@ -256,25 +271,40 @@ export default class extends Vue {
   }
   async onSelEnginType(combDtstType, combDtstTypeNm) {
     this.study = { combDtstType, combDtstTypeNm };
-    const list = await commonService.request(
-      { combDtstType },
+    await this.onSearchCombDtstList(1);
+    await this.onSearchWeightList(1)
+  }
+  async onSearchCombDtstList(pageNo:number) {
+    const newpage = { ...this.combPageInfo, pageNo };
+    const data = await commonService.request(
+      { combDtstType:this.study.combDtstType, ...newpage },
       "/api/comb-dtst/learn/list"
-    );
-    console.log(list);
-    this.dataSetList = list;
-    const weightList = await commonService.request(
-      { weightType: combDtstType },
+    );    
+    newpage.totalCount = data.page.totalCount;
+    this.combPageInfo = { ...newpage };
+    this.dataSetList = data.list;
+    console.log('dataSetList===', this.dataSetList);
+  }
+  async onSearchWeightList(pageNo:number) {
+    const newpage = { ...this.weightPageInfo, pageNo};
+    const data = await commonService.request(
+      { weightType: this.study.combDtstType, ...newpage },
       "/api/weight-info/list"
     );
-    console.log("=====", weightList);
-    this.weightList = weightList;
-    this.weightList.unshift({
-      iterationNo: null,
-      weightId: "가중치 선택안함",
-      weightType: combDtstTypeNm,
-      workDttm:null,
-    })
+    newpage.totalCount = data.page.totalCount;
+    this.weightPageInfo = { ...newpage };
+    this.weightList = data.list;
+    
+    if(pageNo == 1) {
+      this.weightList.unshift({
+        iterationNo: 0,
+        weightId: "가중치 선택안함",
+        weightType: this.study.combDtstTypeNm,
+      })
+    }
+    console.log('===weightList', this.weightList)
   }
+
   async codeList() {
     const codeList = await commonService.request(
       ["NGTP"],

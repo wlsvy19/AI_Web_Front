@@ -8,7 +8,7 @@
         :page-size="pageInfo.pageSize"
         :page-sizes="pageSizes"
         :total="pageInfo.totalCount"
-        layout="total, sizes, prev, pager, next, jumper"
+        :layout="layout"
         background
       >
       </el-pagination>
@@ -26,6 +26,9 @@ export default class extends Vue {
 
   @Prop({ default: () => [10, 20, 30, 50, 100], type: Array })
   pageSizes!: number[];
+  
+  @Prop({ default: () => "total, sizes, prev, pager, next, jumper" })
+  layout! : string
 
   handleSizeChange(newSize) {
     const newValue = {
