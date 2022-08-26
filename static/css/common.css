@@ -321,8 +321,14 @@
     color: var(--white1);
 }
 
+.btn-gray {
+    background-color: var(--gray3) !important
+}
+
 /* Font color */
 .fc1{color: var(--base) !important;}
+.fc2{color: #ff3b30 !important;}
+.fc3{color: #6ca9ff !important;}
 
 /* Align */
 .tx-c{

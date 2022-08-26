@@ -61,6 +61,7 @@
                           type="checkbox"
                           :id="`ch00` + index"
                           v-model="item.chked"
+                          @click="onClickCheckbox(item)"
                         />
                         <label :for="`ch00` + index"></label>
                       </span>
@@ -70,7 +71,9 @@
                     <td class="tx-c">{{ item.vmIp }}</td>
                     <td class="tx-c">{{ item.crntWeightVer }}</td>
                     <td class="tx-c">{{ item.updateDttm }}</td>
-                    <td class="tx-c fc1">{{ item.updateYn }}</td>
+                    <td v-if="item.updateYn=='Y'" class="tx-c fc1" style="">완료</td>
+                    <td v-else-if="item.updateYn=='E'" class="tx-c fc2">에러</td>
+                    <td v-else class="tx-c fc3">진행중</td>
                   </tr>
                 </template>
                 <tr v-if="serverList.length === 0">
@@ -94,7 +97,7 @@
           <fieldset class="newWeight flex flex-btw">
             <legend>정렬영역</legend>
             <label for="sel002" class="sch-id">선택된 가중치 셋</label>
-            <input type="text" class="inp ml5" v-model="selDataset" />
+            <input type="text" class="inp ml5" v-model="selDataset" readonly/>
             <button
               type="button"
               class="btn btn-sz1 btn-gnc"
@@ -119,18 +122,38 @@
               <tbody>
                 <tr>
                   <td class="tx-c">번호판 탐색</td>
-                  <td class="tx-c">WP-004</td>
+                  <td class="tx-c">{{ plateWeightId }}</td>
                 </tr>
                 <tr>
-                  <td class="tx-c">번호판 탐색</td>
-                  <td class="tx-c">WP-004</td>
+                  <td class="tx-c">문자/숫자1</td>
+                  <td class="tx-c">{{ word1WeightId }}</td>
                 </tr>
+                <tr>
+                  <td class="tx-c">문자/숫자2</td>
+                  <td class="tx-c">{{ word2WeightId }}</td>
+                </tr>
+                <tr>
+                  <td class="tx-c">문자/숫자3</td>
+                  <td class="tx-c">{{ word3WeightId }}</td>
+                </tr>
+                <tr>
+                  <td class="tx-c">꺾임/훼손</td>
+                  <td class="tx-c">{{ incnWeightId }}</td>
+                </tr>
+                <tr>
+                  <td class="tx-c">스미어/빛반사</td>
+                  <td class="tx-c">{{ smbrWeightId }}</td>
+                </tr>
+
               </tbody>
             </table>
           </div>
           <div class="udt-btn">
-            <button type="button" id="btn-update" class="btn-bg-gn">
-              업데이트
+            <button type="button" id="btn-update"
+              :class="{'btn-bg-gn btn-gray':weightSetSelect==false || isUpdating==true, 'btn-bg-gn':weightSetSelect==true}"
+              @click="onClickUpdate()" :disabled="!weightSetSelect || isUpdating"
+            >
+              {{ isUpdating ? "업데이트 진행중" : "업데이트" }} 
             </button>
           </div>
         </div>
@@ -142,7 +165,7 @@
     <div v-if="showPop" class="popup pop1" :style="`display:block;left:30%`">
       <h1>가중치 셋 목록</h1>
 
-      <div class="table-l1 mt15 pop-body scl">
+      <div class="table-l1 mt15 pop-body scl tb-ov1">
         <table>
           <colgroup>
             <col width="*" />
@@ -209,12 +232,23 @@ export default class extends Vue {
   selDataset = "";
   hdqrList = [];
   hdqrSelect = "";
+  weightSetSelect = false;
+  checkList: any = {};
+  isUpdating = false;
+
+  plateWeightId = "";
+  word1WeightId = "";
+  word2WeightId = "";
+  word3WeightId = "";
+  incnWeightId = "";
+  smbrWeightId = "";
 
   onShowPop(show) {
     this.showPop = show;
   }
   checkAll() {
     this.serverList = this.serverList.map((v) => {
+      this.checkList[v.vmIp] = this.checked
       return { ...v, chked: this.checked };
     });
   }
@@ -234,15 +268,27 @@ export default class extends Vue {
   }
   onSelItem(item) {
     this.selDataset = item.algoVer;
+    
+    this.plateWeightId = item.plateWeightId == "" ? '기존버전사용' : item.plateWeightId;
+    this.word1WeightId = item.word1WeightId == "" ? '기존버전사용' : item.word1WeightId;
+    this.word2WeightId = item.word2WeightId == "" ? '기존버전사용' : item.word2WeightId;
+    this.word3WeightId = item.word3WeightId == "" ? '기존버전사용' : item.word3WeightId;
+    this.incnWeightId = item.incnWeightId == "" ? '기존버전사용' : item.incnWeightId;
+    this.smbrWeightId = item.smbrWeightId == "" ? '기존버전사용' : item.smbrWeightId;
     this.showPop = false;
+    this.weightSetSelect = true;
   }
+  onClickCheckbox(item) {
+    if (!item.chked) this.checkList[item.vmIp] = !item.chked;
+    else delete this.checkList[item.vmIp];
+  }
+
   async onChange(event) {
-    // console.log(event.target.value);
     this.hdqrSelect = event.target.value;
     this.onSearch(1, this.hdqrSelect);
   }
-
   async onSearch(pageNo: number, hdqrNm: string="") {
+    this.checked = false;
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
       { hdqrNm, ...newpage },
@@ -251,16 +297,30 @@ export default class extends Vue {
     newpage.totalCount = data.page.totalCount;
     this.serverList = data.list;
     this.pageInfo = { ...newpage };
+    this.serverList = this.serverList.map((v) => {
+      if (v.vmIp in this.checkList) return { ...v, chked: this.checkList[v.vmIp] };
+      else return { ...v, chked: false };
+    });
   }
   async getHdqrList() {
     const data = await commonService.request(
       {},
       "/api/updt/hdqr/list"
     );
-    data.forEach((value, index) => {
+    data.forEach((value) => {
       this.hdqrList.push(value.hdqr_nm);
     });
     console.log(this.hdqrList);
+  }
+  async onClickUpdate() {
+    if (Object.keys(this.checkList).length == 0) {
+      this.$alert('배포할 본부를 선택해주세요.')
+    }
+    else {
+      console.log(this.checkList);
+      this.isUpdating = true;
+      // TODO: 업데이트 진행중 프로세스
+    }
   }
 }
 </script>
