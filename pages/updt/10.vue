@@ -102,6 +102,8 @@
               type="button"
               class="btn btn-sz1 btn-gnc"
               @click="onShowPop(true)"
+              :disabled="isUpdating"
+              :style="isUpdating ? 'border: 1px solid #909399;color: #909399;': ''"
             >
               선택
             </button>
@@ -204,7 +206,7 @@
       </div>
 
       <button type="button" class="pop-close" @click="onShowPop(false)">
-        닫기
+        닫기``
       </button>
     </div>
     <!-- 팝업 [E] -->
@@ -317,9 +319,15 @@ export default class extends Vue {
       this.$alert('배포할 본부를 선택해주세요.')
     }
     else {
-      console.log(this.checkList);
-      this.isUpdating = true;
-      // TODO: 업데이트 진행중 프로세스
+      this.$confirm('엔진을 배포하시겠습니까?', '신규엔진 배포 확인', {'callback': (action) => {
+        console.log(action);
+        if (action == "cancel") return;
+
+        console.log(this.checkList);
+        this.isUpdating = true;
+        // this.isUpdating = !this.isUpdating;
+        // TODO: 업데이트 진행중 프로세스
+      }});                      
     }
   }
 }

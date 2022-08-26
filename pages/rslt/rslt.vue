@@ -24,22 +24,32 @@
                     <th>유형</th>
                     <th>가중치ID</th>
                     <th>학습일자</th>
+                    <th>삭제</th>
                   </tr>
                 </thead>
                 <tbody>
                   <template v-for="(item, index) in weightList">
-                    <!-- <tr :key="index" @click="onSearchDataset(item)"> -->
-                    <tr :key="index">
-                      <td class="tx-c">{{ item.weightType }}</td>
+                    <tr :key="index" @click="onClickWeight(item, $event)">
+                    <!-- <tr :key="index"> -->
+                      <td class="tx-c">{{ ngtpCode[item.weightType] }}</td>
                       <td class="tx-c">{{ item.weightId }}</td>
                       <td class="tx-c">{{ item.workDate }}</td>
+                      <td>
+                        <button type="button" @click="onDelWeight(item)">
+                            삭제
+                        </button>
+                      </td>
                     </tr>
                   </template>
                   <tr v-if="weightList.length === 0">
-                    <td class="tx-c" colspan="2">검색된 기록이 없습니다.</td>
+                    <td class="tx-c" colspan="4">검색된 기록이 없습니다.</td>
                   </tr>
                 </tbody>
               </table>
+              <pagination
+                :pageInfo="pageInfo"
+                @pagination="(p) => onWeightList(p.pageNo)"
+              />
             </div>
           </div>
         </div>
@@ -57,24 +67,24 @@
             <div class="tab mb15">
               <ul class="tabList">
                 <li :class="`${dtstShowType === '단위' ? 'active' : ''}`">
-                  <button type="button" @click="onShowType('단위')">
+                  <button type="button" @click="onSearch('단위', 1)">
                     단위 데이터셋
                   </button>
                 </li>
                 <li :class="`${dtstShowType === '통합' ? 'active' : ''}`">
-                  <button type="button" @click="onShowType('통합')">
+                  <button type="button" @click="onSearch('통합', 1)">
                     통합 데이터셋
                   </button>
                 </li>
               </ul>
             </div>
 
-            <div id="step1bx" class="table-l1 tb-op1 tb-ov1 tabBox">
+            <div id="step1bx" class="table-l1 tb-op1 tb-ov1 tabBox" v-if="dtstShowType=='단위'">
               <table>
                 <thead>
                   <tr>
-                    <th>가중치 ID</th>
-                    <th>Iteretion</th>
+                    <th>데이터셋 ID</th>
+                    <th>총 데이터수</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -93,24 +103,28 @@
                   </tr>
                 </tbody>
               </table>
+              <pagination
+                :pageInfo="pageInfo"
+                @pagination="(p) => onWeightList(p.pageNo)"
+              />
             </div>
 
             <div
               id="step2bx"
               class="table-l1 tb-op1 tb-ov1 tabBox"
-              style="display: none"
+              v-else
             >
               <table>
                 <thead>
                   <tr>
-                    <th>가중치 ID</th>
-                    <th>Iteretion</th>
+                    <th>데이터셋 ID</th>
+                    <th>총 데이터수</th>
                   </tr>
                 </thead>
                 <tbody>
                   <template v-for="(item, index) in dtstListBak">
                     <tr :key="index" class="st3tr" data-val="TD-20220305-0001">
-                      <td class="tx-c">{{ item.unitDtstId }}</td>
+                      <td class="tx-c">{{ item.combDtstId }}</td>
                       <td class="tx-c">{{ item.totalCnt }}</td>
                     </tr>
                   </template>
@@ -123,6 +137,10 @@
                   </tr>
                 </tbody>
               </table>
+              <pagination
+                :pageInfo="pageInfo"
+                @pagination="(p) => onSearch('통합',p.pageNo)"
+              />
             </div>
           </div>
         </div>
@@ -146,55 +164,108 @@ import Layout from "~/components/layout.vue";
 import dtling from "./rslt_ing.vue";
 import dtlfinish from "./rslt_finish.vue";
 import commonService from "~/service/common-service";
+import { IPageInfoModel } from "~/models/common-model";
 @Component({ components: { Layout, dtling, dtlfinish } })
 export default class extends Vue {
   isRun = "";
   @Prop()
   pageType: string;
-  code = {};
+  ngtpCode = {};
   weightList = [];
-  dtstList = [];
+  unitDtstList = [];
+  combDtstList = [];
   dtstListBak = [];
   currentMenu: any = {};
   dtstShowType = "단위";
+  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  weightType = "";
+
+
   created() {
     this.currentMenu = this.$store.state.currentMenu;
-    this.onWeightList();
+    this.getNgtpCode();
+    this.onWeightList(1);
   }
-  async onWeightList() {
-    const combDtstType = "A";
-    const weightList = await commonService.request(
-      { weightType: combDtstType },
+  async onWeightList(pageNo: number) {    
+    const newpage = { ...this.pageInfo, pageNo };
+    console.log(this.pageType);
+
+    const data = await commonService.request(
+      { pageType: this.pageType, ...newpage },
       "/api/weight-info/list"
     );
-    console.log("======", weightList);
-    this.weightList = weightList;
+    newpage.totalCount = data.page.totalCount+1;
+    this.pageInfo = { ...newpage };
+    this.weightList = data.list;
+    console.log("======", this.weightList);
   }
   onRun(run) {
     this.isRun = run;
   }
-  onShowType(type) {
+  async onShowType(type, newpage) {
     this.dtstShowType = type;
     if (type === "단위") {
-      console.log(this.dtstList);
-      const dtstListBak = this.dtstList.filter((v) => v.combDtstInclYn === "N");
-      this.dtstListBak = dtstListBak;
+      const unitDtstList = await commonService.request(
+        { unitDtstType: this.weightType, ...newpage },
+        "/api/unit-dtst/list"
+      );
+      this.unitDtstList = unitDtstList.list;
+      console.log("==unitDtstList====", this.unitDtstList);
+
+      // const dtstListBak = this.unitDtstList.filter((v) => v.combDtstInclYn === "N");
+      // this.dtstListBak = dtstListBak;
+      this.dtstListBak = this.unitDtstList;
     }
+
     if (type === "통합") {
-      console.log(this.dtstList);
-      const dtstListBak = this.dtstList.filter((v) => v.combDtstInclYn === "Y");
-      this.dtstListBak = dtstListBak;
+      const combDtstList = await commonService.request(
+        { combDtstType: this.weightType, ...newpage },
+        "/api/comb-dtst/list"
+      );
+      this.combDtstList = combDtstList.list;
+      console.log("==dtstList====", this.combDtstList);
+
+      // const dtstListBak = this.combDtstList.filter((v) => v.dtrmYn === "Y");
+      // this.dtstListBak = dtstListBak;
+      this.dtstListBak = this.combDtstList;
     }
   }
-  async onSearchDataset(item) {
+  async onClickWeight(item, event) {
+    if (event.target.innerText == '삭제') return;
     console.log("======item===", item);
-    const dtstList = await commonService.request(
-      { combDtstId: item.weightId },
-      "/api/unit-dtst/list"
+    this.weightType = item.weightType;
+    const pageNo = 1;
+    const newpage = { ...this.pageInfo, pageNo };
+    this.onShowType("단위", newpage);
+  }
+  async onSearch(type:string, pageNo: number) {
+    const newpage = { ...this.pageInfo, pageNo };
+    this.onShowType(type, newpage)
+  }
+  async getNgtpCode() {
+    const ngtpCode = await commonService.request(
+      {},
+      "/api/cmmn-cd-info/ngtp"
     );
-    console.log("==dtstList====", dtstList);
-    this.dtstList = dtstList;
-    this.onShowType("단위");
+    console.log("ngtpCode==", ngtpCode); 
+    this.ngtpCode = ngtpCode;
+  }
+  async onDelWeight(item) {
+    const rs = await commonService.request(
+      { 
+        weightId:item.weightId,
+        filePath:item.filePath
+      },
+      "/api/weight-info/delete"
+    );
+    console.log("result==", rs); 
+    if (rs == 1) {
+      this.weightList = this.weightList.filter((v) => v.weightId != item.weightId);
+    }
+    else {
+      this.$alert('삭제에 실패하였습니다.', '에러', {'type':'error'})
+    }
+    
   }
 }
 </script>

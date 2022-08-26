@@ -404,7 +404,7 @@ export default class extends Vue {
         }     
       }
       else {
-        this.initLearningChart();
+        if (!this.isInitChart) this.initLearningChart();        
       }
     }    
   }
