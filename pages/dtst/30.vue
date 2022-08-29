@@ -11,12 +11,18 @@
         <div class="clmFlex clmBox-col2 mt15">
           <div class="tab mb15">
             <ul class="tabList">
-              <li class="active"><button type="button">번호판탐색</button></li>
-              <li><button type="button">문자/숫자1</button></li>
-              <li><button type="button">문자/숫자2</button></li>
-              <li><button type="button">문자/숫자3</button></li>
-              <li><button type="button">꺾임/회손</button></li>
-              <li><button type="button">스미어/비차량</button></li>
+              <template v-for="(item, index) in code.NGTP">
+                <li
+                  :class="`${
+                    item.cmmnCd === search.combDtstType ? 'active' : ''
+                  }`"
+                  :key="index"
+                >
+                  <button @click="onSearchTopMenu(item)" type="button">
+                    {{ item.cmmnCdNm }}
+                  </button>
+                </li>
+              </template>
             </ul>
           </div>
 
@@ -229,6 +235,7 @@ import dataset from "./dataset.vue";
 export default class extends Vue {
   data = {};
   data2 = {};
+  code = {};
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
   showPop = false;
   dsList = [];
@@ -246,7 +253,27 @@ export default class extends Vue {
   onShowPop(show) {
     this.showPop = show;
   }
+  async codeInfo() {
+    const codeList = await commonService.request(
+      ["NGTP"],
+      "/api/common/code/list"
+    );
+    console.log("===>code==>", codeList);
+    this.code = codeList;
+  }
+  async onSearchTopMenu(item) {
+    console.log("onSearchTopMenu...");
+    const search = {
+      ...this.search,
+      combDtstType: item.cmmnCd,
+      unitDtstNm: item.cmmnCdNm,
+    };
+    this.search = search;
+    this.onSearch(1);
+    this.onSubSearch(1);
+  }
   mounted() {
+    this.codeInfo();
     this.init();
   }
   init() {
@@ -333,7 +360,7 @@ export default class extends Vue {
   async datasetList() {
     const data = await commonService.request(
       { weightType: "ALL" },
-      "/api/algo-info/list"
+      "/api/algo-info/list" // /api/dtst/comb/barList
     );
     console.log(data);
     this.dsList = data;
@@ -342,7 +369,7 @@ export default class extends Vue {
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
       { ...this.search, ...newpage },
-      "/api/comb-dtst/list"
+      "/api/comb-dtst/list" // /api/dtst/comb/list
     );
     newpage.totalCount = data.page.totalCount;
     this.data = data.list;
@@ -352,7 +379,7 @@ export default class extends Vue {
     const newpage2 = { ...this.pageInfo2, pageNo };
     const data2 = await commonService.request(
       { ...this.search2, ...newpage2 },
-      "/api/unit-dtst/list/id"
+      "/api/unit-dtst/list/id" // /api/dtst/comb/sub/list
     );
     newpage2.totalCount = data2.page.totalCount;
     this.data2 = data2.list;
