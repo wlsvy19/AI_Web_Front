@@ -48,7 +48,7 @@
           <button
             type="button"
             class="btn btn-sz4 btn-gr1"
-            @click="$emit('onRun', 'FINISH')"
+            @click="onClickStop()"
           >
             검증 중지
           </button>
@@ -60,11 +60,19 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout_sub.vue";
+import commonService from "~/service/common-service";
 @Component({ components: { Layout } })
 export default class extends Vue {
   currentMenu: any = {};
   created() {
     this.currentMenu = this.$store.state.currentMenu;
+  }
+  async onClickStop() {
+    const rs = await commonService.request(
+      {},
+      "/api/validation-status/data/stop"
+    )
+    if(rs == 1) this.$emit('onRun', '');
   }
 }
 </script>

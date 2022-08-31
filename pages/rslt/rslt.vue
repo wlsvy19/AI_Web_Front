@@ -31,10 +31,10 @@
                   <template v-for="(item, index) in weightList">
                     <tr :key="index" @click="onClickWeight(item, $event)">
                     <!-- <tr :key="index"> -->
-                      <td class="tx-c">{{ ngtpCode[item.weightType] }}</td>
-                      <td class="tx-c">{{ item.weightId }}</td>
-                      <td class="tx-c">{{ item.workDate }}</td>
-                      <td>
+                      <td class="tx-c" :style="item.weightId == selWeight? 'background-color:var(--green2)':''">{{ ngtpCode[item.weightType] }}</td>
+                      <td class="tx-c" :style="item.weightId == selWeight? 'background-color:var(--green2)':''">{{ item.weightId }}</td>
+                      <td class="tx-c" :style="item.weightId == selWeight? 'background-color:var(--green2)':''">{{ item.workDate }}</td>
+                      <td class="tx-c" :style="item.weightId == selWeight? 'background-color:var(--green2)':''">
                         <button type="button" @click="onDelWeight(item)">
                             삭제
                         </button>
@@ -66,20 +66,20 @@
           <div class="clm-body2">
             <div class="tab mb15">
               <ul class="tabList">
-                <li :class="`${dtstShowType === '단위' ? 'active' : ''}`">
-                  <button type="button" @click="onSearch('단위', 1)">
+                <li :class="`${dtstShowType === 'U' ? 'active' : ''}`">
+                  <button type="button" @click="onSearch('U', 1)">
                     단위 데이터셋
                   </button>
                 </li>
-                <li :class="`${dtstShowType === '통합' ? 'active' : ''}`">
-                  <button type="button" @click="onSearch('통합', 1)">
+                <li :class="`${dtstShowType === 'T' ? 'active' : ''}`">
+                  <button type="button" @click="onSearch('T', 1)">
                     통합 데이터셋
                   </button>
                 </li>
               </ul>
             </div>
 
-            <div id="step1bx" class="table-l1 tb-op1 tb-ov1 tabBox" v-if="dtstShowType=='단위'">
+            <div id="step1bx" class="table-l1 tb-op1 tb-ov1 tabBox" v-if="dtstShowType=='U'">
               <table>
                 <thead>
                   <tr>
@@ -89,9 +89,9 @@
                 </thead>
                 <tbody>
                   <template v-for="(item, index) in dtstListBak">
-                    <tr :key="index" class="st3tr" data-val="TD-20220305-0001">
-                      <td class="tx-c">{{ item.unitDtstId }}</td>
-                      <td class="tx-c">{{ item.totalCnt }}</td>
+                    <tr :key="index" class="st3tr" data-val="TD-20220305-0001" @click="onClickDtst(item)">
+                      <td class="tx-c" :style="item.unitDtstId == selDtst? 'background-color:var(--green2)':''">{{ item.unitDtstId }}</td>
+                      <td class="tx-c" :style="item.unitDtstId == selDtst? 'background-color:var(--green2)':''">{{ item.totalCnt }}</td>
                     </tr>
                   </template>
                   <tr
@@ -123,9 +123,9 @@
                 </thead>
                 <tbody>
                   <template v-for="(item, index) in dtstListBak">
-                    <tr :key="index" class="st3tr" data-val="TD-20220305-0001">
-                      <td class="tx-c">{{ item.combDtstId }}</td>
-                      <td class="tx-c">{{ item.totalCnt }}</td>
+                    <tr :key="index" class="st3tr" data-val="TD-20220305-0001" @click="onClickDtst(item)">
+                      <td class="tx-c" :style="item.combDtstId == selDtst? 'background-color:var(--green2)':''">{{ item.combDtstId }}</td>
+                      <td class="tx-c" :style="item.combDtstId == selDtst? 'background-color:var(--green2)':''">{{ item.totalCnt }}</td>
                     </tr>
                   </template>
                   <tr
@@ -139,7 +139,7 @@
               </table>
               <pagination
                 :pageInfo="pageInfo"
-                @pagination="(p) => onSearch('통합',p.pageNo)"
+                @pagination="(p) => onSearch('T',p.pageNo)"
               />
             </div>
           </div>
@@ -149,7 +149,7 @@
 
       <!-- button -->
       <div class="mt50 tx-c">
-        <button type="button" class="btn-bg-gn wid220" @click="onRun('RUN')">
+        <button type="button" class="btn-bg-gn wid220" @click="onClickStart()">
           검증 시작
         </button>
       </div>
@@ -176,9 +176,11 @@ export default class extends Vue {
   combDtstList = [];
   dtstListBak = [];
   currentMenu: any = {};
-  dtstShowType = "단위";
+  dtstShowType = "U";
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
   weightType = "";
+  selWeight = '';
+  selDtst = '';
 
 
   created() {
@@ -202,9 +204,41 @@ export default class extends Vue {
   onRun(run) {
     this.isRun = run;
   }
+  async onClickStart(run) {
+    if(this.selWeight =='') return this.$alert('검증할 가중치를 선택해 주세요.', '에러', {'type':'error'});
+    if(this.selDtst =='') return this.$alert('검증에 사용할 데이터셋을 선택해 주세요.', '에러', {'type':'error'});
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = ("0" + (now.getMonth()+1)).slice(-2)
+    const day = ('0' + now.getDate()).slice(-2);
+    const hours = ('0' + now.getHours()).slice(-2); 
+    const minutes = ('0' + now.getMinutes()).slice(-2);
+    const seconds = ('0' + now.getSeconds()).slice(-2); 
+
+    const validatingId = "" + year+month+day+hours+minutes+seconds
+    const startDttm = year + "-" + month + "-" + day+ " " + hours + ":" + minutes + ":" + seconds
+    
+    const rs = await commonService.request(
+      { 
+        validatingId: validatingId,
+        engineType: this.weightType,
+        dtstType: this.dtstShowType,
+        dtstId: this.selDtst,
+        weightId: this.selWeight,
+        startDttm: startDttm
+      },
+      "/api/validation-status/data/start"
+    );
+    
+    if(rs == 1) this.onRun('RUN');
+    else {
+      await this.$alert('검증 시작에 실패했습니다.', '에러', {'type':'error'})
+    }
+  }
   async onShowType(type, newpage) {
     this.dtstShowType = type;
-    if (type === "단위") {
+    this.selDtst = "";
+    if (type === "U") {
       const unitDtstList = await commonService.request(
         { unitDtstType: this.weightType, ...newpage },
         "/api/unit-dtst/list"
@@ -217,7 +251,7 @@ export default class extends Vue {
       this.dtstListBak = this.unitDtstList;
     }
 
-    if (type === "통합") {
+    if (type === "T") {
       const combDtstList = await commonService.request(
         { combDtstType: this.weightType, ...newpage },
         "/api/comb-dtst/list"
@@ -231,12 +265,14 @@ export default class extends Vue {
     }
   }
   async onClickWeight(item, event) {
+    this.selDtst = "";
     if (event.target.innerText == '삭제') return;
     console.log("======item===", item);
+    this.selWeight = item.weightId;
     this.weightType = item.weightType;
     const pageNo = 1;
     const newpage = { ...this.pageInfo, pageNo };
-    this.onShowType("단위", newpage);
+    this.onShowType("U", newpage);
   }
   async onSearch(type:string, pageNo: number) {
     const newpage = { ...this.pageInfo, pageNo };
@@ -251,21 +287,34 @@ export default class extends Vue {
     this.ngtpCode = ngtpCode;
   }
   async onDelWeight(item) {
-    const rs = await commonService.request(
-      { 
-        weightId:item.weightId,
-        filePath:item.filePath
-      },
-      "/api/weight-info/delete"
-    );
-    console.log("result==", rs); 
-    if (rs == 1) {
-      this.weightList = this.weightList.filter((v) => v.weightId != item.weightId);
+    await this.$confirm(item.weightId + '를 삭제하시겠습니까?', '삭제',{'callback': async (action) => {
+      if (action == 'cancel') return;
+      const rs = await commonService.request(
+        { 
+          weightId:item.weightId,
+          filePath:item.filePath
+        },
+        "/api/weight-info/delete"
+      );
+      console.log("result==", rs); 
+      if (rs == 1) {
+        this.weightList = this.weightList.filter((v) => v.weightId != item.weightId);
+      }
+      else {
+        this.$alert('삭제에 실패하였습니다.', '에러', {'type':'error'})
+      }
+    }});  
+  }  
+  async onClickDtst(item) {
+    console.log(item);
+    if (Object.keys(item).includes('unitDtstCnt')) {
+      this.selDtst = item.combDtstId;
     }
     else {
-      this.$alert('삭제에 실패하였습니다.', '에러', {'type':'error'})
+      this.selDtst = item.unitDtstId;
     }
-    
+    console.log(this.selDtst);
+    console.log(this.selWeight);
   }
 }
 </script>
