@@ -156,6 +156,7 @@
     </div>
     <dtling v-if="isRun === 'RUN'" @onRun="onRun" />
     <dtlfinish v-if="isRun === 'FINISH'" @onRun="onRun" />
+    <dterror v-if="isRun === 'ERROR'" @onRun="onRun" />
   </layout>
 </template>
 <script lang="ts">
@@ -163,9 +164,10 @@ import { Vue, Component, Watch, Prop } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
 import dtling from "./rslt_ing.vue";
 import dtlfinish from "./rslt_finish.vue";
+import dterror from "./rslt_error.vue";
 import commonService from "~/service/common-service";
 import { IPageInfoModel } from "~/models/common-model";
-@Component({ components: { Layout, dtling, dtlfinish } })
+@Component({ components: { Layout, dtling, dtlfinish, dterror }})
 export default class extends Vue {
   isRun = "";
   @Prop()
@@ -181,6 +183,7 @@ export default class extends Vue {
   weightType = "";
   selWeight = '';
   selDtst = '';
+  statusTimer = null;
 
 
   created() {
@@ -204,7 +207,61 @@ export default class extends Vue {
   onRun(run) {
     this.isRun = run;
   }
-  async onClickStart(run) {
+  async mounted() {
+    await this.getValidationStatusInfo();
+    this.statusTimer= setInterval(this.getValidationStatusInfo, 5000);
+  }
+  async destroyed() {
+    clearInterval(this.statusTimer);
+  }
+  async getValidationStatusInfo() {
+    const data = await commonService.request(
+      {},
+      "/api/validation-status/data"
+    );
+    console.log('status ===== ',data);         
+
+    if (data.validatingStep == 3) {
+      this.$alert(
+        '완료된 검증 내역이 있습니다.',
+        '알림',
+        {
+          'type':'info',
+          'callback':(action) => {
+            clearInterval(this.statusTimer);
+            this.onRun('FINISH');
+          }
+        })
+    }
+
+    if (data.validatingStep == 4 && data.wantToStop != "Y") {
+      clearInterval(this.statusTimer);
+      this.$alert(
+        '확인하지않은 에러 내역이 있습니다.',
+        '알림',
+        {
+          'type':'error',
+          'callback':(action) => {
+            this.onRun('ERROR');
+          }
+        })
+    }
+
+    if (data.validatingYn == 'Y') {
+      this.$alert(
+        '진행중인 검증이 있습니다.',
+        '알림',
+        {
+          'type':'info',
+          'callback':(action) => {
+            clearInterval(this.statusTimer);
+            this.onRun('RUN');
+          }
+        })
+
+    }
+  }
+  async onClickStart() {
     if(this.selWeight =='') return this.$alert('검증할 가중치를 선택해 주세요.', '에러', {'type':'error'});
     if(this.selDtst =='') return this.$alert('검증에 사용할 데이터셋을 선택해 주세요.', '에러', {'type':'error'});
     const now = new Date();
@@ -230,7 +287,10 @@ export default class extends Vue {
       "/api/validation-status/data/start"
     );
     
-    if(rs == 1) this.onRun('RUN');
+    if(rs == 1) {
+      clearInterval(this.statusTimer);
+      this.onRun('RUN');
+    }
     else {
       await this.$alert('검증 시작에 실패했습니다.', '에러', {'type':'error'})
     }
