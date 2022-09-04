@@ -499,7 +499,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "vue-property-decorator";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
 import LabelImg, { IShapeOptions, Points, Shape } from "label-img";
 import commonService from "~/service/common-service";
@@ -562,6 +562,7 @@ export default class extends Vue {
   show1 = "";
   imgDataList = [];
   selImg = "";
+  selImgUrl = "";
   code: any = {};
   dataset: any = { learnDtstType: "" };
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
@@ -609,7 +610,10 @@ export default class extends Vue {
     );
     this.pageInfo = { ...data.page };
     const imgList = data.list;
-    this.imgDataList = imgList.map((v) => ({ ...v, newNmrecgCd: v.nmrecgCd }));
+    this.imgDataList = imgList.map((v) => ({
+      ...v,
+      newNmrecgCd: v.nmrecgCd,
+    }));
     if (imgList.length === 0) {
       this.selIndex = -1;
       this.selItem = {};
@@ -640,7 +644,7 @@ export default class extends Vue {
       _this.outCanvas = document.querySelector("#img-view canvas");
       _this.outCtx = _this.outCanvas.getContext("2d");
       _this.inWidth = 800;
-      _this.inHeight = 462;
+      _this.inHeight = 450;
 
       //캔버스 크기
       _this.outCanvas.width = _this.inWidth;
@@ -677,6 +681,14 @@ export default class extends Vue {
       }
     };
   }
+
+  // @Watch("labeler", { deep: true })
+  // watchCurrentMenu(newVal: any, oldVal) {
+  //   console.log(this.labeler.Image);
+  //   // this.labeler.load()
+  //   // console.log("newVal", JSON.stringify(newVal));
+  //   // console.log("oldVal", JSON.stringify(oldVal));
+  // }
 
   //3차원 배열 만들 때 쓰기 위한 함수
   threeDimensionArr() {
@@ -717,6 +729,7 @@ export default class extends Vue {
       }
     }
     this.outCtx.putImageData(outPaper, 0, 0);
+    // this.labeler.render();
   }
   //본래 이미지 보기
   returnToFirstImg() {
@@ -735,7 +748,8 @@ export default class extends Vue {
       console.log("본래 이미지임");
     }
   }
-  brightnessAdjustment() {
+  async brightnessAdjustment() {
+    console.log(this.labeler);
     let value = parseInt((document.getElementById("brightI") as any).value);
     console.log(value);
 
@@ -758,8 +772,35 @@ export default class extends Vue {
     }
     this.displayImg();
     console.log("변경 완료");
-  }
+    const imgDataUrl = (
+      document.querySelector("#img-view canvas") as any
+    ).toDataURL();
+    (this.labeler as any).loadImg(imgDataUrl, false);
+    // this.onSelImg(
+    //   this.selDate,
+    //   this.sel1,
+    //   this.selItem,
+    //   this.selIndex,
+    //   imgDataUrl
+    // );
+    // this.labeler.render();
+    // console.log("shape==>", JSON.stringify(this.labeler.getShapeList()));
+    // console.log("#new===>", JSON.stringify(this.labeler));
+    // const shapList = this.labeler.getShapeList();
+    // const newShapList = shapList.map((v) => {
+    //   (v.tagger as any).center = [323.33333333333337, 260.4166666666667];
+    //   return v;
+    // });
 
+    // // console.log("==new shap===>", JSON.stringify(newShapList));
+    // (this.labeler as any).setShapeList(newShapList);
+    console.log("#newXXXXX===>", JSON.stringify(this.labeler));
+
+    // this.labeler.addShape(shape);
+    // this.labeler.render();
+    // }
+    // }
+  }
   async onSelImg(workDate, workNo, item, index) {
     console.log("item====", item);
     this.selDate = workDate;
@@ -870,6 +911,12 @@ export default class extends Vue {
         this.labeler.render();
       }
     }
+
+    console.log("aa", this.labeler.Image);
+    console.log("labeler.stringify===>>", JSON.stringify(this.labeler));
+
+    const shapList = this.labeler.getShapeList();
+    console.log("shapList====123>", shapList);
   }
   async onSave() {
     console.log("=====");
@@ -951,7 +998,7 @@ export default class extends Vue {
 
     const labeler = new LabelImg(element, {
       width: 800,
-      height: 600,
+      height: 450,
       bgColor: `#000`, // black
     });
 
