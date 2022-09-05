@@ -13,7 +13,8 @@
           <div class="engineSchBar">
             <label for="sel002" class="sl-nm">본부</label>
             <select id="sel002" class="select">
-              <option value="">수도권</option>
+              <option value="">전체</option>
+              <option :key="index" :value='item' v-for="(item, index) in hdqrList">{{ item }}</option>
             </select>
 
             <label for="sel002" class="sl-nm">지사</label>
@@ -29,6 +30,8 @@
             <label for="sel002" class="sl-nm">TCS/HIPASS</label>
             <select id="sel002" class="select">
               <option value="">전체</option>
+              <option value="T">TCS</option>
+              <option value="H">HIPASS</option>
             </select>
 
             <label for="sel002" class="sl-nm">차로</label>
@@ -37,7 +40,7 @@
             </select>
             <br /><br />
             <label for="sel002" class="sl-nm">일시</label>
-            <select id="sel002" class="select sel-calendar">
+            <select id="sel002" class="select sel-calendar">              
               <option value="">2022-07-22</option>
             </select>
             <label for="sel001" class="hidden">선택해주세요</label>
@@ -165,12 +168,28 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
+import commonService from "~/service/common-service";
 import rslt from "./rslt.vue";
 @Component({ components: { Layout, rslt } })
 export default class extends Vue {
   isRun = "";
+  hdqrList = [];
   onRun(run) {
     this.isRun = run;
+  }
+  created() {
+    this.getHdqrList();
+  }
+  async getHdqrList() {
+    this.hdqrList = [];
+    const data = await commonService.request(
+      {},
+      "/api/updt/hdqr/list"
+    );
+    data.forEach((value) => {
+      this.hdqrList.push(value.hdqr_nm);
+    });
+    console.log("hdqrList ===",this.hdqrList);
   }
 }
 </script>

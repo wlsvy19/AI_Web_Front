@@ -1085,6 +1085,14 @@ nav ol > li > .subMenu > ul > li > a:hover {
   text-indent: -9999px;
 }
 
+.ver-file_list .file-item .ver-x {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: 0 0/20px 20px url(../images/ic_ver_x.png) no-repeat;
+  text-indent: -9999px;
+}
+
 .ver-file_list .file-item .ver-exam {
   width: 64px;
   height: 24px;
