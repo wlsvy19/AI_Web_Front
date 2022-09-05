@@ -71,6 +71,7 @@ export default class extends Vue {
   errMsg = '';
   
   created() {
+    this.$emit('setStatusTimer', 0);
     this.getValidationStatusInfo();
     this.currentMenu = this.$store.state.currentMenu;
   }
@@ -120,6 +121,7 @@ export default class extends Vue {
     )
     if(rs == 1) {
       clearInterval(this.statusTimer);
+      this.$emit('setStatusTimer', 5000);
       this.$emit('onRun', '');
     }
   }

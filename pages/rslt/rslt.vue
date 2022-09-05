@@ -10,6 +10,9 @@
       </div>
 
       <div class="clmFlex clmBox-col2 mt15">
+        <div v-if="isShowSpinner==true" style="position:relative;left:47.2%">
+          <div class="spinner" style="width:80px;height:80px"></div>  
+        </div>       
         <!-- step1. [S] -->
         <div class="clmBox">
           <div class="clm-head">
@@ -149,14 +152,17 @@
 
       <!-- button -->
       <div class="mt50 tx-c">
+        <button type="button" class="btn-bg-gn btn-gray wid220" @click="onClickPrev()">
+          이전 검증 확인
+        </button>
         <button type="button" class="btn-bg-gn wid220" @click="onClickStart()">
           검증 시작
         </button>
       </div>
     </div>
-    <dtling v-if="isRun === 'RUN'" @onRun="onRun" />
-    <dtlfinish v-if="isRun === 'FINISH'" @onRun="onRun" />
-    <dterror v-if="isRun === 'ERROR'" @onRun="onRun" />
+    <dtling v-if="isRun === 'RUN'" @onRun="onRun" @setStatusTimer="setStatusTimer"/>
+    <dtlfinish v-if="isRun === 'FINISH'" @onRun="onRun" @showSpinner="showSpinner" @setStatusTimer="setStatusTimer"/>
+    <dterror v-if="isRun === 'ERROR'" @onRun="onRun" @setStatusTimer="setStatusTimer"/>
   </layout>
 </template>
 <script lang="ts">
@@ -184,12 +190,21 @@ export default class extends Vue {
   selWeight = '';
   selDtst = '';
   statusTimer = null;
-
+  uiId = 0;
+  isShowSpinner = false;
 
   created() {
     this.currentMenu = this.$store.state.currentMenu;
+    this.uiId = this.currentMenu.subMenu.MENU_TORD;
     this.getNgtpCode();
     this.onWeightList(1);
+    this.getValidationStatusInfo();
+  }
+  async mounted() {
+    this.statusTimer= setInterval(this.getValidationStatusInfo, 5000);
+  }
+  async destroyed() {
+    clearInterval(this.statusTimer);
   }
   async onWeightList(pageNo: number) {    
     const newpage = { ...this.pageInfo, pageNo };
@@ -207,58 +222,60 @@ export default class extends Vue {
   onRun(run) {
     this.isRun = run;
   }
-  async mounted() {
-    await this.getValidationStatusInfo();
-    this.statusTimer= setInterval(this.getValidationStatusInfo, 5000);
+  showSpinner(show) {
+    this.isShowSpinner = show;
   }
-  async destroyed() {
-    clearInterval(this.statusTimer);
+  setStatusTimer(time) {
+    if(time == 0) clearInterval(this.statusTimer);
+    else this.statusTimer = setInterval(this.getValidationStatusInfo, time);
   }
   async getValidationStatusInfo() {
     const data = await commonService.request(
-      {},
+      { uiId:this.uiId, },
       "/api/validation-status/data"
     );
     console.log('status ===== ',data);         
 
     if (data.validatingStep == 3) {
-      this.$alert(
-        '완료된 검증 내역이 있습니다.',
-        '알림',
-        {
-          'type':'info',
-          'callback':(action) => {
-            clearInterval(this.statusTimer);
-            this.onRun('FINISH');
-          }
-        })
+      this.onRun('FINISH');
+      // clearInterval(this.statusTimer);
+      // this.$alert(
+      //   '완료된 검증 내역이 있습니다.',
+      //   '알림',
+      //   {
+      //     'type':'info',
+      //     'callback':(action) => {
+      //       this.onRun('FINISH');
+      //     }
+      //   })
     }
 
     if (data.validatingStep == 4 && data.wantToStop != "Y") {
-      clearInterval(this.statusTimer);
-      this.$alert(
-        '확인하지않은 에러 내역이 있습니다.',
-        '알림',
-        {
-          'type':'error',
-          'callback':(action) => {
-            this.onRun('ERROR');
-          }
-        })
+      this.onRun('ERROR');
+      // clearInterval(this.statusTimer);
+      // this.$alert(
+      //   '확인하지않은 에러 내역이 있습니다.',
+      //   '알림',
+      //   {
+      //     'type':'error',
+      //     'callback':(action) => {
+      //       this.onRun('ERROR');
+      //     }
+      //   })
     }
 
     if (data.validatingYn == 'Y') {
-      this.$alert(
-        '진행중인 검증이 있습니다.',
-        '알림',
-        {
-          'type':'info',
-          'callback':(action) => {
-            clearInterval(this.statusTimer);
-            this.onRun('RUN');
-          }
-        })
-
+      this.onRun('RUN');
+      // clearInterval(this.statusTimer);
+      // this.$alert(
+      //   '진행중인 검증이 있습니다.',
+      //   '알림',
+      //   {
+      //     'type':'info',
+      //     'callback':(action) => {
+      //       this.onRun('RUN');
+      //     }
+      //   })
     }
   }
   async onClickStart() {
@@ -276,7 +293,8 @@ export default class extends Vue {
     const startDttm = year + "-" + month + "-" + day+ " " + hours + ":" + minutes + ":" + seconds
     
     const rs = await commonService.request(
-      { 
+      {
+        uiId:this.uiId, 
         validatingId: validatingId,
         engineType: this.weightType,
         dtstType: this.dtstShowType,
@@ -375,6 +393,22 @@ export default class extends Vue {
     }
     console.log(this.selDtst);
     console.log(this.selWeight);
+  }
+  async onClickPrev() {
+    const rs = await commonService.request(
+      { 
+        uiId:this.uiId,
+        validatingStep: 3,
+      },
+      "/api/validation-status/data/step"
+    );
+    if(rs != 1) {
+      this.$alert('이전 검증내역 조회에 실패하였습니다.', '에러', {'type':'error'})
+      this.isShowSpinner = false;
+    }
+    else {
+      this.isShowSpinner = true;
+    }
   }
 }
 </script>
