@@ -1070,6 +1070,14 @@ export default class extends Vue {
         checked: false,
       }));
       this.labelTypeList = labelTypeList;
+      this.labelTypeList.sort((a, b) => {
+        const A = a.cmmnCdNm;
+        const B = b.cmmnCdNm;
+        
+        if(A > B) return 1;
+        if(A < B) return -1;
+        if(A === B) return 0;
+      });
     }
     if (this.pageType === "빛") {
       const labelTypeList = codeList.LABEL_BTN.map((v) => ({
