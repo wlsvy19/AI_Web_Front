@@ -3,7 +3,8 @@
     <div id="contents">
       <div id="ing-content">
         <h1 class="ti">
-          {{ menu }}엔진 검증 에러
+        {{ ((currentMenu || {}).subMenu || {}).MENU_NM }} 에러
+
         </h1>
 
         <div class="table-v1 mb20">
@@ -58,10 +59,7 @@ import commonService from "~/service/common-service";
 @Component({ components: { Layout } })
 export default class extends Vue {
   currentMenu: any = {};
-  plate = ['A'];
-  charNum = ['B','C','D'];
-  imgc = ['E', 'F'];
-  menu = '';
+  uiId = 0;
   statusInfo: any = { 'dtstType': 'U'};
   step = 2;
   prepareProgress = 0;
@@ -72,8 +70,9 @@ export default class extends Vue {
   
   created() {
     this.$emit('setStatusTimer', 0);
-    this.getValidationStatusInfo();
     this.currentMenu = this.$store.state.currentMenu;
+    this.uiId = this.currentMenu.subMenu.MENU_TORD;
+    this.getValidationStatusInfo();
   }
   async mounted() {
     this.statusTimer= setInterval(this.getValidationStatusInfo, 5000);
@@ -84,15 +83,11 @@ export default class extends Vue {
 
   async getValidationStatusInfo() {
     const data = await commonService.request(
-      {},
+      { uiId: this.uiId },
       "/api/validation-status/data"
     );
     console.log('status ===== ',data);
     this.statusInfo = data;
-
-    if(this.statusInfo.engineType in this.plate) this.menu = '번호판 탐색';
-    else if(this.statusInfo.engineType in this.charNum) this.menu = '차량번호 인식';
-    else this.menu = '미오인식 분류';
 
     this.step = this.statusInfo.validatingStep;
     this.errMsg = this.statusInfo.errorMsg;
@@ -116,7 +111,7 @@ export default class extends Vue {
   }
   async onClickStop() {
     const rs = await commonService.request(
-      {},
+      { uiId: this.uiId },
       "/api/validation-status/data/stop"
     )
     if(rs == 1) {
