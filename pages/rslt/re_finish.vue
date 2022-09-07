@@ -19,14 +19,14 @@
             <dl class="target-top">
               <dt class="wid4p">대상</dt>
               <dd class="wid6p">
-                수도권 본부 수원 지사 서울영업소 TCS/HIPASS 전체차로
+                {{ statusInfo.hdqr_nm }}본부 {{ statusInfo.mtnofNm }}지사 {{ statusInfo.tolofNm }}영업소 {{ crgwType }} {{ statusInfo.crgwNo =='ALL'? '전체차로' : statusInfo.crgwTypNo }}
               </dd>
             </dl>
             <dl class="target-btm">
               <dt class="wid4p">검증시작 시간</dt>
-              <dd class="wid6p">2022-04-22 10:00</dd>
+              <dd class="wid6p">{{ statusInfo.startDttm }}</dd>
               <dt class="wid4p">검증완료 시간</dt>
-              <dd class="wid6p">2022-04-23 12:59</dd>
+              <dd class="wid6p">{{ statusInfo.finishDttm }}</dd>
               <dt class="wid4p">재인식 버전</dt>
               <dd class="wid6p">v1.0.0</dd>
               <dt class="wid4p">신규학습 버전</dt>
@@ -121,19 +121,41 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
-import rslt from "./rslt.vue";
 import dtling from "./rslt_ing.vue";
 import dtlfinish from "./rslt_finish.vue";
 import Rslt from "./rslt.vue";
 import * as echarts from "echarts";
+import commonService from "~/service/common-service";
 @Component({ components: { Layout, dtling, dtlfinish, Rslt } })
 export default class extends Vue {
   isRun = "";
+  uiId = 40;
+  statusInfo = {
+    hdqrNm : 'OO',
+    mtnofNm : 'OO',
+    tolofNm : 'OO',
+    crgwNo : 'ALL',
+  };
+  crgwType = 'HIPASS/TCS'
+
   onRun(run) {
     this.isRun = run;
   }
   mounted() {
+    this.getValidationStatusInfo();
     this.init();
+  }
+  async getValidationStatusInfo() {
+    const data = await commonService.request(
+      { uiId:this.uiId, },
+      "/api/rpcs-status/data"
+    );
+    this.statusInfo = data;
+    console.log('status ===== ',data);
+
+    if (data.crgwTypeCd == 'H') this.crgwType = 'HIPASS';
+    else if (data.crgwTypeCd == 'T') this.crgwType = 'TCS';
+    else this.crgwType = 'HIPASS/TCS';
   }
   init() {
     var colorPalette = ["#6CD9CE", "#4C87ED"];
