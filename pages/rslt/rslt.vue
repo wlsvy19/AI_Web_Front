@@ -237,6 +237,7 @@ export default class extends Vue {
     console.log('status ===== ',data);         
 
     if (data.validatingStep == 3) {
+      this.setStatusTimer(0);
       this.onRun('FINISH');
       // clearInterval(this.statusTimer);
       // this.$alert(
@@ -251,6 +252,7 @@ export default class extends Vue {
     }
 
     if (data.validatingStep == 4 && data.wantToStop != "Y") {
+      this.setStatusTimer(0);
       this.onRun('ERROR');
       // clearInterval(this.statusTimer);
       // this.$alert(
@@ -265,6 +267,7 @@ export default class extends Vue {
     }
 
     if (data.validatingYn == 'Y') {
+      this.setStatusTimer(0);
       this.onRun('RUN');
       // clearInterval(this.statusTimer);
       // this.$alert(
