@@ -15,6 +15,15 @@
           >
           </el-date-picker>
           <div class="wid4p tx-r">
+            <label for="sel002" class="sl-nm">유형</label>
+            <select id="sel002" class="select" v-model="search.learnDtstType">
+              <option value="">선택</option>
+              <template v-for="(item, index) in code.NMRECG_CD">
+                <option :value="item.cmmnCd" :key="index">
+                  {{ item.cmmnCdNm }}
+                </option>
+              </template>
+            </select>
             <!-- <label for="sel002" class="sl-nm">엔진 종류</label>
             <select id="sel002" class="select" v-model="search.learnDtstType">
               <option value="">선택</option>
@@ -172,7 +181,7 @@
                 <input
                   @click="onClickBtn(item.cmmnCd)"
                   :key="index"
-                  type="checkbox"
+                  type="radio"
                   name=""
                   :id="'c0' + index"
                   class="lb-chc"
@@ -285,6 +294,9 @@ export default class extends Vue {
     console.log("dataset", this.dataset);
     document.addEventListener("keyup", this.onKeyup);
   }
+  beforeUnmount() {
+    document.removeEventListener("keyup", this.onKeyup);
+  }
   onSelImg(workDate, workNo, item, index) {
     this.selDate = workDate;
     this.sel1 = workNo;
@@ -361,9 +373,9 @@ export default class extends Vue {
     console.log(event);
     if (event.key === "Enter") {
       this.onOk(this.selItem.dtrmYn === "Y" ? "N" : "Y");
-    } else if (event.key === "ArrowDown") {
+    } else if (event.key === "PageDown") {
       this.onNextImage();
-    } else if (event.key === "ArrowUp") {
+    } else if (event.key === "PageUp") {
       this.onBeforeImage();
     } else if (event.key === "Delete") {
       if (this.selItem.delYn !== "Y") {
