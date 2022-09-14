@@ -1702,9 +1702,22 @@ nav ol > li > .subMenu > ul > li > a:hover {
   height: 100%;
   padding: 24px;
   background-color: var(--white1);
+  display:flex; 
+  justify-content:center;
+  align-items:center; 
+  align-content:center; 
+  flex-direction: column; 
+}
+
+.no-img {
+  height: 100%;
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  align-content: center;
-  flex-direction: column;
+  justify-content: center;
+}
+
+.no-img .card-text {
+  font-size: x-large; 
+  display: contents;
 }

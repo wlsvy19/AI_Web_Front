@@ -239,46 +239,16 @@ export default class extends Vue {
     if (data.validatingStep == 3) {
       this.setStatusTimer(0);
       this.onRun('FINISH');
-      // clearInterval(this.statusTimer);
-      // this.$alert(
-      //   '완료된 검증 내역이 있습니다.',
-      //   '알림',
-      //   {
-      //     'type':'info',
-      //     'callback':(action) => {
-      //       this.onRun('FINISH');
-      //     }
-      //   })
     }
 
     if (data.validatingStep == 4 && data.wantToStop != "Y") {
       this.setStatusTimer(0);
       this.onRun('ERROR');
-      // clearInterval(this.statusTimer);
-      // this.$alert(
-      //   '확인하지않은 에러 내역이 있습니다.',
-      //   '알림',
-      //   {
-      //     'type':'error',
-      //     'callback':(action) => {
-      //       this.onRun('ERROR');
-      //     }
-      //   })
     }
 
     if (data.validatingYn == 'Y') {
       this.setStatusTimer(0);
       this.onRun('RUN');
-      // clearInterval(this.statusTimer);
-      // this.$alert(
-      //   '진행중인 검증이 있습니다.',
-      //   '알림',
-      //   {
-      //     'type':'info',
-      //     'callback':(action) => {
-      //       this.onRun('RUN');
-      //     }
-      //   })
     }
   }
   async onClickStart() {
