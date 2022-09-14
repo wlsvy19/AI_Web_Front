@@ -334,7 +334,7 @@
               <input
                 @click="onCheckLabel(item.cmmnCd)"
                 :key="index"
-                type="checkbox"
+                type="radio"
                 name=""
                 :id="'c0' + index"
                 class="lb-chc"
@@ -1076,10 +1076,10 @@ export default class extends Vue {
       this.labelTypeList.sort((a, b) => {
         const A = a.cmmnCdNm;
         const B = b.cmmnCdNm;
-        
-        if(A > B) return 1;
-        if(A < B) return -1;
-        if(A === B) return 0;
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
       });
     }
     if (this.pageType === "빛") {
@@ -1154,14 +1154,17 @@ export default class extends Vue {
     }));
   }
   onCheckLabel(cd) {
+    console.log("code", cd);
     const list = this.labeler.getShapeList();
     const labelArr = list.filter((v) => v.isActive());
+    console.log("labelArr===", labelArr);
+    this.onSelLabel(cd);
     if (labelArr.length < 1) return; //alert("이미지 라벨링을 선택하세요.");
     const label = labelArr[0];
     label.data = cd;
     this.selLabel = cd;
 
-    this.onSelLabel(cd);
+    // this.onSelLabel(cd);
   }
   async onBeforeImage() {
     if (this.selIndex - 1 > 0) {

@@ -871,6 +871,20 @@ nav ol > li > .subMenu > ul > li > a:hover {
   color: var(--base);
 }
 
+/*fqj add start 2022.09.13*/
+.lb-chc-box input[type="radio"] {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+.lb-chc-box input[type="radio"]:checked + label {
+  border: 1px solid var(--base);
+  background-color: var(--green3);
+  color: var(--base);
+}
+/*fqj add end */
+
 .lb-chc-box2 {
   display: flex;
   justify-content: space-between;
@@ -902,6 +916,20 @@ nav ol > li > .subMenu > ul > li > a:hover {
   background-color: var(--green3);
   color: var(--base);
 }
+
+/*start fqj 20220913*/
+.lb-chc-box2 input[type="radio"] {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+.lb-chc-box2 input[type="radio"]:checked + label {
+  border: 1px solid var(--base);
+  background-color: var(--green3);
+  color: var(--base);
+}
+/*end */
 
 .newEngin-l {
   width: 848px;
@@ -1186,11 +1214,11 @@ nav ol > li > .subMenu > ul > li > a:hover {
   width: 848px;
   padding: 24px;
   background-color: var(--white1);
-  display:flex; 
-  justify-content:center;
-  align-items:center; 
-  align-content:center; 
-  flex-direction: column; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  flex-direction: column;
   height: 100%;
 }
 
@@ -1278,7 +1306,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
 }
 
 .disk-usage::-webkit-progress-value {
-  background-color: #EC5353;
+  background-color: #ec5353;
 }
 
 #chart-gpu {
@@ -1614,7 +1642,6 @@ nav ol > li > .subMenu > ul > li > a:hover {
   width: 70%;
 }
 
-
 .layerPopup {
   display: none;
   position: fixed;
@@ -1622,7 +1649,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -1641,15 +1668,15 @@ nav ol > li > .subMenu > ul > li > a:hover {
 }
 @keyframes spinner {
   0% {
-      transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   100% {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
 .error-btn-div {
-  display:flex !important;
+  display: flex !important;
   justify-content: flex-end !important;
 }
 
@@ -1672,7 +1699,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
 
 .del-his {
   width: 100%;
-  height:100%;
+  height: 100%;
   padding: 24px;
   background-color: var(--white1);
   display:flex; 

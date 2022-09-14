@@ -25,8 +25,7 @@
               </template>
             </ul>
           </div>
-
-          <div class="clmBox">
+          <div class="clmBox" v-show="!isDtl">
             <h1 class="ti-s">{{ search.unitDtstNm }} 라벨링 데이터 현황</h1>
             <button
               type="button"
@@ -73,7 +72,7 @@
                       type="text"
                       class="inp2 wid50x"
                       placeholder="200"
-                      :value="data.stdDtstCnt"
+                      v-model="data.stdDtstCnt"
                     />
                     <!-- 준공검사 -->
                     <button
@@ -130,12 +129,86 @@
               />
             </div>
           </div>
-          <div class="clmBox">
+          <div class="clmBox" v-show="!isDtl">
             <h1 class="ti-s">라벨링 클라스별 데이터 현황</h1>
             <div class="clm-body4">
               <!-- chart Area [S]-->
               <div id="chart-localData2"></div>
               <!-- chart Area [E]-->
+            </div>
+          </div>
+          <div class="clmBox" v-show="isDtl">
+            <div class="clm-body4">
+              <div class="table-l1 tb-op1 tb-ov1">
+                <table class="tx-c">
+                  <thead>
+                    <tr>
+                      <th class="tx-c">생성일자</th>
+                      <th class="tx-c">통합데이터셋ID</th>
+                      <th class="tx-c">단위데이터셋 개수</th>
+                      <th class="tx-c">학습데이터 개수</th>
+                      <!-- <th class="tx-c">삭제</th> -->
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-for="(item, index) in dataListDtl">
+                      <tr :key="index" @click="onListClick(item)">
+                        <td>{{ item.workDate }}</td>
+                        <td>{{ item.combDtstId }}</td>
+                        <td>{{ item.unitDtstCnt }}</td>
+                        <td>{{ item.totalCnt }}</td>
+                        <!-- <td><button type="button">삭제</button></td> -->
+                      </tr>
+                    </template>
+                    <tr v-if="data.length == 0">
+                      <td colspan="7">조회된 데이터가 없습니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <pagination
+                :pageInfo="pageInfo"
+                @pagination="(p) => onSearchDtl(p.pageNo)"
+              />
+            </div>
+          </div>
+
+          <!-- 우측 컨텐츠영역 -->
+          <div class="clmBox" v-show="isDtl">
+            <div class="clm-body4">
+              <div class="table-l1 tb-op1 tb-ov1">
+                <div
+                  style="
+                    position: relative;
+                    overflow: hidden;
+                    width: 536px;
+                    height: 300px;
+                  "
+                >
+                  <!-- <img
+                    v-if="isDtl"
+                    :src="`/v1/api/crgw-img/data?workDate=${clickItem.workDate}&workNo=${clickItem.workNo}`"
+                    width="536px;"
+                  /> -->
+                  <!--조인해서 workNo를 가져오면 됩니다.-->
+
+                  <!--왼쪽 테이블이 클릭시 DB붙히고 위에 방법으로 하시면 됩니다.-->
+                  <img
+                    v-if="isDtl"
+                    src="/v1/api/crgw-img/data?workDate=2022-07-21&workNo=00000150"
+                    width="536px;"
+                  />
+                </div>
+              </div>
+              <!-- 생성버튼 -->
+              <button
+                type="button"
+                id="newConbBtn"
+                class="btn btn-sz2 btn-gn newConbBtn"
+                @click="isDtl = false"
+              >
+                뒤로가기
+              </button>
             </div>
           </div>
         </div>
@@ -150,18 +223,31 @@ import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import * as echarts from "echarts";
 import { comma } from "~/utils/common";
+// import dtl from "./22.vue";
+// @Component({ components: { Layout, dtl } })
 @Component({ components: { Layout } })
 export default class extends Vue {
   dataList = {};
+  dataListDtl = {};
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  pageInfoDtl: IPageInfoModel = commonService.getPageInitInfo();
   search = {
     unitDtstType: "A",
     unitDtstNm: "번호판",
     ordfield: "work_dttm",
     order: "ASC",
   };
+
+  searchDtl = {
+    unitDtstType: "A",
+    unitDtstNm: "번호판",
+    ordfield: "work_dttm",
+    order: "ASC",
+  }; //상세검색조건 수정하셔서 사용
   code: any = {};
   data: any = {};
+  clickItem: any = {};
+  isDtl = false;
   async codeInfo() {
     const codeList = await commonService.request(
       ["NGTP"],
@@ -197,6 +283,11 @@ export default class extends Vue {
   }
   async onShowDatasetDetail(item) {
     console.log(item);
+    // 서버에서 상세 데이터 가져오기
+    this.searchDtl = { ...this.searchDtl, ...item };
+    this.onSearchDtl(1);
+
+    this.isDtl = true;
   }
   async onDelDataset(item) {
     console.log(item);
@@ -351,6 +442,22 @@ export default class extends Vue {
     newpage.totalCount = data.page.totalCount;
     this.dataList = data.list;
     this.pageInfo = { ...newpage };
+  }
+  async onSearchDtl(pageNo: number) {
+    const newpage = { ...this.pageInfoDtl, pageNo };
+    const data = await commonService.request(
+      { ...this.searchDtl, ...newpage },
+      "/api/unit-dtst/list/id"
+    );
+    newpage.totalCount = data.page.totalCount;
+    if (data.list && data.list.length > 0) {
+      this.clickItem = data.list[0];
+    }
+    this.dataListDtl = data.list;
+    this.pageInfoDtl = { ...newpage };
+  }
+  onListClick(item: any) {
+    this.clickItem = item;
   }
   created() {
     this.onSearch(1);
