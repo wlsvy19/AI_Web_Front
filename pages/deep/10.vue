@@ -294,8 +294,8 @@ export default class extends Vue {
     console.log("dataset", this.dataset);
     document.addEventListener("keyup", this.onKeyup);
   }
-  beforeUnmount() {
-    document.removeEventListener("keyup", this.onKeyup);
+  destroyed() {
+    document.removeEventListener('keyup', this.onKeyup);
   }
   onSelImg(workDate, workNo, item, index) {
     this.selDate = workDate;
