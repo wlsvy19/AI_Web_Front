@@ -27,7 +27,9 @@
             <template v-for="(item, index) in imgDataList">
               <div :key="index" class="file-item" @click="onClickImg(item, index)">
                 <figure>
-                  <img :src="'/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
+                  <img v-if="statusInfo.engineType == 'E'" :src="'/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
+                  <img v-else-if="statusInfo.engineType == 'A'" :src="'/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo"  width="191" height="107" alt="" />
+                  <img v-else :src="'/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />                
                 </figure>
                 <!-- 결과가 동일시 -->
                 <span v-if="item.isCorrect == 1" class="ver-chk ver-checked">동일함</span>
@@ -118,7 +120,10 @@ import commonService from "~/service/common-service";
 export default class extends Vue {
   showPop = false;
   currentMenu: any = {};
-  statusInfo: any = { 'dtstType': 'U'};
+  statusInfo: any = { 
+    'dtstType': 'U',
+    'engineType': 'A',
+  };
   // plate = ['A'];
   // charNum = ['B','C','D'];
   // imgc = ['E', 'F'];

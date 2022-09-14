@@ -860,7 +860,8 @@ export default class extends Vue {
         rectStyle.active.lineWidth = 3;
       }
     }
-
+    console.log("labelr1===========", this.labeler.Image.getSize());
+    
     const label = await commonService.request(
       {
         workDate: item.workDate,
@@ -871,7 +872,6 @@ export default class extends Vue {
       "/api/label-rslt/data"
     );
     if (label && label.labelJson) {
-      console.log(label.labelJson);
       const labelArr = JSON.parse(label.labelJson);
 
       // 2022.07.29. design.song
@@ -989,6 +989,9 @@ export default class extends Vue {
     this.onSearch(1);
     this.init();
     document.addEventListener("keyup", this.onKeyup);
+  }
+  destroyed() {
+    document.removeEventListener('keyup', this.onKeyup);
   }
   async init() {
     const dataset = commonService.getDataset();
