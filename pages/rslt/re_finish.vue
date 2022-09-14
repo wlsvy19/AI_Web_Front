@@ -93,7 +93,7 @@
           <div class="cmp-statits-btm" style="height:585px">
             <div class="cmp-video">
               <!-- <img :src="'/v1/api/rpcs-img/data?workDate=' + selectWorkDate +'&workNo=' + selectWorkNo" width="700px" height="360px" alt="" /> -->
-              <img v-if="selectImg != ''" :src="'data:image/jpeg;base64,' +selectImg" width="700px" height="360px" alt="" />
+              <img v-if="selectImg != '' && selectImg != undefined" :src="'data:image/jpeg;base64,' +selectImg" width="700px" height="360px" alt="" />
               <div v-else class="no-img">
                 <p class="card-text">
                   <img src="~/static/images/card-image.jpg" style="width: 5%;height: 8%;" />
@@ -105,7 +105,7 @@
               <button
                 type="button"
                 class="btn btn-sz5 btn-gnc"
-                @click="$emit('onRun', '')"
+                @click="onClickButton()"
               >
                 재처리영상 보기
               </button>
@@ -150,6 +150,7 @@ export default class extends Vue {
   typeCorrect = 0;
   typeIncorrect = 0;
   pageNo = 1;
+  viewProcessing = false;
 
   onRun(run) {
     this.isRun = run;
@@ -227,6 +228,11 @@ export default class extends Vue {
     else {
       await this.$alert('검증 완료에 실패했습니다.', '서버 에러', {'type':'error'})
     }
+  }
+  onClickButton() {
+    this.viewProcessing = !this.viewProcessing;
+    if (this.viewProcessing) this.selectImg = this.resultList[this.selectIdx].reprocessingImgData;
+    else this.selectImg = this.resultList[this.selectIdx].imgData;
   }
   initChart() {
     let colorPalette = ["#6CD9CE", "#4C87ED"];

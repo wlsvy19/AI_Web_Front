@@ -48,7 +48,7 @@
             </select>
             <br /><br />
             <label for="sel002" class="sl-nm">일시</label>
-            <el-date-picker type="date" v-model="selectDate" :picker-options="dateOption" :format="'yyyy-MM-dd'"/>
+            <el-date-picker type="date" v-model="selectDate" :picker-options="dateOption" format="yyyy-MM-dd" :value-format="'yyyy-MM-dd'"/>
             
             <label for="sel001" class="hidden">선택해주세요</label>
             <el-time-select
@@ -67,6 +67,14 @@
         </fieldset>
 
         <div class="clmFlex clmBox-col2 mt15">
+          <div v-if="isShowSpinner==true" 
+              style="position: absolute;
+                    left: 46%;
+                    top: 50%;
+                    z-index: 9999;"
+          >
+            <div class="spinner" style="width:80px;height:80px"></div>  
+          </div>       
           <div class="clmBox">
             <h1 class="ti-s">가중치 선택</h1>
             <div class="clm-body3">
@@ -182,6 +190,9 @@
 
         <!-- button -->
         <div class="mt50 tx-c">
+          <button type="button" class="btn-bg-gn btn-gray wid220" @click="onClickPrev()">
+            이전 검증 확인
+          </button>
           <button
             type="button"
             class="btn-bg-gn wid220"
@@ -255,6 +266,7 @@ export default class extends Vue {
   smBr =null;
   selWeigthList = [null, null, null, null, null, null];
   statusTimer = null;
+  isShowSpinner = false;
 
   onRun(run) {
     this.isRun = run;
@@ -431,7 +443,7 @@ export default class extends Vue {
       this.$alert('가중치를 선택해 주세요.', '경고', {'type':'warning'});
       return;
     }
-
+    console.log('date===========',this.selectDate);
     const now = new Date();
     const year = now.getFullYear();
     const month = ("0" + (now.getMonth()+1)).slice(-2)
@@ -483,6 +495,22 @@ export default class extends Vue {
     }
     else {
       await this.$alert('검증 시작에 실패했습니다.', '에러', {'type':'error'})
+    }
+  }
+  async onClickPrev() {
+    const rs = await commonService.request(
+      { 
+        uiId:this.uiId,
+        validatingStep: 3,
+      },
+      "/api/rpcs-status/data/step"
+    );
+    if(rs != 1) {
+      this.$alert('이전 검증내역 조회에 실패하였습니다.', '에러', {'type':'error'})
+      this.isShowSpinner = false;
+    }
+    else {
+      this.isShowSpinner = true;
     }
   }
 }
