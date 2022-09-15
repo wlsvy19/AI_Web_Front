@@ -223,8 +223,7 @@ import { IPageInfoModel } from "~/models/common-model";
 import commonService from "~/service/common-service";
 import * as echarts from "echarts";
 import { comma } from "~/utils/common";
-import dtl from "./22.vue";
-@Component({ components: { Layout, dtl } })
+@Component({ components: { Layout } })
 export default class extends Vue {
   dataList = {};
   dataListDtl = {};

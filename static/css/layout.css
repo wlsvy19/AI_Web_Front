@@ -1012,7 +1012,7 @@ nav ol > li > .subMenu > ul > li > a:hover {
   height: 24px;
   border: 1px solid var(--gray1);
   border-radius: 3px;
-  background-color: var(--white2);
+  /*background-color: var(--white2);*/
   color: var(--gray2);
   text-align: center;
 }
@@ -1031,12 +1031,12 @@ nav ol > li > .subMenu > ul > li > a:hover {
 
 .user-r.active .btn-usr {
   color: var(--black);
-  background-color: var(--white1);
+  /*background-color: var(--white1);*/
 }
 
 .user-r.active .bt-u-add {
   color: var(--white1);
-  background-color: var(--base);
+  /*background-color: var(--base);*/
   border: 1px solid var(--base);
 }
 
