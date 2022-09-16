@@ -35,6 +35,17 @@
           </div>
           <!-- 비교 검증 대상 [E] -->
 
+          <div class="chkbox-div">
+            <div class="chkbox2">
+              <input type="checkbox" id="th001" @change="onClickOnlyNumDiff($event)"/>
+              <label for="th001" class="th_chk">번호인식 불일치 보기</label>
+            </div>
+            <div class="chkbox2">
+              <input type="checkbox" id="th002" @change="onClickOnlyTypeDiff($event)"/>
+              <label for="th002" class="th_chk">유형분류 불일치 보기</label>
+            </div>
+          </div>
+
           <div class="table-v4 mt20 tb-ov1">
             <table>
               <colgroup>
@@ -63,15 +74,15 @@
                     <td class="tx-c">{{ (pageNo-1)*10 + (index +1) }}</td>
                     <td class="tx-c">{{ item.rpcsNumRecgResult }}</td>
                     <td class="tx-c">{{ item.newNumRecgResult }}</td>
-                    <td class="tx-c">{{ item.rpcsTypeRecgResult }}</td>
-                    <td class="tx-c">{{ item.newTypeRecgResult }}</td>
+                    <td class="tx-c">{{ nmercgCd[item.rpcsTypeRecgResult] }}</td>
+                    <td class="tx-c">{{ nmercgCd[item.newTypeRecgResult] }}</td>
                   </tr>
                 </template>                
               </tbody>
             </table>
             <pagination
               :pageInfo="pageInfo"
-              :layout="'total, prev, pager, next'"
+              :layout="'prev, pager, next'"
               @pagination="(p) => getValidationResult(p.pageNo)"
             />
           </div>          
@@ -90,7 +101,7 @@
             </div>
           </div>
 
-          <div class="cmp-statits-btm" style="height:585px">
+          <div class="cmp-statits-btm" style="height:585px">            
             <div class="cmp-video">
               <!-- <img :src="'/v1/api/rpcs-img/data?workDate=' + selectWorkDate +'&workNo=' + selectWorkNo" width="700px" height="360px" alt="" /> -->
               <img v-if="selectImg != '' && selectImg != undefined" :src="'data:image/jpeg;base64,' +selectImg" width="700px" height="360px" alt="" />
@@ -101,6 +112,7 @@
                 </p>
               </div>
             </div>
+            
             <div class="tx-c" style="margin-top:3rem">
               <button
                 type="button"
@@ -130,6 +142,7 @@ import { formatBytes } from "~/utils/common";
 export default class extends Vue {
   isRun = "";
   uiId = 40;
+  nmercgCd = {};
   statusInfo = {
     validatingId : '',
     hdqrNm : 'OO',
@@ -151,12 +164,27 @@ export default class extends Vue {
   typeIncorrect = 0;
   pageNo = 1;
   viewProcessing = false;
+  isCorrectNum = 1;
+  isCorrectType = 1;
+
 
   onRun(run) {
     this.isRun = run;
   }
   mounted() {
+    this.getNmercgCd();
     this.getValidationStatusInfo();
+  }
+  async getNmercgCd() {
+    const data = await commonService.request(
+      { grpCd: 'NMRECG_CD' },
+      "/api/cmmn-cd-info/code"
+    );    
+    console.log(data);
+    data.forEach(item => {
+      this.nmercgCd[item.cmmnCd] = item.cmmnCdNm;
+    });
+    console.log(this.nmercgCd);
   }
   async getValidationStatusInfo() {
     const data = await commonService.request(
@@ -197,6 +225,8 @@ export default class extends Vue {
     const data = await commonService.request(
       {
         validatingId : this.validatingId,
+        isCorrectNum : this.isCorrectNum,
+        isCorrectType : this.isCorrectType,
         ...newpage,
       },
       "/api/rpcs-result/data"
@@ -205,9 +235,8 @@ export default class extends Vue {
     this.pageInfo = { ...newpage };
     this.pageNo = pageNo;
     this.resultList = data.list;
-    this.selectIdx = 0;
-    this.selectImg = this.resultList[0].imgData;
     console.log('result====', data);
+    this.onClickRow(this.resultList[0], 0);
   }
   async onClickRow(item, index) {
     // this.selectWorkDate = item.imgWorkDate;
@@ -233,6 +262,25 @@ export default class extends Vue {
     this.viewProcessing = !this.viewProcessing;
     if (this.viewProcessing) this.selectImg = this.resultList[this.selectIdx].reprocessingImgData;
     else this.selectImg = this.resultList[this.selectIdx].imgData;
+  }
+  async onClickOnlyNumDiff(event) {
+    if(event.target.checked==true) {
+      this.isCorrectNum = 0;
+    }
+    else {
+      this.isCorrectNum = 1;
+    }
+      this.getValidationResult(1);
+
+  }
+  async onClickOnlyTypeDiff(event) {
+    if(event.target.checked==true) {
+      this.isCorrectType = 0;
+    }
+    else {
+      this.isCorrectType = 1;
+    }
+    this.getValidationResult(1);
   }
   initChart() {
     let colorPalette = ["#6CD9CE", "#4C87ED"];

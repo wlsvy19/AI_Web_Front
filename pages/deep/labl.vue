@@ -184,6 +184,7 @@
                   type="button"
                   class="bt-lb-potin"
                   @click="setSelection()"
+                  :style="selectPointBtn ? 'background-blend-mode: multiply;' : ''"
                 >
                   선택
                 </button>
@@ -194,6 +195,7 @@
                   @click="setLabel('polygon')"
                   style="background-image: url(/images/bt_lb_area.jpeg)"
                   class="bt-lb-area"
+                  :style="selectLabelBtn ? 'background-blend-mode: multiply;' : ''"
                 >
                   폴리곤
                 </button>
@@ -203,6 +205,7 @@
                   title="사각형"
                   @click="setLabel('rect')"
                   class="bt-lb-area"
+                  :style="selectLabelBtn ? 'background-blend-mode: multiply;' : ''"
                 >
                   사각형
                 </button>
@@ -589,6 +592,9 @@ export default class extends Vue {
   outHeight: any = "";
   imgURL: any = "";
 
+  selectPointBtn = true;
+  selectLabelBtn = false;
+
   created() {
     console.log("====pageType====", this.pageType);
     this.shapeID = 0;
@@ -803,6 +809,8 @@ export default class extends Vue {
   }
   async onSelImg(workDate, workNo, item, index) {
     console.log("item====", item);
+    this.selectPointBtn = true;
+    this.selectLabelBtn = false;
     this.selDate = workDate;
     this.sel1 = workNo;
     this.sel2 = "";
@@ -1028,7 +1036,7 @@ export default class extends Vue {
       const data = obj.ante.currentTarget.data;
       console.log("data===>11", data);
       this.sel2 = obj.ante.currentTarget.id;
-      this.onSelLabel(data);
+      if (obj.ante.isOnShape) this.onSelLabel(data);
     });
 
     //labeler.getEventList("dblclick")[0];
@@ -1134,10 +1142,14 @@ export default class extends Vue {
   }
   setSelection() {
     console.log("setSelection");
+    this.selectPointBtn = true;
+    this.selectLabelBtn = false;
     this.labeler.labelOff();
     this.nonActive();
   }
   setLabel(type: string) {
+    this.selectPointBtn = false;
+    this.selectLabelBtn = true;
     console.log("setLabel: " + type);
     this.nonActive();
     this.labeler.label(type);
@@ -1152,6 +1164,8 @@ export default class extends Vue {
       ...v,
       checked: v.cmmnCd === val,
     }));
+    this.selectPointBtn = true;
+    this.selectLabelBtn = false;
   }
   onCheckLabel(cd) {
     console.log("code", cd);

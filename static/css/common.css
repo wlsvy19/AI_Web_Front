@@ -626,6 +626,12 @@
 
 
 /* Check Box Design */
+.chkbox-div {
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.1rem;
+}
+
 .chkbox{
     display: inline-block;
 }
