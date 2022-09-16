@@ -134,13 +134,14 @@ export default class extends Vue {
       this.prepareProgress = this.statusInfo.progress;
 
       if(this.prepareProgress == 100) this.elStatus='success';
-
-      if (this.statusInfo.errorMsg != '') {
-        this.elStatus='exception';
-        this.errMsg = this.statusInfo.errorMsg
-      }
       else {
-        this.elStatus = null;
+        if (this.statusInfo.errorMsg != '') {
+          this.elStatus='exception';
+          this.errMsg = this.statusInfo.errorMsg
+        }
+        else {
+          this.elStatus = null;
+        }
       }
     }
     else if (this.step == 0) {

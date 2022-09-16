@@ -5,7 +5,7 @@
         <div class="tit-top flex flex-btw">
           <h2 class="ti wid6p">재인식 엔진 비교 검증</h2>
           <div class="wid4p tx-r pr25">
-            <button type="button" class="btn wid138x btn-sz2 btn-bg-gn" @click="$emit('onRun', '')">             
+            <button type="button" class="btn wid138x btn-sz2 btn-bg-gn" @click="onClickComplete()">             
               신규 검증하기
             </button>
           </div>
@@ -19,14 +19,14 @@
             <dl class="target-top">
               <dt class="wid4p">대상</dt>
               <dd class="wid6p">
-                수도권 본부 수원 지사 서울영업소 TCS/HIPASS 전체차로
+                {{ statusInfo.hdqr_nm }}본부 {{ statusInfo.mtnofNm }}지사 {{ statusInfo.tolofNm }}영업소 {{ crgwType }} {{ statusInfo.crgwNo =='ALL'? '전체차로' : statusInfo.crgwTypNo }}
               </dd>
             </dl>
             <dl class="target-btm">
               <dt class="wid4p">검증시작 시간</dt>
-              <dd class="wid6p">2022-04-22 10:00</dd>
+              <dd class="wid6p">{{ statusInfo.startDttm }}</dd>
               <dt class="wid4p">검증완료 시간</dt>
-              <dd class="wid6p">2022-04-23 12:59</dd>
+              <dd class="wid6p">{{ statusInfo.finishDttm }}</dd>
               <dt class="wid4p">재인식 버전</dt>
               <dd class="wid6p">v1.0.0</dd>
               <dt class="wid4p">신규학습 버전</dt>
@@ -35,7 +35,18 @@
           </div>
           <!-- 비교 검증 대상 [E] -->
 
-          <div class="table-v4 mt20">
+          <div class="chkbox-div">
+            <div class="chkbox2">
+              <input type="checkbox" id="th001" @change="onClickOnlyNumDiff($event)"/>
+              <label for="th001" class="th_chk">번호인식 불일치 보기</label>
+            </div>
+            <div class="chkbox2">
+              <input type="checkbox" id="th002" @change="onClickOnlyTypeDiff($event)"/>
+              <label for="th002" class="th_chk">유형분류 불일치 보기</label>
+            </div>
+          </div>
+
+          <div class="table-v4 mt20 tb-ov1">
             <table>
               <colgroup>
                 <col width="*" />
@@ -58,59 +69,58 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>12가3456</td>
-                  <td>12가3458</td>
-                  <td>밝음</td>
-                  <td>밝음</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>32나2234</td>
-                  <td>33나3334</td>
-                  <td>어두움</td>
-                  <td>꺾임</td>
-                </tr>
+                <template v-for="(item, index) in resultList">
+                  <tr :key="index" class="st3tr" @click="onClickRow(item, index)" :style="selectIdx == index? 'background-color:var(--green2)':''">
+                    <td class="tx-c">{{ (pageNo-1)*10 + (index +1) }}</td>
+                    <td class="tx-c">{{ item.rpcsNumRecgResult }}</td>
+                    <td class="tx-c">{{ item.newNumRecgResult }}</td>
+                    <td class="tx-c">{{ nmercgCd[item.rpcsTypeRecgResult] }}</td>
+                    <td class="tx-c">{{ nmercgCd[item.newTypeRecgResult] }}</td>
+                  </tr>
+                </template>                
               </tbody>
             </table>
-          </div>
-          <div class="paging mt40">
-            <a href="#">맨처음</a>
-            <a href="#">이전</a>
-            <a href="#">1</a>
-            <a href="#">2</a>
-            <strong>3</strong>
-            <a href="#">4</a>
-            <a href="#">다음</a>
-            <a href="#">맨마지막</a>
-          </div>
+            <pagination
+              :pageInfo="pageInfo"
+              :layout="'prev, pager, next'"
+              @pagination="(p) => getValidationResult(p.pageNo)"
+            />
+          </div>          
         </div>
         <div class="compare-r">
           <div class="cmp-statits-top">
             <div class="cmpNumstatis">
               <div id="chart-numStatis"></div>
-              <span class="data-val-a">525,002</span>
-              <span class="data-val-b">4,125</span>
+              <span class="data-val-a">{{ numCorrect }}</span>
+              <span class="data-val-b">{{ numIncorrect }}</span>
             </div>
             <div class="cmpTypestatis">
               <div id="chart-typeStatis"></div>
-              <span class="data-val-a">525,002</span>
-              <span class="data-val-b">5,223</span>
+              <span class="data-val-a">{{ typeCorrect }}</span>
+              <span class="data-val-b">{{ typeIncorrect }}</span>
             </div>
           </div>
 
-          <div class="cmp-statits-btm">
-            <div class="cmp-video">비디오 영상 들어갈 자리</div>
-            <div class="tx-c">
-              <!-- 준공검사 -->
-              <!-- <button
+          <div class="cmp-statits-btm" style="height:585px">            
+            <div class="cmp-video">
+              <!-- <img :src="'/v1/api/rpcs-img/data?workDate=' + selectWorkDate +'&workNo=' + selectWorkNo" width="700px" height="360px" alt="" /> -->
+              <img v-if="selectImg != '' && selectImg != undefined" :src="'data:image/jpeg;base64,' +selectImg" width="700px" height="360px" alt="" />
+              <div v-else class="no-img">
+                <p class="card-text">
+                  <img src="~/static/images/card-image.jpg" style="width: 5%;height: 8%;" />
+                  이미지를 불러오지 못했습니다.
+                </p>
+              </div>
+            </div>
+            
+            <div class="tx-c" style="margin-top:3rem">
+              <button
                 type="button"
                 class="btn btn-sz5 btn-gnc"
-                @click="$emit('onRun', '')"
+                @click="onClickButton()"
               >
                 재처리영상 보기
-              </button> -->
+              </button>
             </div>
           </div>
         </div>
@@ -121,30 +131,167 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
-import rslt from "./rslt.vue";
 import dtling from "./rslt_ing.vue";
 import dtlfinish from "./rslt_finish.vue";
 import Rslt from "./rslt.vue";
 import * as echarts from "echarts";
+import commonService from "~/service/common-service";
+import { IPageInfoModel } from "~/models/common-model";
+import { formatBytes } from "~/utils/common";
 @Component({ components: { Layout, dtling, dtlfinish, Rslt } })
 export default class extends Vue {
   isRun = "";
+  uiId = 40;
+  nmercgCd = {};
+  statusInfo = {
+    validatingId : '',
+    hdqrNm : 'OO',
+    mtnofNm : 'OO',
+    tolofNm : 'OO',
+    crgwNo : 'ALL',
+  };
+  validatingId = '';
+  crgwType = 'HIPASS/TCS'
+  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  resultList = [];
+  selectIdx = -1;
+  // selectWorkNo = '';
+  // selectWorkDate = '';
+  selectImg = null;
+  numCorrect = 0;
+  numIncorrect = 0;
+  typeCorrect = 0;
+  typeIncorrect = 0;
+  pageNo = 1;
+  viewProcessing = false;
+  isCorrectNum = 1;
+  isCorrectType = 1;
+
+
   onRun(run) {
     this.isRun = run;
   }
   mounted() {
-    this.init();
+    this.getNmercgCd();
+    this.getValidationStatusInfo();
   }
-  init() {
-    var colorPalette = ["#6CD9CE", "#4C87ED"];
-    var dom = document.getElementById("chart-numStatis");
-    var myChart = echarts.init(dom, null, {
+  async getNmercgCd() {
+    const data = await commonService.request(
+      { grpCd: 'NMRECG_CD' },
+      "/api/cmmn-cd-info/code"
+    );    
+    console.log(data);
+    data.forEach(item => {
+      this.nmercgCd[item.cmmnCd] = item.cmmnCdNm;
+    });
+    console.log(this.nmercgCd);
+  }
+  async getValidationStatusInfo() {
+    const data = await commonService.request(
+      { uiId:this.uiId, },
+      "/api/rpcs-status/data"
+    );
+    this.statusInfo = data;
+    console.log('status ===== ',data);
+
+    if (data.crgwTypeCd == 'H') this.crgwType = 'HIPASS';
+    else if (data.crgwTypeCd == 'T') this.crgwType = 'TCS';
+    else this.crgwType = 'HIPASS/TCS';
+    
+    if (this.validatingId == '') {
+      this.validatingId = this.statusInfo.validatingId;
+      this.getIsCorrectResult();    
+      this.getValidationResult(1);
+    }    
+  }
+  async getIsCorrectResult() {
+    const data = await commonService.request(
+      { 
+        uiId:this.uiId,
+        validatingId: this.validatingId,
+      },
+      "/api/rpcs-result/data/count"
+    );
+    console.log(data);
+    this.numCorrect = parseInt(data.numCorrect);
+    this.numIncorrect = parseInt(data.numIncorrect);
+    this.typeCorrect = parseInt(data.typeCorrect);
+    this.typeIncorrect = parseInt(data.typeIncorrect);
+    this.initChart();
+  }
+  async getValidationResult(pageNo: number) {
+    this.selectIdx = -1;
+    const newpage = { ...this.pageInfo, pageNo };
+    const data = await commonService.request(
+      {
+        validatingId : this.validatingId,
+        isCorrectNum : this.isCorrectNum,
+        isCorrectType : this.isCorrectType,
+        ...newpage,
+      },
+      "/api/rpcs-result/data"
+    )
+    newpage.totalCount = data.page.totalCount+1;
+    this.pageInfo = { ...newpage };
+    this.pageNo = pageNo;
+    this.resultList = data.list;
+    console.log('result====', data);
+    this.onClickRow(this.resultList[0], 0);
+  }
+  async onClickRow(item, index) {
+    // this.selectWorkDate = item.imgWorkDate;
+    // this.selectWorkNo = item.imgWorkNo;
+    // console.log(this.selectWorkNo);
+    // console.log(this.selectWorkDate);
+    this.selectImg = item.imgData;
+    this.selectIdx = index;
+  }
+  async onClickComplete() {
+    const rs = await commonService.request(
+      { uiId:this.uiId, },
+      "/api/rpcs-status/data/complete"
+    );
+    if(rs == 1) {    
+      this.$emit('onRun', '');
+    }
+    else {
+      await this.$alert('검증 완료에 실패했습니다.', '서버 에러', {'type':'error'})
+    }
+  }
+  onClickButton() {
+    this.viewProcessing = !this.viewProcessing;
+    if (this.viewProcessing) this.selectImg = this.resultList[this.selectIdx].reprocessingImgData;
+    else this.selectImg = this.resultList[this.selectIdx].imgData;
+  }
+  async onClickOnlyNumDiff(event) {
+    if(event.target.checked==true) {
+      this.isCorrectNum = 0;
+    }
+    else {
+      this.isCorrectNum = 1;
+    }
+      this.getValidationResult(1);
+
+  }
+  async onClickOnlyTypeDiff(event) {
+    if(event.target.checked==true) {
+      this.isCorrectType = 0;
+    }
+    else {
+      this.isCorrectType = 1;
+    }
+    this.getValidationResult(1);
+  }
+  initChart() {
+    let colorPalette = ["#6CD9CE", "#4C87ED"];
+    let dom = document.getElementById("chart-numStatis");
+    let myChart = echarts.init(dom, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option;
-
+    let option;
+    console.log(this.numCorrect);
     option = {
       title: {
         text: "번호인식 통계",
@@ -187,8 +334,8 @@ export default class extends Vue {
             show: false,
           },
           data: [
-            { value: 1048, name: "일치" },
-            { value: 735, name: "불일치" },
+            { value: this.numCorrect, name: "일치" },
+            { value: this.numIncorrect, name: "불일치" },
           ],
           top: "30%", // 비율
           center: ["100%", "30%"], //가로 세로 위치
@@ -202,13 +349,13 @@ export default class extends Vue {
 
     window.addEventListener("resize", (myChart as any).resize);
 
-    var dom2 = document.getElementById("chart-typeStatis");
-    var myChart2 = echarts.init(dom2, null, {
+    let dom2 = document.getElementById("chart-typeStatis");
+    let myChart2 = echarts.init(dom2, null, {
       renderer: "canvas",
       useDirtyRect: false,
     });
 
-    var option2;
+    let option2;
 
     option2 = {
       title: {
@@ -252,8 +399,8 @@ export default class extends Vue {
             show: false,
           },
           data: [
-            { value: 1048, name: "일치" },
-            { value: 735, name: "불일치" },
+            { value: this.typeCorrect, name: "일치" },
+            { value: this.typeIncorrect, name: "불일치" },
           ],
           top: "30%", // 비율
           center: ["100%", "30%"], //가로 세로 위치
