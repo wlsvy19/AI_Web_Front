@@ -972,7 +972,8 @@ export default class extends Vue {
     // };
     console.log(saveData);
     //await commonService.request(saveData, "/api/crgw-img-data/save");
-    await commonService.request(saveData, "/api/label-rslt/data/save");
+    const data = await commonService.request(saveData, "/api/label-rslt/data/save");
+    console.log(data);
     this.selItem.dtrmYn = dtrmYn;
     this.$util.notification("처리완료");
     const newIndex = this.selIndex + 1;

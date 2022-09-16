@@ -16,6 +16,9 @@
             정확도 <strong>{{ accuracy }}%</strong
             ><span class="verifi-file-cnt">(일치 {{ this.correctCount }}장 / {{ this.totalCount }}장)</span>
           </div>
+          <div>
+            현재 페이지 {{ curPageNo }} / {{ totalPageNo }}
+          </div>
           <div class="chkbox2">
             <input type="checkbox" id="th001" @change="onClickOnlyNotPros($event)"/>
             <label for="th001" class="th_chk">확인 필요만 보기</label>
@@ -28,8 +31,8 @@
               <div :key="index" class="file-item" @click="onClickImg(item, index)">
                 <figure>
                   <img v-if="statusInfo.engineType == 'E'" :src="'/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
-                  <img v-else-if="statusInfo.engineType == 'A'" :src="'/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo"  width="191" height="107" alt="" />
-                  <img v-else :src="'/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />                
+                  <img v-else-if="statusInfo.engineType == 'A'" :src="'/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
+                  <img v-else :src="'/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />                
                 </figure>
                 <!-- 결과가 동일시 -->
                 <span v-if="item.isCorrect == 1" class="ver-chk ver-checked">동일함</span>
@@ -43,8 +46,8 @@
               <p>이전 검증 결과가 없습니다.</p>
             </div>
           </div>
-          <button type="button" class="file-nav file-prev">이전</button>
-          <button type="button" class="file-nav file-next">다음</button>
+          <button type="button" class="file-nav file-prev" @click="onClickPrev()">이전</button>
+          <button type="button" class="file-nav file-next" @click="onClickNext()">다음</button>
 
           <div class="tx-c mt45">
             <button
@@ -60,14 +63,48 @@
     </div>
     <div class="popup pop2" v-if="showPop" :style="`display:block;left:30%`">
       <div class="pop-body">
+        <!-- 데이터 관리 도구 버튼 -->
+        <div class="table-v3 ver-s-cont" style="margin-bottom:1rem;">
+          <table class="tx-c">
+            <colgroup>
+              <col width="*" />
+              <col width="130" />
+              <col width="130" />
+            </colgroup>
+            <tbody>
+              <tr>
+                <td>
+                  데이터 관리 도구
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray">
+                    데이터 삭제하기
+                  </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray">
+                    라벨링 다시하기
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 큰 이미지 -->
         <figure class="ver-m-img">
           <img :src="this.url" width="666" height="373" alt="" />
         </figure>
-        <div class="ver-i-cont">
+
+        <!-- 맨 아랫줄 -->
+        <div class="ver-i-cont" style="align-items: center;">
+          <!-- 작은 이미지 -->
           <figure class="ver-s-img">
             <img :src="this.url" width="232" height="129" alt="" />
           </figure>
-          <div class="table-v3 ver-s-cont">
+
+          <!-- 정답, 검증결과 테이블 -->
+          <div class="table-v3 ver-s-cont" style="margin-left:1rem;">
             <table class="tx-c">
               <colgroup>
                 <col width="137" />
@@ -79,16 +116,16 @@
                   <th>라벨링 데이터</th>
                   <td>{{ selAnswer }}</td>
                   <td>
-                    <button type="button" class="btn btn-sz2 btn-l-b-gn" @click="onClickAnswer(0)">
-                      정답 or <br/> 둘다 틀림
+                    <button v-if="selItem.isCorrect == 0" type="button" class="btn btn-sz1 btn-l-b-gn" @click="onClickAnswer(0)">
+                      정답
                     </button>
                   </td>
                 </tr>
                 <tr>
-                  <th>검증 데이터</th>
+                  <th>검증 결과</th>
                   <td>{{ selItem.result }}</td>
                   <td>
-                    <button type="button" class="btn btn-sz2 btn-l-b-gn" @click="onClickAnswer(1)">
+                    <button v-if="selItem.isCorrect == 0" type="button" class="btn btn-sz1 btn-l-b-gn" @click="onClickAnswer(1)">
                       정답
                     </button>
                   </td>
@@ -96,7 +133,14 @@
               </tbody>
             </table>
           </div>
-        </div>
+
+          <!--  둘다 틀림 버튼 -->
+          <div v-if="selItem.isCorrect == 0" style="margin-left:1rem; height: fit-content; width: 7%;">
+            <button type="button" class="btn btn-sz1 btn-l-b-gn" @click="onClickAnswer(2)">
+              둘다 틀림
+            </button>
+          </div>
+        </div>        
       </div>
 
       <button type="button" class="pop-close" @click="onShowPop(false)">
@@ -140,6 +184,9 @@ export default class extends Vue {
   accuracy = 0;  
   prosYn = '';
   isCorrect = null;
+  totalPageNo = 1;
+  curPageNo = 1;
+
   async created() {
     this.currentMenu = this.$store.state.currentMenu;
     this.uiId = this.currentMenu.subMenu.MENU_TORD;
@@ -165,6 +212,7 @@ export default class extends Vue {
 
     // 검증 데이터 전체 수
     this.totalCount = this.statusInfo.totalDataCnt;
+    this.totalPageNo = Math.ceil(this.totalCount / 20);
   }
   async getCorrectCount() {
     const data = await commonService.request(
@@ -221,18 +269,23 @@ export default class extends Vue {
   }
   async onClickNext() {    
     if (this.totalCount - this.offset > 0) {
+      this.curPageNo += 1;
       this.offset += 20;
       this.getValidationResult();
-    }
-    this.getValidationResult()
+    }    
   }
   async onClickPrev() {
     this.offset -= 20;
+    if (this.curPageNo != 1) this.curPageNo -= 1;
+    
     if (this.offset < 0) this.offset = 0;
     else this.getValidationResult();
   }
   async onClickImg(item, index) {    
-    this.url = '/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
+    if(this.statusInfo.engineType == 'E') this.url = '/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
+    else if(this.statusInfo.engineType == 'A') this.url = '/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
+    else this.url = '/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
+
     this.selItem = item;
     this.selIndex = index;
     if(this.statusInfo.engineType == 'E') {
@@ -287,10 +340,12 @@ export default class extends Vue {
     return imgc_dict
   }
   async onClickAnswer(correct) {
+    let is_correct = 0;
+    if (correct == 1) is_correct =1 ;
     const rs = await commonService.request(
       {
         uiId:this.uiId,
-        isCorrect:correct,
+        isCorrect: is_correct,
         validatingId:this.statusInfo.validatingId,
         imgWorkDate:this.selItem.imgWorkDate,
         imgWorkNo:this.selItem.imgWorkNo,
@@ -306,6 +361,11 @@ export default class extends Vue {
         this.accuracy = parseFloat(((this.correctCount/this.totalCount) * 100).toFixed(1))
       }
     }
+
+    if (correct == 2) {
+
+    }
+
     this.onShowPop(false)
   }
 }

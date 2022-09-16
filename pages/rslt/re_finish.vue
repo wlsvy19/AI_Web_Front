@@ -46,8 +46,8 @@
             </div>
           </div>
 
-          <div class="table-v4 mt20 tb-ov1">
-            <table>
+          <div class="table-v4 mt20 tb-ov1" contenteditable="true" @keydown="onKeyDown($event)">
+            <table contenteditable="false">
               <colgroup>
                 <col width="*" />
                 <col width="22%" />
@@ -117,7 +117,7 @@
               <button
                 type="button"
                 class="btn btn-sz5 btn-gnc"
-                @click="onClickButton()"
+                @click="onClickProcessViewBtn()"
               >
                 재처리영상 보기
               </button>
@@ -137,7 +137,7 @@ import Rslt from "./rslt.vue";
 import * as echarts from "echarts";
 import commonService from "~/service/common-service";
 import { IPageInfoModel } from "~/models/common-model";
-import { formatBytes } from "~/utils/common";
+
 @Component({ components: { Layout, dtling, dtlfinish, Rslt } })
 export default class extends Vue {
   isRun = "";
@@ -166,6 +166,7 @@ export default class extends Vue {
   viewProcessing = false;
   isCorrectNum = 1;
   isCorrectType = 1;
+  dataLoading = false;
 
 
   onRun(run) {
@@ -219,8 +220,10 @@ export default class extends Vue {
     this.typeIncorrect = parseInt(data.typeIncorrect);
     this.initChart();
   }
-  async getValidationResult(pageNo: number) {
-    this.selectIdx = -1;
+  async getValidationResult(pageNo: number, reverse=false) {
+    if (this.dataLoading == true) return;
+    this.dataLoading = true;
+    // this.selectIdx = -1;
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
       {
@@ -236,7 +239,8 @@ export default class extends Vue {
     this.pageNo = pageNo;
     this.resultList = data.list;
     console.log('result====', data);
-    this.onClickRow(this.resultList[0], 0);
+    if (reverse == true) this.onClickRow(this.resultList[this.resultList.length-1], this.resultList.length-1);
+    else this.onClickRow(this.resultList[0], 0);
   }
   async onClickRow(item, index) {
     // this.selectWorkDate = item.imgWorkDate;
@@ -245,6 +249,7 @@ export default class extends Vue {
     // console.log(this.selectWorkDate);
     this.selectImg = item.imgData;
     this.selectIdx = index;
+    this.dataLoading = false;
   }
   async onClickComplete() {
     const rs = await commonService.request(
@@ -258,7 +263,7 @@ export default class extends Vue {
       await this.$alert('검증 완료에 실패했습니다.', '서버 에러', {'type':'error'})
     }
   }
-  onClickButton() {
+  onClickProcessViewBtn() {
     this.viewProcessing = !this.viewProcessing;
     if (this.viewProcessing) this.selectImg = this.resultList[this.selectIdx].reprocessingImgData;
     else this.selectImg = this.resultList[this.selectIdx].imgData;
@@ -413,6 +418,43 @@ export default class extends Vue {
     }
 
     window.addEventListener("resize", (myChart2 as any).resize);
+  }
+  onKeyDown(event) {
+    event.preventDefault();
+    console.log(event.keyCode);
+    // space
+    if (event.keyCode === 32) {
+      this.onClickProcessViewBtn();
+    }
+    // left
+    else if (event.keyCode === 37) {
+      if (this.pageNo != 1 && this.dataLoading == false) this.getValidationResult(this.pageNo-1);
+    }
+    // up
+    else if (event.keyCode === 38) {
+      if (this.selectIdx != 0) {
+        this.selectIdx -= 1
+        this.selectImg = this.resultList[this.selectIdx].imgData;
+      }
+      else {
+        if (this.pageNo != 1 && this.dataLoading == false) this.getValidationResult(this.pageNo-1, true);
+      }
+    }
+    // right
+    else if (event.keyCode === 39) {
+      console.log(Math.floor(this.pageInfo.totalCount / 10) +1);
+      if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1 && this.dataLoading == false) this.getValidationResult(this.pageNo+1);
+    }
+    // down
+    else if (event.keyCode === 40) {
+      if (this.selectIdx != this.resultList.length -1) {
+        this.selectIdx += 1
+        this.selectImg = this.resultList[this.selectIdx].imgData;
+      }
+      else {
+        if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1 && this.dataLoading == false) this.getValidationResult(this.pageNo+1);
+      }
+    }
   }
 }
 </script>

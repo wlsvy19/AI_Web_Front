@@ -322,7 +322,8 @@
 }
 
 .btn-gray {
-    background-color: var(--gray3) !important
+    background-color: var(--gray3) !important;
+    border: 1px solid var(--gray3) !important;
 }
 
 /* Font color */
