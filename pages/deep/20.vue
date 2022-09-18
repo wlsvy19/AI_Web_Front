@@ -1,7 +1,5 @@
 <template>
-  <layout>
-    <labl pageType="번호판" />
-  </layout>
+  <labl pageType="번호판" />
 </template>
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
