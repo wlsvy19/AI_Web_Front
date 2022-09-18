@@ -1,7 +1,5 @@
 <template>
-  <layout>
-    <labl pageType="차량번호" />
-  </layout>
+  <labl pageType="차량번호" />
 </template>
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";

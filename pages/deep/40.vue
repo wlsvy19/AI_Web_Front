@@ -1,7 +1,5 @@
 <template>
-  <layout>
-    <labl pageType="꺾임" />
-  </layout>
+  <labl pageType="꺾임" />
 </template>
 <script lang="ts">
 import { Vue, Component, PropSync } from "vue-property-decorator";
