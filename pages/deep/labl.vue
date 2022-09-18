@@ -184,7 +184,9 @@
                   type="button"
                   class="bt-lb-potin"
                   @click="setSelection()"
-                  :style="selectPointBtn ? 'background-blend-mode: multiply;' : ''"
+                  :style="
+                    selectPointBtn ? 'background-blend-mode: multiply;' : ''
+                  "
                 >
                   선택
                 </button>
@@ -195,7 +197,9 @@
                   @click="setLabel('polygon')"
                   style="background-image: url(/images/bt_lb_area.jpeg)"
                   class="bt-lb-area"
-                  :style="selectLabelBtn ? 'background-blend-mode: multiply;' : ''"
+                  :style="
+                    selectLabelBtn ? 'background-blend-mode: multiply;' : ''
+                  "
                 >
                   폴리곤
                 </button>
@@ -205,7 +209,9 @@
                   title="사각형"
                   @click="setLabel('rect')"
                   class="bt-lb-area"
-                  :style="selectLabelBtn ? 'background-blend-mode: multiply;' : ''"
+                  :style="
+                    selectLabelBtn ? 'background-blend-mode: multiply;' : ''
+                  "
                 >
                   사각형
                 </button>
@@ -213,7 +219,9 @@
                 <button @click="onRemoveLabel()">삭제</button>
                 <button @click="fun1()">data</button> -->
               </div>
-              <div class="lb-keyst" v-if="false">단축키: <span>역광</span></div>
+              <div class="lb-keyst" v-if="quickClassObj?.cd">
+                단축키: <span>{{ quickClassObj.nm }}</span>
+              </div>
             </div>
 
             <div class="label-view">
@@ -506,6 +514,7 @@ import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import Layout from "~/components/layout.vue";
 import LabelImg, { IShapeOptions, Points, Shape } from "label-img";
 import commonService from "~/service/common-service";
+import { $cookies } from "~/utils/api";
 import { IPageInfoModel } from "~/models/common-model";
 
 // 2022.07.29. design.song
@@ -595,11 +604,14 @@ export default class extends Vue {
   selectPointBtn = true;
   selectLabelBtn = false;
 
+  quickClassObj = {};
+
   created() {
     console.log("====pageType====", this.pageType);
     this.shapeID = 0;
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
+    this.setQuickClass();
   }
   async onSearch(pageNo) {
     if (pageNo < 1) pageNo = 1;
@@ -869,7 +881,7 @@ export default class extends Vue {
       }
     }
     console.log("labelr1===========", this.labeler.Image.getSize());
-    
+
     const label = await commonService.request(
       {
         workDate: item.workDate,
@@ -999,7 +1011,7 @@ export default class extends Vue {
     document.addEventListener("keyup", this.onKeyup);
   }
   destroyed() {
-    document.removeEventListener('keyup', this.onKeyup);
+    document.removeEventListener("keyup", this.onKeyup);
   }
   async init() {
     const dataset = commonService.getDataset();
@@ -1210,13 +1222,49 @@ export default class extends Vue {
       this.onBeforeImage();
     } else if (event.key === "Escape") {
       this.setSelection();
-    } else if (event.key === "Delete") {
+    } else if (event.key === "X") {
       if (this.selItem.delYn !== "Y") {
         this.updateDel("Y");
       } else {
         this.updateDel("N");
       }
+    } else {
+      if (this.pageType === "차량번호" || this.pageType === "번호판") {
+        // 0~9 클릭시
+        if (event.key in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) {
+          this.onCheckLabel(event.key);
+        }
+      }
+      if (event.key === "S" || event.key === "s" || event.key === "ㄴ") {
+        const selLabel = $cookies.get("selLabel");
+        console.log(selLabel);
+        if (!selLabel) return alert("설정된 퀵 클래스가 없습니다.");
+        this.labelTypeList = this.labelTypeList.map((v) => {
+          const nv = { ...v };
+          if (nv.cmmnCd == selLabel) {
+            nv.checked = true;
+          }
+          return nv;
+        });
+      }
+      if (
+        event.key === "Q" ||
+        event.key === "q" ||
+        event.key === "ㅂ" ||
+        event.key === "ㅃ"
+      ) {
+        const chk = this.labelTypeList.filter((v) => v.checked);
+        if (chk.length < 1) return alert("선택된 라벨이 없습니다.");
+        $cookies.set("selLabel", chk[0].cmmnCd);
+        $cookies.set("selLabelNm", chk[0].cmmnCdNm);
+        this.setQuickClass();
+      }
     }
+  }
+  setQuickClass() {
+    const cd = $cookies.get("selLabel");
+    const nm = $cookies.get("selLabelNm");
+    this.quickClassObj = { cd, nm };
   }
   nonActive() {
     const list = this.labeler.getShapeList();
