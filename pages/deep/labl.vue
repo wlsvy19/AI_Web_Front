@@ -700,13 +700,26 @@ export default class extends Vue {
     };
   }
 
-  // @Watch("labeler", { deep: true })
-  // watchCurrentMenu(newVal: any, oldVal) {
-  //   console.log(this.labeler.Image);
-  //   // this.labeler.load()
-  //   // console.log("newVal", JSON.stringify(newVal));
-  //   // console.log("oldVal", JSON.stringify(oldVal));
-  // }
+  @Watch("labeler.shapeList", { deep: true })
+  watchCurrentMenu(newVal: any, oldVal) {
+    // console.log("====length", shapList.length, ss.length);
+    if (this.pageType === "빛" || this.pageType === "꺾임") {
+      console.log("3333");
+      this.setLabel("polygon");
+    } else {
+      console.log("4444");
+      this.setLabel("rect");
+    }
+    const chk = this.labelTypeList.filter((v) => v.checked);
+    // console.log("====chk", chk);
+    if (chk.length < 1) return;
+    const labelType = chk[0].cmmnCd;
+    // console.log("====>", labelType);
+    newVal[newVal.length - 1].data = labelType;
+    // this.labeler.load()
+    // console.log("newVal", JSON.stringify(newVal));
+    // console.log("oldVal", JSON.stringify(oldVal));
+  }
 
   //3차원 배열 만들 때 쓰기 위한 함수
   threeDimensionArr() {
@@ -1267,6 +1280,7 @@ export default class extends Vue {
     this.quickClassObj = { cd, nm };
   }
   nonActive() {
+    return;
     const list = this.labeler.getShapeList();
     list.map((v) => {
       v.setActive(false);
