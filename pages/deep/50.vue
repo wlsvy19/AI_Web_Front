@@ -1,7 +1,5 @@
 <template>
-  <layout>
-    <labl pageType="빛" />
-  </layout>
+  <labl pageType="빛" />
 </template>
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
