@@ -13,19 +13,19 @@
           <div class="engineSchBar">
             <label for="sel002" class="sl-nm">본부</label>
             <select id="sel002" class="select" @change="onChangeHdqr($event)">
-              <!-- <option value="ALL">전체</option> -->
+              <!-- <option value="A">전체</option> -->
               <option :key="index" :value='index' v-for="(item, index) in hdqrList">{{ item.hdqrNm }}</option>
             </select>
 
             <label for="sel002" class="sl-nm">지사</label>
             <select id="sel002" class="select" @change="onChangeMtn($event)">
-              <!-- <option value="ALL">전체</option> -->
+              <!-- <option value="A">전체</option> -->
               <option :key="index" :value='index' v-for="(item, index) in mtnList">{{ item.mtnofNm }}</option>
             </select>
 
             <label for="sel002" class="sl-nm">영업소</label>
             <select id="sel002" class="select" @change="onChangeTol($event)">
-              <!-- <option value="ALL">전체</option> -->
+              <!-- <option value="A">전체</option> -->
               <option :key="index" :value='index' v-for="(item, index) in tolList">{{ item.korTolofNm }}</option>
             </select>
 
@@ -222,14 +222,14 @@ export default class extends Vue {
   mtnList = [];
   tolList = [];
   crgwList = [];
-  selectHdqr = 'ALL';
+  selectHdqr = 'A';
   selectHdqrCd = 0;
-  selectMtn = 'ALL';
+  selectMtn = 'A';
   selectMtnCd = 0;
-  selectTol = 'ALL';
+  selectTol = 'A';
   selectTolCd = 0;
   selectCrgwTypeCd = 'A';
-  selectCrgwNo = 'ALL';
+  selectCrgwNo = 'A';
   selectHdqrDbip = '0.0.0.0';
   selectDate = moment().format('YYYY-MM-DD');
   limitDate = moment().add(-8, 'day');
@@ -338,7 +338,7 @@ export default class extends Vue {
     );
     this.tolList = data;
     console.log("tolList ===",this.tolList);    
-    this.selectTol = this.tolList[0].tolofNm;   // 전체 기능 쓰는 경우 제거
+    this.selectTol = this.tolList[0].korTolofNm;   // 전체 기능 쓰는 경우 제거
     this.selectTolCd = this.tolList[0].tolofCd;
     
     this.getCrgwList();
@@ -426,7 +426,7 @@ export default class extends Vue {
   // 검증 시작 버튼
   async onClickStartValidation() {
 
-    if(this.selectHdqr == 'ALL' || this.selectMtn == 'ALL' || this.selectTol == 'ALL') {
+    if(this.selectHdqr == 'A' || this.selectMtn == 'A' || this.selectTol == 'A') {
       console.log(this.selectHdqr, this.selectMtn, this.selectTol);
       this.$alert('본부, 지사, 영업소를 선택해야합니다.', '경고', {'type':'warning'});
       return;
