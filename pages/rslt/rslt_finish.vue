@@ -16,8 +16,13 @@
             정확도 <strong>{{ accuracy }}%</strong
             ><span class="verifi-file-cnt">(일치 {{ this.correctCount }}장 / {{ this.totalCount }}장)</span>
           </div>
-          <div>
-            현재 페이지 {{ curPageNo }} / {{ totalPageNo }}
+          <div style="display:flex">
+            현재 페이지 
+            <span style="margin-left:1rem">
+              <input :value="curPageNo" style="width: 40px;text-align:right"
+                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
+                    @keyup="onKeyUpPage($event)"/>
+            </span> / {{ totalPageNo }}
           </div>
           <div class="chkbox2">
             <input type="checkbox" id="th001" @change="onClickOnlyNotPros($event)"/>
@@ -29,15 +34,21 @@
           <div v-if="imgDataList!=null && imgDataList.length!=0" class="ver-file_list">
             <template v-for="(item, index) in imgDataList">
               <div :key="index" class="file-item" @click="onClickImg(item, index)">
-                <figure>
+                <figure v-if="item.delYn == 'N'">
                   <img v-if="statusInfo.engineType == 'E'" :src="'/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
                   <img v-else-if="statusInfo.engineType == 'A'" :src="'/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />
                   <img v-else :src="'/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo" width="191" height="107" alt="" />                
                 </figure>
+
+                <div v-else class="no-img" style="background-color: var(--gray2);">
+                  <p class="">
+                    제외된 이미지
+                  </p>
+                </div>
                 <!-- 결과가 동일시 -->
-                <span v-if="item.isCorrect == 1" class="ver-chk ver-checked">동일함</span>
-                <span v-if="item.isCorrect == 0 && item.prosYn == 'Y'" class="ver-chk ver-x">오답</span>
-                <span v-if="item.isCorrect == 0 && item.prosYn == 'N'" class="ver-chk ver-exam">확인필요</span>
+                <span v-if="item.isCorrect == 1 && item.delYn=='N'" class="ver-chk ver-checked">동일함</span>
+                <span v-if="(item.isCorrect == 0 && item.prosYn == 'Y') || item.delYn=='Y'" class="ver-chk ver-x">오답</span>
+                <span v-if="item.isCorrect == 0 && item.prosYn == 'N' && item.delYn=='N'" class="ver-chk ver-exam">확인필요</span>
               </div>
             </template>                        
           </div>
@@ -77,12 +88,12 @@
                   데이터 관리 도구
                 </td>
                 <td>
-                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray">
+                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray" @click="onClickDeleteData()">
                     데이터 삭제하기
                   </button>
                 </td>
                 <td>
-                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray">
+                  <button type="button" class="btn btn-sz1 btn-l-b-gn btn-gray" @click="onClickReLabeling()">
                     라벨링 다시하기
                   </button>
                 </td>
@@ -181,6 +192,7 @@ export default class extends Vue {
   selAnswer = '';
   url = '';
   correctCount = 0;
+  delCount = 0;
   accuracy = 0;  
   prosYn = '';
   isCorrect = null;
@@ -210,9 +222,6 @@ export default class extends Vue {
     // else if(this.statusInfo.engineType in this.charNum) this.menu = '차량번호 인식';
     // else this.menu = '미오인식 분류';
 
-    // 검증 데이터 전체 수
-    this.totalCount = this.statusInfo.totalDataCnt;
-    this.totalPageNo = Math.ceil(this.totalCount / 20);
   }
   async getCorrectCount() {
     const data = await commonService.request(
@@ -223,7 +232,18 @@ export default class extends Vue {
       },
       "/api/validation-result/data/count"
     );
-    this.correctCount = data;
+    console.log('count ===== ', data);
+    this.totalCount = data.totalCount;
+    this.correctCount = data.correctCount;
+    this.delCount = data.delCount;
+    this.totalCount = this.totalCount - this.delCount;
+    
+    if (this.isCorrect =='0') {
+      this.totalPageNo = Math.ceil((this.totalCount - this.correctCount) / 20);
+    }
+    else {
+      this.totalPageNo = Math.ceil(this.totalCount / 20);
+    }
     this.accuracy = parseFloat(((this.correctCount/this.totalCount) * 100).toFixed(1));
   }
   async getValidationResult() {
@@ -240,7 +260,9 @@ export default class extends Vue {
       "/api/validation-result/data"
     );
     console.log('result===', data);
-    this.imgDataList = data;    
+    this.imgDataList = data;
+
+    this.getCorrectCount();
   }
   async onClickComplete() {
     const rs = await commonService.request(
@@ -265,13 +287,17 @@ export default class extends Vue {
       this.prosYn = '';
       this.isCorrect = '';
     }
+    this.curPageNo = 1;
+    this.offset = 0;
     this.getValidationResult();
   }
   async onClickNext() {    
     if (this.totalCount - this.offset > 0) {
-      this.curPageNo += 1;
-      this.offset += 20;
-      this.getValidationResult();
+      if (this.curPageNo < this.totalPageNo) {
+        this.curPageNo += 1;
+        this.offset += 20;
+        this.getValidationResult();
+      }      
     }    
   }
   async onClickPrev() {
@@ -282,6 +308,8 @@ export default class extends Vue {
     else this.getValidationResult();
   }
   async onClickImg(item, index) {    
+    if (item.delYn == 'Y') return;
+
     if(this.statusInfo.engineType == 'E') this.url = '/v1/api/incn-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
     else if(this.statusInfo.engineType == 'A') this.url = '/v1/api/crgw-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
     else this.url = '/v1/api/plate-img/data?workDate=' + item.imgWorkDate +'&workNo=' + item.imgWorkNo;
@@ -354,12 +382,13 @@ export default class extends Vue {
     );
     console.log(rs);
     if (rs == 1) {
-      this.imgDataList[this.selIndex].isCorrect = correct;
-      this.imgDataList[this.selIndex].prosYn = 'Y';
-      if (correct == 1) {
-        this.correctCount += 1;
-        this.accuracy = parseFloat(((this.correctCount/this.totalCount) * 100).toFixed(1))
-      }
+      // this.imgDataList[this.selIndex].isCorrect = is_correct;
+      // this.imgDataList[this.selIndex].prosYn = 'Y';
+      // if (correct == 1) {
+      //   this.correctCount += 1;
+      //   this.accuracy = parseFloat(((this.correctCount/this.totalCount) * 100).toFixed(1))
+      // }
+      this.getValidationResult();
     }
 
     if (correct == 2) {
@@ -367,6 +396,119 @@ export default class extends Vue {
     }
 
     this.onShowPop(false)
+  }
+  async onClickDeleteData() {
+    this.$confirm(
+      '해당 데이터와 사진을 모두 삭제합니다. 진행하시겠습니까?', 
+      '데이터 삭제하기',
+      {
+        'type' : 'info',
+        'callback': async (action) => {
+          console.log(action);
+          if (action == 'confirm') {
+            let rs = 0;
+            try {
+              rs = await commonService.request(
+                {
+                  uiId : this.uiId,
+                  validatingId : this.statusInfo.validatingId,
+                  engineType : this.statusInfo.engineType,
+                  imgWorkDate: this.selItem.imgWorkDate,
+                  imgWorkNo: this.selItem.imgWorkNo,
+                  delYn: 'Y',
+                },
+                "/api/validation-result/data/del"
+              );
+            }
+            catch(e) {
+              rs = 0;
+            }
+            
+            
+            if(rs == 1) {
+              this.$alert('삭제 완료하였습니다.', '삭제 완료', {'type':'info'});
+              this.selItem.delYn = 'Y';
+            }
+            else {
+              this.$alert('삭제에 실패하였습니다.', '삭제 실패', {'type':'error'});
+            }
+
+            this.onShowPop(false);
+            this.getValidationResult();
+          }
+        }
+      }
+    )
+  }
+  async onClickReLabeling() {
+    this.$confirm(
+      '라벨링을 미확정 상태로 되돌립니다. 진행하시겠습니까?', 
+      '데이터 삭제하기',
+      {
+        'type' : 'info',
+        'callback': async (action) => {
+          console.log(action);
+          if (action == 'confirm') {
+            let rs = 0;
+            try {
+              rs = await commonService.request(
+                {
+                  uiId : this.uiId,
+                  validatingId : this.statusInfo.validatingId,
+                  engineType : this.statusInfo.engineType,
+                  imgWorkDate: this.selItem.imgWorkDate,
+                  imgWorkNo: this.selItem.imgWorkNo,
+                  delYn: 'Y',
+                },
+                "/api/validation-result/data/relabeling"
+              );
+            }
+            catch(e) {
+              rs = 0;
+            }
+
+            if(rs == 1) {
+              this.$alert('라벨링 미확정 상태로 되돌렸습니다.', '완료', {'type':'info'});
+              this.selItem.delYn = 'Y';
+            }
+            else {
+              this.$alert('라벨링 미확정 상태로 되돌리는데 실패하였습니다.', '실패', {'type':'error'});
+            }
+
+            this.onShowPop(false);
+            this.getValidationResult();
+          }          
+        }
+      }
+    )
+  }
+  onKeyUpPage(event) {
+    event.preventDefault();
+    console.log(event.target.value);
+    const wantPageNo = event.target.value;   
+    if (event.keyCode == 13) {
+      if(wantPageNo > 0 && wantPageNo <= this.totalPageNo) {
+        this.curPageNo = wantPageNo;
+        this.offset = (wantPageNo-1) * 20;
+        this.getValidationResult();
+      }
+      else {
+        this.$alert(
+          '총 페이지 수는 ' + this.totalPageNo + '입니다. 끝 페이지로 이동합니다.',
+          '알림',
+          {
+            'type':'warning',
+            'callback': (action) => {
+              event.target.blur();
+              this.curPageNo = this.totalPageNo;
+              this.offset = (this.totalPageNo-1) * 20;
+              this.getValidationResult();
+              event.target.focus();
+            }
+          }
+        );        
+      }
+    }
   }
 }
 </script>

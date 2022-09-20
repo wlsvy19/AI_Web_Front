@@ -437,7 +437,7 @@ export default class extends Vue {
         workNo: item.workNo,
         delYn: delYn,
       },
-      "/api/crgw-img-data/del"
+      "/api/nmrecg-clsf/data/del"
     );
     item.delYn = delYn;
     // alert("완료");
