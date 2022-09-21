@@ -5169,7 +5169,7 @@ const { isDebuggerStatement } = require("typescript");
                 _initShapeEvent();
                 _initImageEvent();
                 _initScaler();
-                _initShortcutKey();
+                // _initShortcutKey();
             };
             /**
              * 加载图片
