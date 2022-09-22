@@ -79,29 +79,37 @@
         <!-- 영상학습 목록 [S] -->
         <div class="vod-l">
           <div class="view-mini mb25">
-            <figure>
+            <figure v-if="isNoImg == true">
+              <div id="no-img-small">
+                <img
+                  src="/images/file-earmark-x.svg"
+                  width="30%"
+                  />
+              </div>
+            </figure>
+            <figure v-else>
               <img
-                v-if="pageType === '꺾임' && selImg != '' && selImg != null"
-                alt="번호판 이미지"
+                v-if="pageType === '꺾임'"
+                alt="작은 이미지"
                 width="152"
                 height="88"
-                :src="`/v1/api/incn-img/data?workDate=${selDate}&workNo=${selImg}`"
+                :src="`/v1/api/incn-img/data?workDate=${selItem.workDate}&workNo=${this.selItem.workNo}`"
               />
               <img
                 v-else-if="
-                  pageType === '차량번호' && selImg != '' && selImg != null
+                  pageType === '차량번호'
                 "
-                alt="번호판 이미지"
+                alt="작은 이미지"
                 width="152"
                 height="88"
-                :src="`/v1/api/plate-img/data?workDate=${selDate}&workNo=${selImg}`"
+                :src="`/v1/api/plate-img/data?workDate=${selItem.workDate}&workNo=${this.selItem.workNo}`"
               />
               <img
-                v-else-if="selImg != '' && selImg != null"
-                alt="번호판 이미지"
+                v-else-if="this.selItem.workNo != ''"
+                alt="작은 이미지"
                 width="152"
                 height="88"
-                :src="`/v1/api/crgw-img/data?workDate=${selDate}&workNo=${selImg}`"
+                :src="`/v1/api/crgw-img/data?workDate=${selItem.workDate}&workNo=${this.selItem.workNo}`"
               />
             </figure>
           </div>
@@ -134,7 +142,7 @@
                   <tr
                     :key="index"
                     @click="onSelImg(item.workDate, item.workNo, item, index)"
-                    :class="sel1 === item.workNo ? 'active' : ''"
+                    :class="selItem.workNo === item.workNo ? 'active' : ''"
                   >
                     <td
                       class="tx-c"
@@ -172,11 +180,16 @@
         <!-- 영상학습 영상 [S] -->
         <div class="vod-c">
           <div class="labeling-viewBox">
-            <div class="label-v-info">
-              영상ID: <span>{{ selItem.workNo }}</span> 미·오인식 유형:
-              <span>{{ codeNm(selItem.nmrecgCd) }}</span> 촬영일시:
-              <span>{{ selItem.shootDttm }}</span> 촬영장소:
-              <span>{{ selItem.tolofNm }}</span>
+            <div class="label-v-info" v-if="pageType!='차량번호' && pageType!='꺾임'">
+              영상ID: <span>{{ selItem.workNo }}</span> 
+              미·오인식 유형: <span >{{ codeNm(selItem.nmrecgCd) }}</span>
+              촬영일시: <span>{{ selItem.shootDttm }}</span> 
+              촬영장소: <span>{{ selItem.tolofNm }}</span>
+            </div>
+            <div class="label-v-info" v-else>
+              영상 번호: <span>{{ selItem.workNo }}</span> 
+              영상 날짜: <span>{{ selItem.workDate }}</span> 
+              <!-- 영상 타입: <span>{{ selItem.labelType }}</span>  -->
             </div>
             <div class="label-v-ctl">
               <div class="flex lb-btn">
@@ -214,25 +227,15 @@
                   "
                 >
                   사각형
-                </button>
-                <!-- <button @click="add('rect', 'test1111')">add</button>
-                <button @click="onRemoveLabel()">삭제</button>
-                <button @click="fun1()">data</button> -->
+                </button>                
               </div>
               <div class="lb-keyst" v-if="quickClassObj?.nm">
                 단축키: <span>{{ quickClassObj.nm }}</span>
               </div>
             </div>
 
-            <div class="label-view">
-              <figure>
-                <!-- <div id="img-view" style="width: 800px; height: 462px"></div> -->
-                <!-- <img src="/images/vi_ex.jpg" width="800" height="462" alt="" /> -->
-                <!-- <image-bright
-                  id="img-view"
-                  :url="url"
-                  style="width: 800"
-                ></image-bright> -->
+            <div class="label-view">              
+              <figure>                
                 <input
                   style="display: none"
                   type="range"
@@ -241,35 +244,25 @@
                   :value="lightValue"
                   id="brightI"
                   @mouseup="brightnessAdjustment()"
-                />
-                <div id="img-view" style="width: 800px">
-                  <!-- <img
-                    width="100%"
-                    height="100%"
-                    v-if="selImg != ''"
-                    :src="`/v1/api/crgw-img/data?workNo=${selImg}`"
-                  /> -->
+                />                
+                <div id="img-view" :style="(isNoImg==true? 'display:none;' : '')  + 'width: 800px; height:450px;'">
+                <!-- 영상 Canvas 들어올 자리 -->
+                </div>
+                <div id="no-img" :style="(isNoImg==false? 'display:none;' : '')  + 'width: 800px; height:450px;'">
+                  <img src="/images/no-img.png" />
                 </div>
               </figure>
             </div>
             <div class="label-bntBox">
               <div class="label-bntBox-l">
-                <!-- 준공검사 주석 -->
-                <!-- <button type="button" class="bt-ctl-op">
-                  <em class="bt-up"></em>
-                </button>
-                <span id="label-opt" class="label-opt">밝기B</span>
-                <button type="button" class="bt-ctl-op">
-                  <em class="bt-dw"></em>
-                </button> -->
                 <button
                   type="button"
                   class="bt-ctl-op"
                   @click="onUpDown('DOWN')"
                 >
-                  <em class="bt-up"></em>
+                <em class="bt-up"></em>
                 </button>
-                <span id="label-opt" class="label-opt">밝기B</span>
+                <span id="label-opt" class="label-opt">밝기</span>
                 <button type="button" class="bt-ctl-op" @click="onUpDown('UP')">
                   <em class="bt-dw"></em>
                 </button>
@@ -278,7 +271,7 @@
               <div class="label-bntBox-r">
                 <!-- 혹시 버튼식이 필요하면 아래꺼 주석 해제하여 사용하세요 -->
                 <!-- <button type="button" class="btn btn-sz3 btn-gr1">밝게</button>
-                                    <button type="button" class="btn btn-sz3 btn-gr1">어둡게</button> -->
+                <button type="button" class="btn btn-sz3 btn-gr1">어둡게</button> -->
                 <template v-if="selIndex >= 0">
                   <button
                     type="button"
@@ -297,15 +290,7 @@
                     삭제 취소
                   </button>
                 </template>
-
-                <!-- <button
-                  v-if="selIndex >= 0"
-                  type="button"
-                  @click="updateDel('Y')"
-                  class="btn btn-sz3 btn-gr1"
-                >
-                  삭제
-                </button> -->
+              
                 <button
                   type="button"
                   class="btn btn-sz3 btn-l-b-gn"
@@ -369,11 +354,11 @@
             class="as-area2"
             v-if="typeof labeler.getShapeList == 'function'"
           >
-            <template v-for="(item, index) in labeler.getShapeList()">
+            <template v-for="(item, index) in shapeList">
               <div
                 class="lb-as-l"
                 :key="index"
-                :class="sel2 === item.id ? 'active' : ''"
+                :class="item.isActive() ? 'active' : ''"
               >
                 <button
                   type="button"
@@ -404,39 +389,6 @@
     <!-- 라벨링 유형에 대한 설명 추가 -->
     <div class="popup pop1" v-if="showPop" :style="`display:block;left:30%`">
       <h1>라벨링 유형 설명</h1>
-
-      <!-- <div class="thumList-l1 pop-body scl">
-        <ul>
-          <template v-for="(item, index) in code.NUM_BTN">
-            <li :key="index" class="flex">
-              <figure>
-                <img v-if="pageType === '번호판'"
-                  :src="`/v1/api/sample-info/data?grpCd=NUM_BTN&cmmnCd=${item.cmmnCd}`"
-                  :alt="item.cmmnCdNm"
-                  width="177"
-                  height="132"
-                />
-                <img v-if="pageType === '꺾임'"
-                  :src="`/v1/api/sample-info/data?grpCd=LABEL_CN_BTN&cmmnCd=${item.cmmnCd}`"
-                  :alt="item.cmmnCdNm"
-                  width="177"
-                  height="132"
-                />
-                <img v-if="pageType === '빛'"
-                  :src="`/v1/api/sample-info/data?grpCd=LABEL_BTN&cmmnCd=${item.cmmnCd}`"
-                  :alt="item.cmmnCdNm"
-                  width="177"
-                  height="132"
-                />
-              </figure>
-              <div class="thm-box">
-                <strong class="thm-name">{{ item.cmmnCdNm }}</strong>
-                <p class="thm-cp">{{ item.cmmnDesc }}</p>
-              </div>
-            </li>
-          </template>
-        </ul>
-      </div> -->
       <div class="thumList-l1 pop-body scl" v-if="pageType === '번호판'">
         <ul>
           <template v-for="(item, index) in code.NUM_BTN">
@@ -565,26 +517,32 @@ export default class extends Vue {
   search = { nmrecgCd: "", withNum: "", withChar: "" };
   labeler = {} as LabelImg;
   currentMenu: any = {};
-  selDate = "";
-  sel1 = "";
-  sel2 = ""; // 2022.07.29. design.song
-  selIndex = -1;
-  selItem: any = {};
-  selLabel = "";
-  showPop = false;
-  show1 = "";
-  imgDataList = [];
-  selImg = "";
-  selImgUrl = "";
-  code: any = {};
-  dataset: any = { learnDtstType: "" };
-  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
-  labelTypeList: any = [];
-  shapeID: 0;
-  // labelWorkList: any = [];
-  selCrgwImg: any = null;
 
-  url = ""; // 2022.08.21 fqj
+  // 선택한 이미지 정보, 박스 정보
+  selItem: any = {
+    workDate:"",
+    workNo:"",
+  };
+  selIndex = -1;
+  selLabel = "";
+  selImg: any = null;
+  selBoxId = "";
+  
+  showPop = false;
+  
+  imgDataList = [];
+  labelTypeList: any = [];
+  shapeList = [];
+
+  code: any = {};
+  pageInfo: IPageInfoModel = commonService.getPageInitInfo();
+  shapeID: 0;
+  // dataset: any = { learnDtstType: "" };
+  // labelWorkList: any = [];
+  // url = ""; // 2022.08.21 fqj
+
+  isNoImg = false;
+
   // 입력 캔버스 관련
   lightValue: any = 0;
   outCanvas: any = "";
@@ -601,7 +559,6 @@ export default class extends Vue {
   inHeight: any = "";
   outWidth: any = "";
   outHeight: any = "";
-  imgURL: any = "";
 
   selectPointBtn = true;
   selectLabelBtn = false;
@@ -827,16 +784,16 @@ export default class extends Vue {
   }
   async brightnessAdjustment() {
     
-    const shapeList = this.labeler.getShapeList();
-    let saveList = shapeList.slice(0,shapeList.length);
+    this.shapeList = this.labeler.getShapeList();
+    let saveList = this.shapeList.slice(0,this.shapeList.length);
     this.onDelAll();
 
     let image = new Image();
-    image.src = 'data:image/jpeg;base64,' + this.selCrgwImg.imgData;
+    image.src = 'data:image/jpeg;base64,' + this.selImg.imgData;
     image.onload = () => {
       let canvas = document.createElement('canvas');
-      canvas.width = this.selCrgwImg.width;
-      canvas.height = this.selCrgwImg.height;
+      canvas.width = this.selImg.width;
+      canvas.height = this.selImg.height;
       let context = canvas.getContext('2d');
       context.drawImage(image,0,0);      
       let pixels= context.getImageData(0,0, canvas.width, canvas.height);
@@ -849,6 +806,7 @@ export default class extends Vue {
       saveList.forEach((value) => {
         this.labeler.addShape(value);
       })
+      this.shapeList = this.labeler.getShapeList();
     }
     
     return;
@@ -914,101 +872,133 @@ export default class extends Vue {
     this.lightValue = 0;
     this.selectPointBtn = true;
     this.selectLabelBtn = false;
-    this.selDate = workDate;
-    this.sel1 = workNo;
-    this.sel2 = "";
-    this.selImg = workNo;
+    // this.selDate = workDate;
+    // this.sel1 = workNo;
+    // this.sel2 = "";
+    // this.selImg = workNo;
     this.selItem = item;
+    this.selBoxId = "";
     this.selIndex = index;
     this.labelTypeList = this.labelTypeList.map((v) => ({
       ...v,
       checked: false,
     }));        
-    
-    if (this.selImg) {
-      if (this.pageType === "꺾임") {
-        // console.log(
-        //   "onSelImg: " +
-        //     `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.labeler.load(
-        //   `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.url = `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
-        const data:any = await commonService.request(
-          {
-            workDate:this.selDate,
-            workNo:this.selImg,
-          },
-          "/api/incn-img/data"
-        )
-        console.log(data);
-        this.selCrgwImg = data;
-        this.labeler.load('data:image/jpeg;base64,' + data.imgData);
-        
-        polygonStyle.normal.dotRadius = 2;
-        polygonStyle.active.dotRadius = 2;
-        polygonStyle.normal.lineWidth = 1;
-        polygonStyle.active.lineWidth = 2;
+    let data = null;
 
-      } 
-      else if (this.pageType === "차량번호") {
-        // console.log(
-        //   "onSelImg: " +
-        //     `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.labeler.load(
-        //   `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.url = `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
-        const data:any = await commonService.request(
-          {
-            workDate:this.selDate,
-            workNo:this.selImg,
-          },
-          "/api/plate-img/data"
-        )
-        console.log(data);
-        this.selCrgwImg = data;
-        this.labeler.load('data:image/jpeg;base64,' + data.imgData);
-
-        rectStyle.normal.dotRadius = 2;
-        rectStyle.active.dotRadius = 2;
-        rectStyle.normal.lineWidth = 1;
-        rectStyle.active.lineWidth = 2;
-      } 
-      else {
-        // console.log(
-        //   "onSelImg: " +
-        //     `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.labeler.load(
-        //   `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
-        // );
-        // this.url = `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
-        // this.openImage();
-        const data:any = await commonService.request(
-          {
-            workDate:this.selDate,
-            workNo:this.selImg,
-          },
-          "/api/crgw-img/data"
-        )
-        console.log(data);
-        this.selCrgwImg = data;
-        this.labeler.load('data:image/jpeg;base64,' + data.imgData);
-
-        polygonStyle.normal.dotRadius = 5;
-        polygonStyle.active.dotRadius = 5;
-        polygonStyle.normal.lineWidth = 2;
-        polygonStyle.active.lineWidth = 3;
-        rectStyle.normal.dotRadius = 5;
-        rectStyle.active.dotRadius = 5;
-        rectStyle.normal.lineWidth = 2;
-        rectStyle.active.lineWidth = 3;
+    if (this.pageType === "꺾임") {
+      // console.log(
+      //   "onSelImg: " +
+      //     `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.labeler.load(
+      //   `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.url = `/v1/api/incn-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
+      data = await commonService.request(
+        {
+          // workDate:this.selDate,
+          // workNo:this.selImg,
+          workDate:this.selItem.workDate,
+          workNo:this.selItem.workNo,
+        },
+        "/api/incn-img/data"
+      )
+      console.log('img-data',data);
+      this.selImg = data;
+      if(this.selImg == null) {
+        this.isNoImg = true;
       }
-    }
+      else {
+        this.isNoImg = false;
+        
+        polygonStyle.normal.dotRadius = data.width/ 100;
+        polygonStyle.active.dotRadius = data.width/ 100;
+        polygonStyle.normal.lineWidth = data.width/ 100 -2;
+        polygonStyle.active.lineWidth = data.width/ 100 -1;
+      }
+    } 
+    else if (this.pageType === "차량번호") {
+      // console.log(
+      //   "onSelImg: " +
+      //     `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.labeler.load(
+      //   `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.url = `/v1/api/plate-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
+      data = await commonService.request(
+        {
+          // workDate:this.selDate,
+          // workNo:this.selImg,
+          workDate:this.selItem.workDate,
+          workNo:this.selItem.workNo,
+        },
+        "/api/plate-img/data"
+      )
+      console.log('img-data',data);
+      this.selImg = data;
+      if(this.selImg == null) {
+        this.isNoImg = true;
+      }
+      else {
+        this.isNoImg = false;
+        
+        // rectStyle.normal.dotRadius = 2;
+        // rectStyle.active.dotRadius = 2;
+        // rectStyle.normal.lineWidth = 1;
+        // rectStyle.active.lineWidth = 2;
+        rectStyle.normal.dotRadius = data.width/ 100;
+        rectStyle.active.dotRadius = data.width/ 100;
+        rectStyle.normal.lineWidth = data.width/ 100 -2;
+        rectStyle.active.lineWidth = data.width/ 100 -1;
+      }
+    } 
+    else {
+      // console.log(
+      //   "onSelImg: " +
+      //     `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.labeler.load(
+      //   `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`
+      // );
+      // this.url = `/v1/api/crgw-img/data?workDate=${this.selDate}&workNo=${this.selImg}`;
+      // this.openImage();
+      data = await commonService.request(
+        {
+          // workDate:this.selDate,
+          // workNo:this.selImg,
+          workDate:this.selItem.workDate,
+          workNo:this.selItem.workNo,
+        },
+        "/api/crgw-img/data"
+      )
+      console.log('img-data',data);
+      this.selImg = data;
+      if(this.selImg == null) {
+        this.isNoImg = true;
+      }
+      else {
+        this.isNoImg = false;
+        
+        polygonStyle.normal.dotRadius = data.width/ 100;
+        polygonStyle.active.dotRadius = data.width/ 100;
+        polygonStyle.normal.lineWidth = data.width/ 100 -2;
+        polygonStyle.active.lineWidth = data.width/ 100 -1;
+        rectStyle.normal.dotRadius = data.width/ 100;
+        rectStyle.active.dotRadius = data.width/ 100;
+        rectStyle.normal.lineWidth = data.width/ 100 -2;
+        rectStyle.active.lineWidth = data.width/ 100 -1;
+      }
+    }      
     
+    if (this.isNoImg == true) {
+      this.labeler.load('/images/no-img.png');
+      return;
+    }
+    else {
+      this.labeler.load('data:image/jpeg;base64,' + data.imgData);
+    }
+
     const label = await commonService.request(
       {
         workDate: item.workDate,
@@ -1047,7 +1037,7 @@ export default class extends Vue {
           visible2: true,
           visible: true,
           showTag: true,
-          tag: value.data,
+          tag: this.labelNm(value.data),          
         } as IShapeOptions);
 
         // apply different color
@@ -1063,7 +1053,7 @@ export default class extends Vue {
     // console.log("aa", this.labeler.Image);
     // console.log("labeler.stringify===>>", JSON.stringify(this.labeler));
 
-    const shapList = this.labeler.getShapeList();
+    this.shapeList = this.labeler.getShapeList();
     // console.log("shapList====123>", shapList);
   }
   async onSave() {
@@ -1152,9 +1142,9 @@ export default class extends Vue {
     
   }
   async init() {
-    const dataset = commonService.getDataset();
-    if (dataset) this.dataset = dataset;
-    console.log("dataset", this.dataset);
+    // const dataset = commonService.getDataset();
+    // if (dataset) this.dataset = dataset;
+    // console.log("dataset", this.dataset);
     const element: HTMLDivElement = document.getElementById("img-view") as any;
 
     const labeler = new LabelImg(element, {
@@ -1178,23 +1168,44 @@ export default class extends Vue {
       type: "Rect",
       tag: "사각형",
       showTag: false,
-      style: rectStyle,
+      style: rectStyle,      
     });
 
-    labeler.on("click", (obj) => {
-      if (obj.ante.currentTarget == null) return; // design.song
-      const data = obj.ante.currentTarget.data;
+    // 2022.09.22 wook 수정
+    labeler.on("click", 'top', (obj) => {
       console.log("obj===>11", obj);
-      this.sel2 = obj.ante.currentTarget.id;
-      if (obj.ante.isOnShape) this.onSelLabel(data);
+      if(!obj.ante.isOnImage) return;
+      const data = obj.ante.currentTarget.data;
+
+      if (data == null) {
+        if (this.selectPointBtn == true) {
+          this.nonActive();
+        }
+        else{
+          if(this.pageType == '빛' || this.pageType == '꺾임') {
+            if (! obj.ante.isOnShape) return;
+          }
+          let newBoxId = obj.ante.currentTarget.id;
+          console.log(this.selLabel);
+          this.shapeList = this.labeler.getShapeList();
+          this.shapeList.map((v) => {
+            if (newBoxId == v.id) v.data = this.selLabel;
+            return v;
+          })
+          this.selectPointBtn = true;
+          this.selectLabelBtn = false;
+        }
+      }
+      else {
+        this.selBoxId = obj.ante.currentTarget.id;
+        console.log(this.selBoxId);
+        if (obj.ante.isOnShape) this.onSelLabel(data);
+      }
     });
 
-    //labeler.getEventList("dblclick")[0];
-
-    // labeler.load("/images/vi_ex.jpg");
-    // 选择标注多边形
-    //labeler.label("polygon");
     this.labeler = labeler;
+    console.log('init');
+
   }
   async codeList() {
     const codeList = await commonService.request(
@@ -1277,6 +1288,7 @@ export default class extends Vue {
     if (cds1.length === 0) return "";
     return cds1[0].cmmnCdNm;
   }
+  // 삭제예정
   fun1() {
     const list = this.labeler.getShapeList();
     console.log(JSON.stringify(list));
@@ -1290,10 +1302,12 @@ export default class extends Vue {
     console.log(lis);
     alert(JSON.stringify(lis));
   }
-  setSelection() {
+  setSelection() {    
     console.log("setSelection");
+
     this.selectPointBtn = true;
     this.selectLabelBtn = false;
+
     this.labeler.labelOff();
     this.nonActive();
   }
@@ -1308,27 +1322,46 @@ export default class extends Vue {
     console.log("reDraw");
     this.labeler.labelOff();
   }
-  onSelLabel(val) {
-    console.log("onSelLabel: " + val);
-    this.labelTypeList = this.labelTypeList.map((v) => ({
-      ...v,
-      checked: v.cmmnCd === val,
-    }));
-    this.selectPointBtn = true;
-    this.selectLabelBtn = false;
-  }
-  onCheckLabel(cd) {
-    console.log("code", cd);
-    const list = this.labeler.getShapeList();
-    const labelArr = list.filter((v) => v.isActive());
-    console.log("labelArr===", labelArr);
-    this.onSelLabel(cd);
-    if (labelArr.length < 1) return; //alert("이미지 라벨링을 선택하세요.");
-    const label = labelArr[0];
-    label.data = cd;
+  onSelLabel(cd) {
     this.selLabel = cd;
 
-    // this.onSelLabel(cd);
+    console.log("onSelLabel: " + cd);
+    this.labelTypeList = this.labelTypeList.map((v) => ({
+      ...v,
+      checked: v.cmmnCd === cd,
+    }));
+    console.log('shaplist ---- ',this.shapeList);
+    this.shapeList = this.shapeList.map((v) => {
+      if(this.selBoxId == v.id) {
+        v.setActive(true);
+        console.log('aaaa',v.isActive());
+      }
+      return v;
+    })
+    this.labeler.render();
+  }
+  onCheckLabel(cd) {    
+    console.log("code", cd);
+    this.onSelLabel(cd);
+
+    if (this.selBoxId != '') {
+      const list = this.labeler.getShapeList();
+      const labelArr = list.filter((v) => v.isActive());
+      console.log("labelArr===", labelArr);
+      if (labelArr.length > 0) {
+        // return; //alert("이미지 라벨링을 선택하세요.");
+        const label = labelArr[0];
+        label.data = cd;
+      }
+    }
+    else {
+      if(this.pageType === '빛' || this.pageType === '꺾임') {
+        this.setLabel('polygon')
+      }
+      else {
+        this.setLabel('rect')
+      }
+    }    
   }
   async onBeforeImage() {
     if (this.selIndex - 1 > 0) {
@@ -1407,75 +1440,38 @@ export default class extends Vue {
     this.quickClassObj = { cd, nm };
     console.log(this.quickClassObj);
   }
-  // 2022.09.21 wook
-  // 미사용 함수 삭제 예정
+
+  // 2022.09.21 wook 수정
   nonActive() {
-    return;
-    const list = this.labeler.getShapeList();
-    list.map((v) => {
-      v.setActive(false);
+
+    this.shapeList = this.labeler.getShapeList()
+    this.shapeList.map((v) => {
+      if (this.selBoxId == v.id) v.setActive(false);
+      return v;
     });
+    this.selBoxId = '';
     this.labeler.render();
   }
 
-  // 2022.09.21 wook
-  // 테스트 코드로 추정 삭제 예정
-  add(type: string, tag) {
-    this.shapeID++;
-    let Shape = LabelImg.Shape;
-
-    if (type === "rect") {
-      const shape = new Shape({
-        type: "Rect",
-        registerID: String(this.shapeID),
-        name: "rect",
-        positions: [
-          [533, 229],
-          [712, 229],
-          [712, 426],
-          [533, 426],
-        ],
-        style: rectStyle,
-      } as IShapeOptions);
-      this.labeler.addShape(shape);
-    } else {
-      const shape = new Shape({
-        type: "Polygon",
-        registerID: String(this.shapeID),
-        name: "polygon",
-        positions: [
-          [214.37, 69.615],
-          [194.48, 117.13],
-          [246.415, 163.54],
-          [377.91, 201.10999999999999],
-          [498.355, 149.175],
-          [427.635, 64.09],
-          [236.47, 51.935],
-        ],
-        style: polygonStyle,
-      } as IShapeOptions);
-      this.labeler.addShape(shape);
-    }
-  }
   onRemove(index) {
-    const list = this.labeler.getShapeList();
-    list.splice(index, 1);
+    // const list = this.labeler.getShapeList();
+    this.shapeList.splice(index, 1);
     // const activeLen = list.filter((v, idx) => index === idx)[0];
     // this.labeler.remove(id);
     this.labeler.render();
   }
   onDelAll() {
-    const list = this.labeler.getShapeList();
-    list.splice(0, list.length);
+    // const list = this.labeler.getShapeList();
+    this.shapeList.splice(0, this.shapeList.length);
     // const activeLen = list.filter((v, idx) => index === idx)[0];
     // this.labeler.remove(id);
     this.labeler.render();
   }
   onActiveLabel(index) {
-    this.labeler.getShapeList().map((v, idx) => {
+    this.shapeList.map((v, idx) => {
       console.log("===111", v.data);
       if (idx === index) {
-        this.sel2 = v.id;
+        this.selBoxId = v.id;
         console.log(v);
         this.onSelLabel(v.data);
         v.setActive(true);
@@ -1485,11 +1481,13 @@ export default class extends Vue {
     console.log("onActiveLabel: " + index);
     this.labeler.render();
   }
+  // 2022.09.22 wook
+  // 삭제 예정
   onRemoveLabel() {
-    const list = this.labeler.getShapeList();
-    const activeLen = list.filter((v) => v.isActive()).length;
+    // const list = this.labeler.getShapeList();
+    const activeLen = this.shapeList.filter((v) => v.isActive()).length;
     if (activeLen < 1) return alert("삭제할 라벨을 선택하세요.");
-    list.map((v) => {
+    this.shapeList.map((v) => {
       if (v.isActive()) {
         this.labeler.remove(v.id);
         console.log(v.id);
