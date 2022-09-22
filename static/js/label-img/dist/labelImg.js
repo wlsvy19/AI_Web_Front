@@ -4884,7 +4884,7 @@ const { isDebuggerStatement } = require("typescript");
                             return;
                         if (_this.drawing)
                             return;
-                        //if(!_this.isActive) return; //design.song
+                        if(!_this.isActive) return; //design.song // wook 주석해제
                         var ox = offset[0], oy = offset[1]; // offset x, offset y
                         var diff = [ox - start[0], oy - start[1]];
                         var position = diff;
@@ -4904,6 +4904,7 @@ const { isDebuggerStatement } = require("typescript");
                 var _initScaler = function () {
                     var Image = _this.Image;
                     Image.on("wheel", function (e) {
+                        return; // wook
                         var Image = _this.Image;
                         if (!Image.el)
                             return;
@@ -5649,7 +5650,9 @@ const { isDebuggerStatement } = require("typescript");
                     else {
                         var scale_1 = _this._scale;
                         tagger.addTo(_this.tagContainer);
-                        tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 1);
+                        // tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 1);
+                        tagger.move([points[0][0], (points[0][1] + points[2][1])/2], _this._options.shouldTagScale ? scale_1 : 2);
+                        // tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 2);
                     }
                 }
                 else {

@@ -1721,3 +1721,12 @@ nav ol > li > .subMenu > ul > li > a:hover {
   font-size: x-large; 
   display: contents;
 }
+
+#no-img-small {
+  width:152px; 
+  height:88px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--gray1);
+}
