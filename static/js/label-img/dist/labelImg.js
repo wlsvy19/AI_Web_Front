@@ -4749,6 +4749,10 @@ const { isDebuggerStatement } = require("typescript");
                     EventReceiver_1.antMouseEvents.forEach(function (type) {
                         canvas.addEventListener(type, function (e) {
                             e.preventDefault();
+                            const is_right_click = (e.which == 3) || (e.button == 2);
+                            if(type=='click') {
+                                console.log("intinmouseevnent");
+                            }
                             var offset = [e.offsetX, e.offsetY];
                             var isPropagation = true;
                             var scale = _this._scale;
@@ -5293,10 +5297,13 @@ const { isDebuggerStatement } = require("typescript");
                */
             _this.remove = function (input) {
                 var _a = _this.findShapeIndex(input), idx = _a[0], shape = _a[1];
+                console.log('remove, idx=' + idx + 'shape=' + _this._isShapeMoving);
+                console.log(_a);
                 if (idx === null)
                     return;
                 shape === null || shape === void 0 ? void 0 : shape.tagger.remove();
                 _this.shapeList.splice(idx, 1);
+                _this.activeShape = null;
                 _this.render();
                 _this.emitter.emit("delete");
                 _this.emitter.emit("update");
@@ -5354,7 +5361,7 @@ const { isDebuggerStatement } = require("typescript");
              */
             _this.labelOff = function () {
                 _this.drawing = null;
-                _this.continuity = false;
+                // _this.continuity = false;
                 _this.emitter.emit("labelType");
                 if (_this.cache) {
                     _this.cache = null;
@@ -5618,6 +5625,31 @@ const { isDebuggerStatement } = require("typescript");
                 if ((shape.isClose() || shape.type === Shape_1.ShapeType.Rect)) {
                     points.push(points[0]);
                 }
+                
+                let xmin = null;
+                let ymin = null;
+                let xmax = null;
+                let ymax = null;
+                points.forEach((v, idx) => {
+                    if(idx == 0) {
+                        xmin = v[0];
+                        ymin = v[1];
+                        xmax = v[0];
+                        ymax = v[1];
+                    }
+                    else {
+                        if (v[0] < xmin) xmin = v[0];
+                        if (v[0] > xmax) xmax = v[0];
+                        if (v[1] < ymin) ymin = v[1];
+                        if (v[1] > ymax) ymax = v[1];
+                    }
+                })
+                // console.log('xmin',xmin);
+                // console.log('xmax',xmax);
+                // console.log('ymin',ymin);
+                // console.log('ymax',ymax);
+                // console.log('points', points);
+
                 var styleScale = _this.getShapeStyleScale();
                 
                 var shapeStyle = {
@@ -5637,22 +5669,35 @@ const { isDebuggerStatement } = require("typescript");
                     _this.canvas.line(points, shapeStyle);
                     _this.canvas.dot(points[0], shapeStyle);
                 }
-
-                var isTagShow = _this.isTagShow() && shape.isShowTag() && !_this._isShapeMoving && !_this.drawing;
+                
+                // console.log(_this.isTagShow());
+                // console.log(shape.isShowTag());
+                // console.log(!_this._isShapeMoving);
+                // console.log(!_this.drawing);
+                
+                // var isTagShow = _this.isTagShow() && shape.isShowTag() && !_this._isShapeMoving && !_this.drawing;
+                var isTagShow = _this.isTagShow() && shape.isShowTag() && !_this._isShapeMoving;
                 var tagger = shape.tagger;
                 if (isTagShow) {
                     if (_this.isExport) {
+                        console.log('isExport');
                         _this.canvas.text(shape.tagContent, points[0], {
                             bgColor: dotColor,
-                            color: "#fff"
+                            color: "#fff",
                         });
                     }
                     else {
+                        console.log('NotisExport');
                         var scale_1 = _this._scale;
                         tagger.addTo(_this.tagContainer);
                         // tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 1);
-                        tagger.move([points[0][0], (points[0][1] + points[2][1])/2], _this._options.shouldTagScale ? scale_1 : 2);
-                        // tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 2);
+                        tagger.move([xmin, (ymin+ymax)/2], _this._options.shouldTagScale ? scale_1 : 2);
+                        let taggerCss = {
+                            scale : 2,
+                            bgColor: dotColor,
+                            color : '#fff',
+                        }
+                        tagger.css(taggerCss);
                     }
                 }
                 else {
