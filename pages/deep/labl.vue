@@ -385,13 +385,15 @@
       </div>
     </div>
 
-    <div id="label-popup"  
+    <div id="label-popup"    
         :style="changeLabelPop? 'display: block;' : 'display: none;'"
         @contextmenu.prevent>
-      <h1>라벨링 변경</h1>
-      <select id="sel002" class="select" @change="onClickChangeLabel($event)">
-        <option :key="index" :value='index' v-for="(item, index) in labelTypeList" :selected="selLabel == item.cmmnCdNm">{{ item.cmmnCdNm }}</option>
-      </select>
+      <h2>라벨링 변경</h2>
+      <div style="display: flex; justify-content: flex-end;">
+        <select id="sel002" class="select" @change="onClickChangeLabel($event)" style="height:100%">
+          <option :key="index" :value='index' v-for="(item, index) in labelTypeList" :selected="selBoxLabel == item.cmmnCdNm">{{ item.cmmnCdNm }}</option>
+        </select>
+      </div>
     </div>
 
     <!-- 준공검사 -->
@@ -540,6 +542,7 @@ export default class extends Vue {
   selLabel = "";
   selImg: any = null;
   selBoxId = "";
+  selBoxLabel = "";
   
   showPop = false;
   changeLabelPop = true;
@@ -739,7 +742,10 @@ export default class extends Vue {
         if (this.selectPointBtn == true) {
           console.log('빈공간');
           this.nonActive();
-          this.selLabel = '';
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
         }
         // 라벨링 끝마치는 클릭
         else{
@@ -750,24 +756,13 @@ export default class extends Vue {
           // console.log(this.labelTypeList);
           let newBoxId = obj.ante.currentTarget.id;
           console.log(this.selLabel);
-          let labelDataText = '';
-          this.shapeList = this.labeler.getShapeList();
-          this.shapeList = this.shapeList.map((v) => {
-            labelDataText += this.labelNm(v.data);
-            if (newBoxId == v.id) {
-              v.data = this.selLabel;
-              let temp = this.labelTypeList.find((v) => {
-                if(v.cmmnCd == this.selLabel) return true;
-              });
-              v.tagContent = temp.cmmnCdNm;
-              v.tagger.content = v.tagContent;
-              v.tagShow(true);
-              console.log(v);
-            }
-            return v;
-          })
-          this.selItem.labelDataText = labelDataText;
+          this.setLabelDataText(newBoxId);
+          
           console.log('라벨링 완료');
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
           labeler.render();
         }
       }
@@ -779,6 +774,10 @@ export default class extends Vue {
         if (obj.ante.isOnShape) this.onSelLabel(data);
         console.log('박스 선택');
         console.log("shapeList",this.shapeList);
+        // if (this.pageType == '차량번호') {
+        //   this.alignShapeList();
+        //   this.setLabelDataText();
+        // }
       }
     });
     
@@ -793,9 +792,10 @@ export default class extends Vue {
       // 우클릭
       if (is_right_click) {
         const data = event.ante.currentTarget.data;
+        const visible = event.ante.currentTarget.visible;
         // 박스 선택(우클릭)
         this.setSelection();
-        if(data != null){
+        if(data != null || visible){
           this.selBoxId = event.ante.currentTarget.id;
           console.log('boxid',this.selBoxId);
           if (event.ante.isOnShape) this.onSelLabel(data);
@@ -810,8 +810,11 @@ export default class extends Vue {
           // 박스가 없는 공간 클릭
           console.log('우클릭 빈공간');
           this.nonActive();
-          this.selLabel = '';
           this.changeLabelPop = false;
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
         } 
       }
       // 좌클릭
@@ -828,6 +831,9 @@ export default class extends Vue {
   
   // ==== 이미지 선택 관련(s) ======
   async onSelImg(item, index) {
+    this.changeLabelPop = false;
+    this.onShowPop(false);
+
     console.log("item====", item);
     this.lightValue = 0;
     this.selItem = item;
@@ -1003,6 +1009,12 @@ export default class extends Vue {
   async onSave() {
     console.log("=====");
     const selItem = this.selItem;
+    
+    if (this.pageType == '차량번호') {
+      this.alignShapeList();
+      this.setLabelDataText();
+    }
+    
     const list = this.labeler.getShapeList();
     // if (list.length < 1) return alert("저장할 라벨이 없습니다.");
     const nd = list.filter((v) => !v.data);
@@ -1017,12 +1029,6 @@ export default class extends Vue {
     const lis = list.map(({ id, tagContent, positions, data }, index) => {
       dataText += data;
       labelDataText += this.labelNm(data);
-      
-      // 2022.09.20 wook
-      // class_n, class_n_crdnt 사용안함
-      // const idx = index + 1;
-      // saveData["class" + idx] = data;
-      // saveData["class" + idx + "Crdnt"] = JSON.stringify(positions);
 
       return {
         id,
@@ -1036,7 +1042,17 @@ export default class extends Vue {
     saveData.workNo = selItem.workNo;
     saveData.labelType = selItem.nmrecgCd;
     saveData.nmrecgCd = selItem.nmrecgCd;
-    //saveData.labelDataText = dataText;
+    
+    if (this.pageType == '차량번호') {
+      const firstStr = labelDataText.slice(0, 1);
+      if (firstStr == "영") {
+        labelDataText = labelDataText.slice(1, labelDataText.length) + firstStr;
+      }
+      if(!this.validatePlate(labelDataText) && dtrmYn == 'Y') {
+        this.$alert('번호판 형식에 맞지 않음','에러', {'type':'error'});
+        return;
+      }
+    }
     saveData.labelDataText = labelDataText;
     saveData.labelJson = JSON.stringify(lis);
     // const saveData = {
@@ -1098,13 +1114,12 @@ export default class extends Vue {
     this.labeler.label(type);
   }
   onSelLabel(cd) {
-    this.selLabel = cd;
-
     console.log("onSelLabel: " + cd);
     console.log('shaplist ---- ',this.shapeList);
     this.shapeList = this.shapeList.map((v, idx) => {
       if(this.selBoxId == v.id) {
         v.setActive(true);
+        this.selBoxLabel = v.tagContent;
       }
       return v;
     });
@@ -1114,6 +1129,7 @@ export default class extends Vue {
   onCheckLabel(cd) {    
     console.log("code", cd);
     this.onSelLabel(cd);
+    this.selLabel = cd;
     if(this.pageType === '빛' || this.pageType === '꺾임') {
         this.setLabel('polygon')
     }
@@ -1138,13 +1154,10 @@ export default class extends Vue {
   nonActive() {
     console.log('nonActive');
     this.shapeList = this.labeler.getShapeList();
-    let labelDataText = '';
     this.shapeList.map((v) => {
       if (this.selBoxId == v.id) v.setActive(false);
-      labelDataText += this.labelNm(v.data);
       return v;
     });
-    this.selItem.labelDataText = labelDataText;
     this.selBoxId = '';
     this.labeler.render();
   }
@@ -1160,15 +1173,17 @@ export default class extends Vue {
         v.data = this.labelTypeList[index].cmmnCd;
         v.tagContent = this.labelTypeList[index].cmmnCdNm;
         v.tagger.content = v.tagContent;
+        v.showTag = true;
       }
       return v;
     })
-    this.selLabel = this.labelTypeList[index].cmmnCdNm;
-    this.alignShapeList();
+    if (this.pageType == '차량번호') this.alignShapeList();
     this.labeler.render();
   }
   onRemove(index) {
+    console.log('onRemove', this.selBoxId);
     if (index== -1) return;
+    console.log('onRemove', this.selBoxId);
     this.labeler.remove(this.selBoxId);
     this.selBoxId = '';
     this.shapeList = this.labeler.getShapeList();
@@ -1185,12 +1200,146 @@ export default class extends Vue {
     this.shapeList = this.labeler.getShapeList();
     this.nonActive();
   }
+  setLabelDataText(newBoxId="") {
+    let labelDataText = '';
+    this.shapeList = this.labeler.getShapeList();
+    this.shapeList = this.shapeList.map((v) => {
+      labelDataText += this.labelNm(v.data);
+      if (newBoxId == v.id  && newBoxId != "") {
+        v.data = this.selLabel;
+        let temp = this.labelTypeList.find((v) => {
+          if(v.cmmnCd == this.selLabel) return true;
+        });
+        v.tagContent = temp.cmmnCdNm;
+        v.tagger.content = v.tagContent;
+        v.tagShow(true);
+        console.log(v);
+      }
+      return v;
+    })
+    
+    const firstStr = labelDataText.slice(0, 1);
+    if (firstStr == "영") {
+      labelDataText = labelDataText.slice(1, labelDataText.length) + firstStr;
+      console.log(labelDataText);
+    }
+    this.selItem.labelDataText = labelDataText;
+
+  }
   alignShapeList() {
     console.log('alignShapeList');
-    let list = this.shapeList;
-    console.log(list);
+
+    let list = [...this.shapeList];
+    if (list.length == 0) return;
+    let positions = [];
+
+    positions = list.map((value) => {
+      const v = value.positions;
+      const x1 = v[0][0];
+      const y1 = v[0][1];
+      const x2= v[2][0];
+      const y2 = v[2][1];
+
+      const minx = Math.min(x1, x2);
+      const miny = Math.min(y1, y2);
+      const maxx = Math.max(x1, x2);
+      const maxy = Math.max(y1, y2);
+
+      const midpoint = [(minx + maxx) /2, (miny + maxy) / 2]
+
+      console.log(minx, miny, maxx, maxy);
+      console.log(midpoint);
+      return {
+        'minx': minx,
+        'miny': miny,
+        'maxx': maxx,
+        'maxy': maxy,
+        'mid': midpoint,
+        'boxHeight': maxy-miny,
+        'boxWidth' : maxx-minx,
+        'shape':value,
+      }
+    })
+
     let line1 = [];
     let line2 = [];
+    
+    // B 타입은 한줄짜리 번호판
+    if (this.selImg.labelType == 'B') {
+      console.log('B타입');
+      // x축 기준 정렬
+      positions.sort((a, b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      positions.forEach((v) => {
+        line1.push(v);
+      })
+    }
+    else {
+      console.log('C,D 타입');
+      // y축 기준 정렬
+      positions.sort((a, b) => {
+        const A = a.mid[1];
+        const B = b.mid[1];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      console.log('after',positions);
+
+      const lineSeparator = positions[0].mid[1] + (positions[0].boxHeight /2);
+      console.log('lineSeparator',lineSeparator);
+
+      // 윗줄, 아랫줄 구분
+      positions.forEach((v, i) => {
+        if(v.mid[1] < lineSeparator) line1.push(v);
+        else line2.push(v);
+      })  
+      console.log('line1',line1);
+      console.log('line2',line2);
+
+      // x축 정렬
+      line1.sort((a,b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      line2.sort((a,b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+    }
+
+    // 모두 삭제하고 shape 다시 만듬
+    this.onDelAll();
+
+    let id = 0;
+    line1.forEach((v, i) => {
+      v.shape.id = String(id).padStart(8, '0');
+      v.shape.registerID = String(id+1);
+      this.labeler.addShape(v.shape);
+      id += 1;
+    })
+    line2.forEach((v, i) => {
+      v.shape.id = String(id).padStart(8, '0');
+      v.shape.registerID = String(id+1);
+      this.labeler.addShape(v.shape);
+      id += 1;
+    })
+    console.log("=== align end ===");
   }
 
   // ====== 이미지 밝기 조절 관련(s) ======
@@ -1306,6 +1455,53 @@ export default class extends Vue {
   onShowPop(show) {
     this.showPop = show;
   } 
+  validatePlate(labelDataText) {
+    const GENERAL1 = /^[0-9]{2}[가-힣]{1}[0-9]{4}/;  //P0, P2, P3
+    const GENERAL2 = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}/; // P1, P4, P5
+    const P7 = /^[0-9]{3}[가-힣]{1}[0-9]{4}/; // P7
+
+    const FOREIGN = /^[가-힣]{2}[0-9]{3}-[0-9]{3}/; // P1외교, P9외교
+    const TEMP1 = /^임[0-9]{4}/; // P10임시, P11임시
+    const TEMP2 = /^[^a-zA-Z가-힣ㄱ-ㅎ][0-9]{6}?/; // P10임시, P11임시
+    const YOUNG = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}영/; // P6
+    console.log('validatePlate', this.selImg.labelType, labelDataText);
+    if(this.selImg.labelType == 'B') {
+      if(!GENERAL1.test(labelDataText)){
+        if(!GENERAL2.test(labelDataText)){
+          if(!P7.test(labelDataText)){
+            if(!TEMP1.test(labelDataText)){
+              if(!TEMP2.test(labelDataText)){
+                return false;
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+    else {
+      if(!GENERAL1.test(labelDataText)) {
+        console.log('GENERAL1');
+        if(!GENERAL2.test(labelDataText)) {
+        console.log('GENERAL2', GENERAL2.test(labelDataText));
+          if(!YOUNG.test(labelDataText)) {
+        console.log('YOUNG');
+            if(!FOREIGN.test(labelDataText)) {
+        console.log('FOREIGN');
+              if(!TEMP1.test(labelDataText)) {
+        console.log('TEMP1');
+                if(!TEMP2.test(labelDataText)) {
+        console.log('TEMP2');
+                  return false;
+                }
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+  }
   // ====== 기타(e) ======
 
 }

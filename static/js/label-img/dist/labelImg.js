@@ -4750,10 +4750,6 @@ const { isDebuggerStatement } = require("typescript");
                     EventReceiver_1.antMouseEvents.forEach(function (type) {
                         canvas.addEventListener(type, function (e) {
                             e.preventDefault();
-                            const is_right_click = (e.which == 3) || (e.button == 2);
-                            if(type=='click') {
-                                console.log("intinmouseevnent");
-                            }
                             var offset = [e.offsetX, e.offsetY];
                             var isPropagation = true;
                             var scale = _this._scale;
@@ -5298,8 +5294,6 @@ const { isDebuggerStatement } = require("typescript");
                */
             _this.remove = function (input) {
                 var _a = _this.findShapeIndex(input), idx = _a[0], shape = _a[1];
-                console.log('remove, idx=' + idx + 'shape=' + _this._isShapeMoving);
-                console.log(_a);
                 if (idx === null)
                     return;
                 shape === null || shape === void 0 ? void 0 : shape.tagger.remove();
