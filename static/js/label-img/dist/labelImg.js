@@ -4148,7 +4148,8 @@ const { isDebuggerStatement } = require("typescript");
             _this.tagger = new Popover_1.Popover({
                 content: tag,
                 style: {
-                    color: "#fff",
+                    // color: "#fff",
+                    color: _this.getStyle().tagColor,
                     bgColor: _this.getStyle().dotColor
                 }
             });
@@ -4749,10 +4750,6 @@ const { isDebuggerStatement } = require("typescript");
                     EventReceiver_1.antMouseEvents.forEach(function (type) {
                         canvas.addEventListener(type, function (e) {
                             e.preventDefault();
-                            const is_right_click = (e.which == 3) || (e.button == 2);
-                            if(type=='click') {
-                                console.log("intinmouseevnent");
-                            }
                             var offset = [e.offsetX, e.offsetY];
                             var isPropagation = true;
                             var scale = _this._scale;
@@ -5297,8 +5294,6 @@ const { isDebuggerStatement } = require("typescript");
                */
             _this.remove = function (input) {
                 var _a = _this.findShapeIndex(input), idx = _a[0], shape = _a[1];
-                console.log('remove, idx=' + idx + 'shape=' + _this._isShapeMoving);
-                console.log(_a);
                 if (idx === null)
                     return;
                 shape === null || shape === void 0 ? void 0 : shape.tagger.remove();
@@ -5619,7 +5614,7 @@ const { isDebuggerStatement } = require("typescript");
                 var scale = _this._scale; 
                 var positions = shape.positions;
                 var style = shape.getStyle();
-                var dotColor = style.dotColor, dotRadius = style.dotRadius, lineColor = style.lineColor, lineWidth = style.lineWidth, fillColor = style.fillColor;
+                var dotColor = style.dotColor, dotRadius = style.dotRadius, lineColor = style.lineColor, lineWidth = style.lineWidth, fillColor = style.fillColor, tagColor = style.tagColor;
                 var points = Image.getShape2CanvasPoints(positions, scale);
                 
                 if ((shape.isClose() || shape.type === Shape_1.ShapeType.Rect)) {
@@ -5659,6 +5654,7 @@ const { isDebuggerStatement } = require("typescript");
                     dotColor: dotColor,
                     fillColor: fillColor,
                     opacity: style.opacity == undefined ? .7 : style.opacity,  // 2022.07.29. design.song
+                    tagColor: style.tagColor, // 2022-09-27 wook
                     //opacity: .7
                 };
                 if (shape.isClose()) {
@@ -5680,14 +5676,14 @@ const { isDebuggerStatement } = require("typescript");
                 var tagger = shape.tagger;
                 if (isTagShow) {
                     if (_this.isExport) {
-                        console.log('isExport');
+                        // console.log('isExport');
                         _this.canvas.text(shape.tagContent, points[0], {
                             bgColor: dotColor,
-                            color: "#fff",
+                            color: tagColor,
                         });
                     }
                     else {
-                        console.log('NotisExport');
+                        // console.log('NotisExport');
                         var scale_1 = _this._scale;
                         tagger.addTo(_this.tagContainer);
                         // tagger.move(points[0], _this._options.shouldTagScale ? scale_1 : 1);
@@ -5695,7 +5691,7 @@ const { isDebuggerStatement } = require("typescript");
                         let taggerCss = {
                             scale : 2,
                             bgColor: dotColor,
-                            color : '#fff',
+                            color : tagColor,
                         }
                         tagger.css(taggerCss);
                     }

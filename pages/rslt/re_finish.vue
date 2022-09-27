@@ -50,10 +50,10 @@
             <table contenteditable="false">
               <colgroup>
                 <col width="*" />
-                <col width="22%" />
-                <col width="22%" />
-                <col width="22%" />
-                <col width="22%" />
+                <col width="28%" />
+                <col width="28%" />
+                <col width="17%" />
+                <col width="17%" />
               </colgroup>
               <thead>
                 <tr>
@@ -166,8 +166,6 @@ export default class extends Vue {
   viewProcessing = false;
   isCorrectNum = 1;
   isCorrectType = 1;
-  dataLoading = false;
-
 
   onRun(run) {
     this.isRun = run;
@@ -221,8 +219,7 @@ export default class extends Vue {
     this.initChart();
   }
   async getValidationResult(pageNo: number, reverse=false) {
-    if (this.dataLoading == true) return;
-    this.dataLoading = true;
+    console.log('getValidationResult', this.isCorrectNum);
     // this.selectIdx = -1;
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
@@ -233,14 +230,19 @@ export default class extends Vue {
         ...newpage,
       },
       "/api/rpcs-result/data"
-    )
-    newpage.totalCount = data.page.totalCount+1;
+    );
+    console.log('data====', data);
+    
+    newpage.totalCount = data.page.totalCount;
     this.pageInfo = { ...newpage };
     this.pageNo = pageNo;
     this.resultList = data.list;
-    console.log('result====', data);
-    if (reverse == true) this.onClickRow(this.resultList[this.resultList.length-1], this.resultList.length-1);
-    else this.onClickRow(this.resultList[0], 0);
+    if (this.resultList.length != 0 ){
+      if (reverse == true) this.onClickRow(this.resultList[this.resultList.length-1], this.resultList.length-1);
+      else this.onClickRow(this.resultList[0], 0);
+    }
+    console.log('pageinfo====', this.pageInfo);
+    console.log('result====', this.resultList);
   }
   async onClickRow(item, index) {
     // this.selectWorkDate = item.imgWorkDate;
@@ -249,7 +251,6 @@ export default class extends Vue {
     // console.log(this.selectWorkDate);
     this.selectImg = item.imgData;
     this.selectIdx = index;
-    this.dataLoading = false;
   }
   async onClickComplete() {
     const rs = await commonService.request(
@@ -275,7 +276,8 @@ export default class extends Vue {
     else {
       this.isCorrectNum = 1;
     }
-      this.getValidationResult(1);
+    console.log('click button');
+    this.getValidationResult(1);
 
   }
   async onClickOnlyTypeDiff(event) {
@@ -428,7 +430,7 @@ export default class extends Vue {
     }
     // left
     else if (event.keyCode === 37) {
-      if (this.pageNo != 1 && this.dataLoading == false) this.getValidationResult(this.pageNo-1);
+      if (this.pageNo != 1) this.getValidationResult(this.pageNo-1);
     }
     // up
     else if (event.keyCode === 38) {
@@ -437,13 +439,13 @@ export default class extends Vue {
         this.selectImg = this.resultList[this.selectIdx].imgData;
       }
       else {
-        if (this.pageNo != 1 && this.dataLoading == false) this.getValidationResult(this.pageNo-1, true);
+        if (this.pageNo != 1) this.getValidationResult(this.pageNo-1, true);
       }
     }
     // right
     else if (event.keyCode === 39) {
       console.log(Math.floor(this.pageInfo.totalCount / 10) +1);
-      if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1 && this.dataLoading == false) this.getValidationResult(this.pageNo+1);
+      if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1) this.getValidationResult(this.pageNo+1);
     }
     // down
     else if (event.keyCode === 40) {
@@ -452,7 +454,7 @@ export default class extends Vue {
         this.selectImg = this.resultList[this.selectIdx].imgData;
       }
       else {
-        if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1 && this.dataLoading == false) this.getValidationResult(this.pageNo+1);
+        if (this.pageNo != Math.floor(this.pageInfo.totalCount / 10) +1) this.getValidationResult(this.pageNo+1);
       }
     }
   }

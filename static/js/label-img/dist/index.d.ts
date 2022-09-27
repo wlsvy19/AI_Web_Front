@@ -173,6 +173,7 @@ interface IShapeStyle {
     lineColor: TColor;
     lineWidth: number;
     fillColor: TColor;
+    tagColor: TColor;
 }
 declare type IShapeOptionsStyle = Record<TShapeStatus, IShapeStyle>;
 declare type TShapeStyle = Partial<IShapeStyle>;

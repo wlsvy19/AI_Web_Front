@@ -385,6 +385,17 @@
       </div>
     </div>
 
+    <div id="label-popup"    
+        :style="changeLabelPop? 'display: block;' : 'display: none;'"
+        @contextmenu.prevent>
+      <h2>라벨링 변경</h2>
+      <div style="display: flex; justify-content: flex-end;">
+        <select id="sel002" class="select" @change="onClickChangeLabel($event)" style="height:100%">
+          <option :key="index" :value='index' v-for="(item, index) in labelTypeList" :selected="selBoxLabel == item.cmmnCdNm">{{ item.cmmnCdNm }}</option>
+        </select>
+      </div>
+    </div>
+
     <!-- 준공검사 -->
     <!-- 라벨링 유형에 대한 설명 추가 -->
     <div class="popup pop1" v-if="showPop" :style="`display:block;left:30%`">
@@ -480,6 +491,7 @@ const rectStyle = {
     lineWidth: 1,
     fillColor: "transparent",
     opacity: 0.1,
+    tagColor: '#fff'
   },
   active: {
     dotColor: "yellow",
@@ -488,6 +500,7 @@ const rectStyle = {
     lineWidth: 1,
     fillColor: "yellow",
     opacity: 0.2,
+    tagColor: 'black'
   },
 };
 
@@ -499,6 +512,7 @@ const polygonStyle = {
     lineWidth: 1,
     fillColor: "orange",
     opacity: 0.1,
+    tagColor: '#fff'
   },
   active: {
     dotColor: "yellow",
@@ -507,6 +521,7 @@ const polygonStyle = {
     lineWidth: 1,
     fillColor: "yellow",
     opacity: 0.2,
+    tagColor: 'black'
   },
 };
 
@@ -527,8 +542,10 @@ export default class extends Vue {
   selLabel = "";
   selImg: any = null;
   selBoxId = "";
+  selBoxLabel = "";
   
   showPop = false;
+  changeLabelPop = true;
   
   imgDataList = [];
   labelTypeList: any = [];
@@ -573,6 +590,7 @@ export default class extends Vue {
     this.currentMenu = this.$store.state.currentMenu;
     this.codeList();
     this.setQuickClass();
+    this.changeLabelPop=false;
   }
   mounted() {
     this.onSearch(1);
@@ -582,7 +600,8 @@ export default class extends Vue {
   destroyed() {
     document.removeEventListener("keyup", this.onKeyup);
   }
-
+  
+  // ====== 정보 불러오기(s) =======
   async onSearch(pageNo) {
     if (pageNo < 1) pageNo = 1;
     const newpage = { ...this.pageInfo, pageNo };
@@ -611,57 +630,210 @@ export default class extends Vue {
       await this.onNext(0);
     }
   }
-
-  // 이미지 밝기 조절 관련 
-  onUpDown(type) {
-    if (type === "UP") {
-      if (this.lightValue + 30 > 255) this.lightValue = 255;
-      else this.lightValue += 30;
-      // this.lightValue = 30;
-    } else {
-      if (this.lightValue - 30 < -255) this.lightValue = -255;
-      else this.lightValue -= 30;
-      // this.lightValue = -30;
+  async codeList() {
+    const codeList = await commonService.request(
+      [
+        "NMRECG_CD",
+        "NGTP",
+        "NUM_BTN",
+        "CAR_NUM_BTN",
+        "LABEL_BTN",
+        "LABEL_CN_BTN",
+      ],
+      "/api/common/code/list"
+    );
+    console.log("====pageType===", this.pageType);
+    this.code = codeList;
+    if (this.pageType === "번호판") {
+      const labelTypeList = codeList.NUM_BTN.map((v) => ({
+        ...v,
+        checked: false,
+      }));
+      this.labelTypeList = labelTypeList;
     }
-    this.brightnessAdjustment();
+    if (this.pageType === "차량번호") {
+      const labelTypeList = codeList.CAR_NUM_BTN.map((v) => ({
+        ...v,
+        checked: false,
+      }));
+      console.log("=====", 1111);
+      this.labelTypeList = labelTypeList;
+    }
+    if (this.pageType === "꺾임") {
+      const labelTypeList = codeList.LABEL_CN_BTN.map((v) => ({
+        ...v,
+        checked: false,
+      }));
+      this.labelTypeList = labelTypeList;
+      this.labelTypeList.sort((a, b) => {
+        const A = a.cmmnCdNm;
+        const B = b.cmmnCdNm;
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      });
+    }
+    if (this.pageType === "빛") {
+      const labelTypeList = codeList.LABEL_BTN.map((v) => ({
+        ...v,
+        checked: false,
+      }));
+      this.labelTypeList = labelTypeList;
+    }
   }
-  brightnessFilter(pixels, value) {
-    var d = pixels.data;    
-    for(var i =0; i< d.length; i+=4) {        
-      d[i] += value/3;        
-      d[i+1] += value/3;        
-      d[i+2] += value/3;    
-    }    
-    return pixels;
+  // ====== 정보 불러오기(e) =======
+
+  // ====== 코드, 라벨 변환(s) =======
+  labelNm(cd) {
+    const cds = this.labelTypeList || [];
+    if (cds.length === 0) return "";
+    const cds1 = cds.filter((v) => v.cmmnCd === cd);
+    if (cds1.length === 0) return "";
+    return cds1[0].cmmnCdNm;
   }
-  async brightnessAdjustment() {
+  codeNm(cd) {
+    const cds = this.code.NMRECG_CD || [];
+    if (cds.lenght === 0) return "";
+    const cds1 = cds.filter((v) => v.cmmnCd === cd);
+    if (cds1.length === 0) return "";
+    return cds1[0].cmmnCdNm;
+  }  
+  // ====== 코드, 라벨 변환(e) =======
+
+  // ===== 라벨러 설정(s) ======
+  async init() {
+    const element: HTMLDivElement = document.getElementById("img-view") as any;
+
+    const labeler = new LabelImg(element, {
+      width: 800,
+      height: 450,
+      bgColor: `#000`, // black
+    });
+
+    // 2022.07.29. design.song
+    // 웹에서 신규 박스 그릴 시 아래 등록된 정보로 그려진다.
+    labeler.register("polygon", {
+      name: "insert polygon",
+      type: "Polygon",
+      tag: "폴리곤",
+      showTag: false,
+      style: polygonStyle,
+    });
+
+    labeler.register("rect", {
+      name: "insert rect",
+      type: "Rect",
+      tag: "사각형",
+      showTag: false,
+      style: rectStyle,      
+    });
     
-    this.shapeList = this.labeler.getShapeList();
-    let saveList = this.shapeList.slice(0,this.shapeList.length);
-    this.onDelAll();
-
-    let image = new Image();
-    image.src = 'data:image/jpeg;base64,' + this.selImg.imgData;
-    image.onload = () => {
-      let canvas = document.createElement('canvas');
-      canvas.width = this.selImg.width;
-      canvas.height = this.selImg.height;
-      let context = canvas.getContext('2d');
-      context.drawImage(image,0,0);      
-      let pixels= context.getImageData(0,0, canvas.width, canvas.height);
-      let filteredData = this.brightnessFilter(pixels, this.lightValue);
-      context.putImageData(filteredData, 0, 0);
-      let dataURL = canvas.toDataURL();
+    // 2022.09.22 wook 수정
+    // 좌클릭(+마우스 업)만 적용됨
+    labeler.on("click", 'top', (obj) => {
+      console.log("obj===>11", obj);
+      if(!obj.ante.isOnImage) return;
+      this.changeLabelPop = false;
+      const data = obj.ante.currentTarget.data;
+      console.log('data===', data);
+      if (data == null) {
+        // 박스가 없는 공간 클릭
+        if (this.selectPointBtn == true) {
+          console.log('빈공간');
+          this.nonActive();
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
+        }
+        // 라벨링 끝마치는 클릭
+        else{
+          // 폴리곤은 도형이 완전히 그려져야 라벨링 끝마침
+          if(this.pageType == '빛' || this.pageType == '꺾임') {
+            if (! obj.ante.isOnShape) return;
+          }
+          // console.log(this.labelTypeList);
+          let newBoxId = obj.ante.currentTarget.id;
+          console.log(this.selLabel);
+          this.setLabelDataText(newBoxId);
+          
+          console.log('라벨링 완료');
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
+          labeler.render();
+        }
+      }
+      // 박스 선택
+      else {
+        console.log('data===', data);
+        this.selBoxId = obj.ante.currentTarget.id;
+        console.log('boxid',this.selBoxId);
+        if (obj.ante.isOnShape) this.onSelLabel(data);
+        console.log('박스 선택');
+        console.log("shapeList",this.shapeList);
+        // if (this.pageType == '차량번호') {
+        //   this.alignShapeList();
+        //   this.setLabelDataText();
+        // }
+      }
+    });
+    
+    // 마우스 다운 이벤트
+    labeler.on('mousedown','top', (event) => {
+      console.log('event ===',event);
+      event.preventDefault();
+      if(!event.ante.isOnImage) return;
+      const is_right_click = (event.which == 3) || (event.button == 2)
+      // if (! is_right_click) return;
       
-      this.labeler.load(dataURL);
-      // this.labeler.render();
-      saveList.forEach((value) => {
-        this.labeler.addShape(value);
-      })
-      this.shapeList = this.labeler.getShapeList();
-    }
+      // 우클릭
+      if (is_right_click) {
+        const data = event.ante.currentTarget.data;
+        const visible = event.ante.currentTarget.visible;
+        // 박스 선택(우클릭)
+        this.setSelection();
+        if(data != null || visible){
+          this.selBoxId = event.ante.currentTarget.id;
+          console.log('boxid',this.selBoxId);
+          if (event.ante.isOnShape) this.onSelLabel(data);
+          console.log('우클릭 박스 선택');
+          
+          this.changeLabelPop = true;
+          const element = document.getElementById("label-popup");
+          element.style.left = event.x + 'px';
+          element.style.top = event.y + 'px';
+        }
+        else {
+          // 박스가 없는 공간 클릭
+          console.log('우클릭 빈공간');
+          this.nonActive();
+          this.changeLabelPop = false;
+          if (this.pageType == '차량번호') {
+            this.alignShapeList();
+            this.setLabelDataText();
+          }
+        } 
+      }
+      // 좌클릭
+      else {
+        this.changeLabelPop = false;
+      }
+    });
+    
+    labeler.setContinuity(true);
+    this.labeler = labeler;
+    console.log('init');
   }
+  // ===== 라벨러 설정(e) ======
+  
+  // ==== 이미지 선택 관련(s) ======
   async onSelImg(item, index) {
+    this.changeLabelPop = false;
+    this.onShowPop(false);
+
     console.log("item====", item);
     this.lightValue = 0;
     this.selItem = item;
@@ -805,9 +977,44 @@ export default class extends Vue {
     this.nonActive();
     // console.log("shapList====123>", shapList);
   }
+  async onNext(newIndex) {
+    if (newIndex < this.imgDataList.length) {
+      const newItem = this.imgDataList[newIndex];
+      this.onSelImg(newItem, newIndex);
+    } 
+  }
+  async onBeforeImage() {
+    if (this.selIndex - 1 > 0) {
+      this.onNext(this.selIndex - 1);
+    } else {
+      const pageNo = this.pageInfo.pageNo;
+      this.selIndex = 0;
+      await this.onSearch(pageNo - 1);
+      this.onNext(9);
+    }
+  }
+  async onNextImage() {
+    if (this.selIndex + 1 < this.imgDataList.length) {
+      this.onNext(this.selIndex + 1);
+    } else {
+      const pageNo = this.pageInfo.pageNo;
+      this.selIndex = 0;
+      await this.onSearch(pageNo + 1);
+      this.onNext(0);
+    }
+  }
+  // ==== 이미지 선택 관련(e) ======
+
+  // ====== 이미지 데이터 처리 관련(s) ======
   async onSave() {
     console.log("=====");
     const selItem = this.selItem;
+    
+    if (this.pageType == '차량번호') {
+      this.alignShapeList();
+      this.setLabelDataText();
+    }
+    
     const list = this.labeler.getShapeList();
     // if (list.length < 1) return alert("저장할 라벨이 없습니다.");
     const nd = list.filter((v) => !v.data);
@@ -822,12 +1029,6 @@ export default class extends Vue {
     const lis = list.map(({ id, tagContent, positions, data }, index) => {
       dataText += data;
       labelDataText += this.labelNm(data);
-      
-      // 2022.09.20 wook
-      // class_n, class_n_crdnt 사용안함
-      // const idx = index + 1;
-      // saveData["class" + idx] = data;
-      // saveData["class" + idx + "Crdnt"] = JSON.stringify(positions);
 
       return {
         id,
@@ -841,7 +1042,17 @@ export default class extends Vue {
     saveData.workNo = selItem.workNo;
     saveData.labelType = selItem.nmrecgCd;
     saveData.nmrecgCd = selItem.nmrecgCd;
-    //saveData.labelDataText = dataText;
+    
+    if (this.pageType == '차량번호') {
+      const firstStr = labelDataText.slice(0, 1);
+      if (firstStr == "영") {
+        labelDataText = labelDataText.slice(1, labelDataText.length) + firstStr;
+      }
+      if(!this.validatePlate(labelDataText) && dtrmYn == 'Y') {
+        this.$alert('번호판 형식에 맞지 않음','에러', {'type':'error'});
+        return;
+      }
+    }
     saveData.labelDataText = labelDataText;
     saveData.labelJson = JSON.stringify(lis);
     // const saveData = {
@@ -867,173 +1078,7 @@ export default class extends Vue {
       this.onNext(newIndex);
     }
   }
-
-  async onNext(newIndex) {
-    if (newIndex < this.imgDataList.length) {
-      const newItem = this.imgDataList[newIndex];
-      this.onSelImg(newItem, newIndex);
-    } 
-  }
-  async init() {
-    const element: HTMLDivElement = document.getElementById("img-view") as any;
-
-    const labeler = new LabelImg(element, {
-      width: 800,
-      height: 450,
-      bgColor: `#000`, // black
-    });
-
-    // 2022.07.29. design.song
-    // 웹에서 신규 박스 그릴 시 아래 등록된 정보로 그려진다.
-    labeler.register("polygon", {
-      name: "insert polygon",
-      type: "Polygon",
-      tag: "폴리곤",
-      showTag: false,
-      style: polygonStyle,
-    });
-
-    labeler.register("rect", {
-      name: "insert rect",
-      type: "Rect",
-      tag: "사각형",
-      showTag: false,
-      style: rectStyle,      
-    });
-    
-    // 2022.09.22 wook 수정
-    // 좌클릭만 적용됨
-    labeler.on("click", 'top', (obj) => {
-      console.log("obj===>11", obj);
-      if(!obj.ante.isOnImage) return;
-      const data = obj.ante.currentTarget.data;
-      console.log('data===', data);
-      if (data == null) {
-        // 박스가 없는 공간 클릭
-        if (this.selectPointBtn == true) {
-          console.log('빈공간');
-          this.nonActive();
-        }
-        // 라벨링 끝마치는 클릭
-        else{
-          // 폴리곤은 도형이 완전히 그려져야 라벨링 끝마침
-          if(this.pageType == '빛' || this.pageType == '꺾임') {
-            if (! obj.ante.isOnShape) return;
-          }
-          // console.log(this.labelTypeList);
-          let newBoxId = obj.ante.currentTarget.id;
-          console.log(this.selLabel);
-          let labelDataText = '';
-          this.shapeList = this.labeler.getShapeList();
-          this.shapeList = this.shapeList.map((v) => {
-            labelDataText += this.labelNm(v.data);
-            if (newBoxId == v.id) {
-              v.data = this.selLabel;
-              let temp = this.labelTypeList.find((v) => {
-                if(v.cmmnCd == this.selLabel) return true;
-              });
-              v.tagContent = temp.cmmnCdNm;
-              v.tagger.content = v.tagContent;
-              v.tagShow(true);
-              console.log(v);
-            }
-            return v;
-          })
-          this.selItem.labelDataText = labelDataText;
-          console.log('라벨링 완료');
-          labeler.render();
-        }
-      }
-      // 박스 선택
-      else {
-        console.log('data===', data);
-        this.selBoxId = obj.ante.currentTarget.id;
-        console.log('boxid',this.selBoxId);
-        if (obj.ante.isOnShape) this.onSelLabel(data);
-        console.log('박스 선택');
-        console.log("shapeList",this.shapeList);
-      }
-    });
-    
-    
-    // 우클릭 적용
-    labeler.on('mousedown','top', (event) => {
-      console.log('event ===',event);
-      if(!event.ante.isOnImage) return;
-      const is_right_click = (event.which == 3) || (event.button == 2)
-      if (! is_right_click) return;
-      const data = event.ante.currentTarget.data;
-      // 박스 선택(우클릭)
-      this.setSelection();
-      if(data != null){
-        this.selBoxId = event.ante.currentTarget.id;
-        console.log('boxid',this.selBoxId);
-        if (event.ante.isOnShape) this.onSelLabel(data);
-        console.log('우클릭 박스 선택');
-      }
-      else {
-        // 박스가 없는 공간 클릭
-        console.log('우클릭 빈공간');
-        this.nonActive();
-      } 
-    });
-    
-    labeler.setContinuity(true);
-    this.labeler = labeler;
-    console.log('init');
-  }
-  async codeList() {
-    const codeList = await commonService.request(
-      [
-        "NMRECG_CD",
-        "NGTP",
-        "NUM_BTN",
-        "CAR_NUM_BTN",
-        "LABEL_BTN",
-        "LABEL_CN_BTN",
-      ],
-      "/api/common/code/list"
-    );
-    console.log("====pageType===", this.pageType);
-    this.code = codeList;
-    if (this.pageType === "번호판") {
-      const labelTypeList = codeList.NUM_BTN.map((v) => ({
-        ...v,
-        checked: false,
-      }));
-      this.labelTypeList = labelTypeList;
-    }
-    if (this.pageType === "차량번호") {
-      const labelTypeList = codeList.CAR_NUM_BTN.map((v) => ({
-        ...v,
-        checked: false,
-      }));
-      console.log("=====", 1111);
-      this.labelTypeList = labelTypeList;
-    }
-    if (this.pageType === "꺾임") {
-      const labelTypeList = codeList.LABEL_CN_BTN.map((v) => ({
-        ...v,
-        checked: false,
-      }));
-      this.labelTypeList = labelTypeList;
-      this.labelTypeList.sort((a, b) => {
-        const A = a.cmmnCdNm;
-        const B = b.cmmnCdNm;
-
-        if (A > B) return 1;
-        if (A < B) return -1;
-        if (A === B) return 0;
-      });
-    }
-    if (this.pageType === "빛") {
-      const labelTypeList = codeList.LABEL_BTN.map((v) => ({
-        ...v,
-        checked: false,
-      }));
-      this.labelTypeList = labelTypeList;
-    }
-  }
+  
   async updateDel(delYn) {
     if (this.selIndex < 0) return alert("선택하세요.");
     const item = this.selItem;
@@ -1049,20 +1094,9 @@ export default class extends Vue {
     item.delYn = delYn;
     // alert("완료");
   }
-  labelNm(cd) {
-    const cds = this.labelTypeList || [];
-    if (cds.length === 0) return "";
-    const cds1 = cds.filter((v) => v.cmmnCd === cd);
-    if (cds1.length === 0) return "";
-    return cds1[0].cmmnCdNm;
-  }
-  codeNm(cd) {
-    const cds = this.code.NMRECG_CD || [];
-    if (cds.lenght === 0) return "";
-    const cds1 = cds.filter((v) => v.cmmnCd === cd);
-    if (cds1.length === 0) return "";
-    return cds1[0].cmmnCdNm;
-  }  
+  // ====== 이미지 데이터 처리 관련(e) ======
+  
+  // ====== 라벨 선택 관련(s) =======
   setSelection() {    
     console.log("setSelection");
 
@@ -1080,14 +1114,12 @@ export default class extends Vue {
     this.labeler.label(type);
   }
   onSelLabel(cd) {
-    this.selLabel = cd;
-
     console.log("onSelLabel: " + cd);
     console.log('shaplist ---- ',this.shapeList);
     this.shapeList = this.shapeList.map((v, idx) => {
       if(this.selBoxId == v.id) {
         v.setActive(true);
-        console.log('aaaa',v.isActive());
+        this.selBoxLabel = v.tagContent;
       }
       return v;
     });
@@ -1097,33 +1129,278 @@ export default class extends Vue {
   onCheckLabel(cd) {    
     console.log("code", cd);
     this.onSelLabel(cd);
+    this.selLabel = cd;
     if(this.pageType === '빛' || this.pageType === '꺾임') {
         this.setLabel('polygon')
     }
     else {
       this.setLabel('rect')
     }
+  }      
+  onActiveLabel(index) {
+    this.shapeList.map((v, idx) => {
+      console.log("===111", v.data);
+      if (idx === index) {
+        this.selBoxId = v.id;
+        console.log(v);
+        this.onSelLabel(v.data);
+        v.setActive(true);
+      } else v.setActive(false);
+      return v;
+    });
+    console.log("onActiveLabel: " + index);
+    this.labeler.render();
   }
-  async onBeforeImage() {
-    if (this.selIndex - 1 > 0) {
-      this.onNext(this.selIndex - 1);
+  nonActive() {
+    console.log('nonActive');
+    this.shapeList = this.labeler.getShapeList();
+    this.shapeList.map((v) => {
+      if (this.selBoxId == v.id) v.setActive(false);
+      return v;
+    });
+    this.selBoxId = '';
+    this.labeler.render();
+  }
+  // ====== 라벨 선택 관련(s) =======
+
+  // ====== 라벨 데이터 처리 관련(s) =======
+  onClickChangeLabel(event) {
+    // console.log("onClickChangeLabel", event.target.value);
+    const index = event.target.value;
+    // console.log(this.labelTypeList[index].cmmnCdNm);
+    this.shapeList.map((v) => {
+      if (v.id == this.selBoxId) {
+        v.data = this.labelTypeList[index].cmmnCd;
+        v.tagContent = this.labelTypeList[index].cmmnCdNm;
+        v.tagger.content = v.tagContent;
+        v.showTag = true;
+      }
+      return v;
+    })
+    if (this.pageType == '차량번호') this.alignShapeList();
+    this.labeler.render();
+  }
+  onRemove(index) {
+    console.log('onRemove', this.selBoxId);
+    if (index== -1) return;
+    console.log('onRemove', this.selBoxId);
+    this.labeler.remove(this.selBoxId);
+    this.selBoxId = '';
+    this.shapeList = this.labeler.getShapeList();
+    this.nonActive();
+  }
+  onDelAll() {
+    let idList = [];
+    this.shapeList.map((v) => {
+      idList.push(v.id);
+    })
+    idList.forEach((v) => {
+      this.labeler.remove(v);
+    })
+    this.shapeList = this.labeler.getShapeList();
+    this.nonActive();
+  }
+  setLabelDataText(newBoxId="") {
+    let labelDataText = '';
+    this.shapeList = this.labeler.getShapeList();
+    this.shapeList = this.shapeList.map((v) => {
+      labelDataText += this.labelNm(v.data);
+      if (newBoxId == v.id  && newBoxId != "") {
+        v.data = this.selLabel;
+        let temp = this.labelTypeList.find((v) => {
+          if(v.cmmnCd == this.selLabel) return true;
+        });
+        v.tagContent = temp.cmmnCdNm;
+        v.tagger.content = v.tagContent;
+        v.tagShow(true);
+        console.log(v);
+      }
+      return v;
+    })
+    
+    const firstStr = labelDataText.slice(0, 1);
+    if (firstStr == "영") {
+      labelDataText = labelDataText.slice(1, labelDataText.length) + firstStr;
+      console.log(labelDataText);
+    }
+    this.selItem.labelDataText = labelDataText;
+
+  }
+  alignShapeList() {
+    console.log('alignShapeList');
+
+    let list = [...this.shapeList];
+    if (list.length == 0) return;
+    let positions = [];
+
+    positions = list.map((value) => {
+      const v = value.positions;
+      const x1 = v[0][0];
+      const y1 = v[0][1];
+      const x2= v[2][0];
+      const y2 = v[2][1];
+
+      const minx = Math.min(x1, x2);
+      const miny = Math.min(y1, y2);
+      const maxx = Math.max(x1, x2);
+      const maxy = Math.max(y1, y2);
+
+      const midpoint = [(minx + maxx) /2, (miny + maxy) / 2]
+
+      console.log(minx, miny, maxx, maxy);
+      console.log(midpoint);
+      return {
+        'minx': minx,
+        'miny': miny,
+        'maxx': maxx,
+        'maxy': maxy,
+        'mid': midpoint,
+        'boxHeight': maxy-miny,
+        'boxWidth' : maxx-minx,
+        'shape':value,
+      }
+    })
+
+    let line1 = [];
+    let line2 = [];
+    
+    // B 타입은 한줄짜리 번호판
+    if (this.selImg.labelType == 'B') {
+      console.log('B타입');
+      // x축 기준 정렬
+      positions.sort((a, b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      positions.forEach((v) => {
+        line1.push(v);
+      })
+    }
+    else {
+      console.log('C,D 타입');
+      // y축 기준 정렬
+      positions.sort((a, b) => {
+        const A = a.mid[1];
+        const B = b.mid[1];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      console.log('after',positions);
+
+      const lineSeparator = positions[0].mid[1] + (positions[0].boxHeight /2);
+      console.log('lineSeparator',lineSeparator);
+
+      // 윗줄, 아랫줄 구분
+      positions.forEach((v, i) => {
+        if(v.mid[1] < lineSeparator) line1.push(v);
+        else line2.push(v);
+      })  
+      console.log('line1',line1);
+      console.log('line2',line2);
+
+      // x축 정렬
+      line1.sort((a,b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+      line2.sort((a,b) => {
+        const A = a.mid[0];
+        const B = b.mid[0];
+
+        if (A > B) return 1;
+        if (A < B) return -1;
+        if (A === B) return 0;
+      })
+    }
+
+    // 모두 삭제하고 shape 다시 만듬
+    this.onDelAll();
+
+    let id = 0;
+    line1.forEach((v, i) => {
+      v.shape.id = String(id).padStart(8, '0');
+      v.shape.registerID = String(id+1);
+      this.labeler.addShape(v.shape);
+      id += 1;
+    })
+    line2.forEach((v, i) => {
+      v.shape.id = String(id).padStart(8, '0');
+      v.shape.registerID = String(id+1);
+      this.labeler.addShape(v.shape);
+      id += 1;
+    })
+    console.log("=== align end ===");
+  }
+
+  // ====== 이미지 밝기 조절 관련(s) ======
+  onUpDown(type) {
+    if (type === "UP") {
+      if (this.lightValue + 30 > 255) this.lightValue = 255;
+      else this.lightValue += 30;
+      // this.lightValue = 30;
     } else {
-      const pageNo = this.pageInfo.pageNo;
-      this.selIndex = 0;
-      await this.onSearch(pageNo - 1);
-      this.onNext(9);
+      if (this.lightValue - 30 < -255) this.lightValue = -255;
+      else this.lightValue -= 30;
+      // this.lightValue = -30;
+    }
+    this.brightnessAdjustment();
+  }
+  brightnessFilter(pixels, value) {
+    var d = pixels.data;    
+    for(var i =0; i< d.length; i+=4) {        
+      d[i] += value/3;        
+      d[i+1] += value/3;        
+      d[i+2] += value/3;    
+    }    
+    return pixels;
+  }
+  async brightnessAdjustment() {
+    
+    this.shapeList = this.labeler.getShapeList();
+    let saveList = this.shapeList.slice(0,this.shapeList.length);
+    this.onDelAll();
+
+    let image = new Image();
+    image.src = 'data:image/jpeg;base64,' + this.selImg.imgData;
+    image.onload = () => {
+      let canvas = document.createElement('canvas');
+      canvas.width = this.selImg.width;
+      canvas.height = this.selImg.height;
+      let context = canvas.getContext('2d');
+      context.drawImage(image,0,0);      
+      let pixels= context.getImageData(0,0, canvas.width, canvas.height);
+      let filteredData = this.brightnessFilter(pixels, this.lightValue);
+      context.putImageData(filteredData, 0, 0);
+      let dataURL = canvas.toDataURL();
+      
+      this.labeler.load(dataURL);
+      // this.labeler.render();
+      saveList.forEach((value) => {
+        this.labeler.addShape(value);
+      })
+      this.shapeList = this.labeler.getShapeList();
     }
   }
-  async onNextImage() {
-    if (this.selIndex + 1 < this.imgDataList.length) {
-      this.onNext(this.selIndex + 1);
-    } else {
-      const pageNo = this.pageInfo.pageNo;
-      this.selIndex = 0;
-      await this.onSearch(pageNo + 1);
-      this.onNext(0);
-    }
+  // ====== 이미지 밝기 조절 관련(e) ======
+
+  // ====== 이벤트 리스너(s) ======
+  setQuickClass() {
+    const cd = $cookies.get("selLabel");
+    const nm = $cookies.get("selLabelNm");
+    this.quickClassObj = { cd, nm };
+    console.log(this.quickClassObj);
   }
+
   onKeyup(event) {
     event.preventDefault();
     console.log(event);
@@ -1172,67 +1449,61 @@ export default class extends Vue {
       }
     }
   }
-  setQuickClass() {
-    const cd = $cookies.get("selLabel");
-    const nm = $cookies.get("selLabelNm");
-    this.quickClassObj = { cd, nm };
-    console.log(this.quickClassObj);
-  }
+  // ====== 이벤트 리스너(e) ======
 
-  // 2022.09.21 wook 수정
-  nonActive() {
-    console.log('nonActive');
-    this.shapeList = this.labeler.getShapeList();
-    let labelDataText = '';
-    this.shapeList.map((v) => {
-      if (this.selBoxId == v.id) v.setActive(false);
-      labelDataText += this.labelNm(v.data);
-      return v;
-    });
-    this.selItem.labelDataText = labelDataText;
-    this.selBoxId = '';
-    this.labelTypeList = this.labelTypeList.map((v) => ({
-      ...v,
-      checked: false
-    }));
-
-    this.labeler.render();
-  }
-  onRemove(index) {
-    if (index== -1) return;
-    this.labeler.remove(this.selBoxId);
-    this.selBoxId = '';
-    this.shapeList = this.labeler.getShapeList();
-    this.nonActive();
-  }
-  onDelAll() {
-    let idList = [];
-    this.shapeList.map((v) => {
-      idList.push(v.id);
-    })
-    idList.forEach((v) => {
-      this.labeler.remove(v);
-    })
-    this.shapeList = this.labeler.getShapeList();
-    this.nonActive();
-  }
-  onActiveLabel(index) {
-    this.shapeList.map((v, idx) => {
-      console.log("===111", v.data);
-      if (idx === index) {
-        this.selBoxId = v.id;
-        console.log(v);
-        this.onSelLabel(v.data);
-        v.setActive(true);
-      } else v.setActive(false);
-      return v;
-    });
-    console.log("onActiveLabel: " + index);
-    this.labeler.render();
-  }
+  // ====== 기타(s) ======
   onShowPop(show) {
     this.showPop = show;
-  }  
+  } 
+  validatePlate(labelDataText) {
+    const GENERAL1 = /^[0-9]{2}[가-힣]{1}[0-9]{4}/;  //P0, P2, P3
+    const GENERAL2 = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}/; // P1, P4, P5
+    const P7 = /^[0-9]{3}[가-힣]{1}[0-9]{4}/; // P7
+
+    const FOREIGN = /^[가-힣]{2}[0-9]{3}-[0-9]{3}/; // P1외교, P9외교
+    const TEMP1 = /^임[0-9]{4}/; // P10임시, P11임시
+    const TEMP2 = /^[^a-zA-Z가-힣ㄱ-ㅎ][0-9]{6}?/; // P10임시, P11임시
+    const YOUNG = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}영/; // P6
+    console.log('validatePlate', this.selImg.labelType, labelDataText);
+    if(this.selImg.labelType == 'B') {
+      if(!GENERAL1.test(labelDataText)){
+        if(!GENERAL2.test(labelDataText)){
+          if(!P7.test(labelDataText)){
+            if(!TEMP1.test(labelDataText)){
+              if(!TEMP2.test(labelDataText)){
+                return false;
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+    else {
+      if(!GENERAL1.test(labelDataText)) {
+        console.log('GENERAL1');
+        if(!GENERAL2.test(labelDataText)) {
+        console.log('GENERAL2', GENERAL2.test(labelDataText));
+          if(!YOUNG.test(labelDataText)) {
+        console.log('YOUNG');
+            if(!FOREIGN.test(labelDataText)) {
+        console.log('FOREIGN');
+              if(!TEMP1.test(labelDataText)) {
+        console.log('TEMP1');
+                if(!TEMP2.test(labelDataText)) {
+        console.log('TEMP2');
+                  return false;
+                }
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+  }
+  // ====== 기타(e) ======
+
 }
 </script>
 
