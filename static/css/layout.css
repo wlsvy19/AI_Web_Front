@@ -1730,3 +1730,11 @@ nav ol > li > .subMenu > ul > li > a:hover {
   align-items: center;
   background: var(--gray1);
 }
+
+#label-popup {
+  width: 185px;
+  height: 80px;
+  position: absolute;
+  border: solid var(--gray2);
+  background: var(--gray1);
+}

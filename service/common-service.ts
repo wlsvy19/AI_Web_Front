@@ -47,6 +47,14 @@ class CommonService {
     return result.data.data;
   }
 
+  async getRequest(url) {
+    const result = await $axios.request<IBaseResponseModel<any>>({
+      url: url,
+      method: "GET",
+    });
+    return result.data.data;
+  }
+
   // 메뉴가져오기
   async getSiteMenus() {
     const menuList = await this.request("", "/api/common/menu/list");
