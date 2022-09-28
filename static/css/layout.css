@@ -1738,3 +1738,23 @@ nav ol > li > .subMenu > ul > li > a:hover {
   border: solid var(--gray2);
   background: var(--gray1);
 }
+
+.date-wrapper {
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.search-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ml-2 {
+  margin-left: 2rem;
+}

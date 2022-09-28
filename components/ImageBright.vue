@@ -40,8 +40,8 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import LabelImg, { IShapeOptions, Points, Shape } from "label-img";
+// import Vue from "vue";
+// import LabelImg, { IShapeOptions, Points, Shape } from "label-img";
 export default {
   name: "HelloWorld",
   props: {

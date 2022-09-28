@@ -6,18 +6,21 @@
           <h2 class="ti wid6p">
             {{ ((currentMenu || {}).subMenu || {}).MENU_NM }}
           </h2>
-          <!-- 준공검사 주석 -->
-          <el-date-picker
-            v-model="search.workDate"
-            value-format="yyyy-MM-dd"
-            type="date"
-            placeholder="검색날짜"
-          >
-          </el-date-picker>
-          <div class="wid4p tx-r">
+          <div class='date-wrapper'>
+            <label for="sel002" class="sl-nm">날짜</label>
+            <el-date-picker
+              v-model="search.searchDate"
+              value-format="yyyy-MM-dd"
+              type="date"
+              placeholder="검색날짜"
+            >
+            </el-date-picker>
+          </div>
+
+          <div class="wid4p tx-r search-right">
             <label for="sel002" class="sl-nm">유형</label>
-            <select id="sel002" class="select" v-model="search.learnDtstType">
-              <option value="">선택</option>
+            <select id="sel002" class="select" v-model="search.nmrecgCd" @change="onChangeType($event)">
+              <option value="">전체</option>
               <template v-for="(item, index) in code.NMRECG_CD">
                 <option :value="item.cmmnCd" :key="index">
                   {{ item.cmmnCdNm }}
@@ -35,7 +38,7 @@
             </select> -->
             <button
               type="button"
-              class="btn btn-sz2 btn-gn fc1 mr25"
+              class="btn btn-sz2 btn-gn fc1 mr25 ml-2"
               @click="onSearch(1)"
             >
               조회
@@ -75,7 +78,7 @@
                   <tr
                     :key="index"
                     @click="onSelImg(item.workDate, item.workNo, item, index)"
-                    :class="sel1 === item.workNo ? 'active' : ''"
+                    :class="selIndex === index ? 'active' : ''"
                   >
                     <td
                       class="tx-c"
@@ -112,6 +115,14 @@
 
         <!-- 영상학습 영상 [S] -->
         <div class="vod-c">
+          <div class="labeling-viewBox" style="margin-bottom:2rem;">
+            <div class="label-v-info">
+              영상ID: <span>{{ selItem.workNo }}</span> 
+              미·오인식 유형: <span >{{ codeNm(selItem.nmrecgCd) }}</span>
+              촬영일시: <span>{{ selItem.shootDttm }}</span> 
+              촬영장소: <span>{{ selItem.tolofNm }}</span>
+            </div>
+          </div>
           <!-- <div class="vod-ctlBox"> -->
           <!-- 엔진종류 콤보박스 -->
           <!-- <label for="sel002" class="sl-nm">엔진 종류</label>
@@ -279,8 +290,7 @@ export default class extends Vue {
   selImg = "";
   currentMenu: any = {};
   code: any = {};
-  dataset: any = { learnDtstType: "" };
-  search: any = { workDate: "", learnDtstType: "" };
+  search: any = { searchDate: "", nmrecgCd: "" };
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
   async created() {
     this.currentMenu = this.$store.state.currentMenu;
@@ -289,9 +299,6 @@ export default class extends Vue {
     await this.onNext(0);
   }
   mounted() {
-    const dataset = commonService.getDataset();
-    if (dataset) this.dataset = dataset;
-    console.log("dataset", this.dataset);
     document.addEventListener("keyup", this.onKeyup);
   }
   destroyed() {
@@ -321,7 +328,6 @@ export default class extends Vue {
     const newpage = { ...this.pageInfo, pageNo };
     const data = await commonService.request(
       {
-        searchDate: this.search.workDate,
         ...this.search,
         ...newpage,
       },
@@ -331,6 +337,7 @@ export default class extends Vue {
     const imgList = data.list;
     this.pageInfo = { ...data.page };
     this.imgDataList = imgList.map((v) => ({ ...v, newNmrecgCd: v.nmrecgCd }));
+    console.log('imgDataList', this.imgDataList);
     if (imgList.length === 0) {
       this.selIndex = -1;
       this.selItem = {};
@@ -449,6 +456,11 @@ export default class extends Vue {
     const cds1 = cds.filter((v) => v.cmmnCd === cd);
     if (cds1.length === 0) return "";
     return cds1[0].cmmnCdNm;
+  }
+  onChangeType(e) {
+    e.preventDefault();
+    console.log(e.target.value);
+    this.search.nmrecgCd = e.target.value;
   }
 }
 </script>
