@@ -6,63 +6,61 @@
           <h2 class="ti wid6p">
             {{ ((currentMenu || {}).subMenu || {}).MENU_NM }}
           </h2>
-
-          <!-- <label for="sel002" class="sl-nm" style="width: 50px">유형</label>
-            <select id="sel002" class="select" v-model="search.nmrecgCd">
-              <option value="">전체</option>
-              <template v-for="(item, index) in code.NMRECG_CD">
-                <option :value="item.cmmnCd" :key="index">
-                  {{ item.cmmnCdNm }}
-                </option>
-              </template>
-            </select> -->
-          <!-- 준공검사 주석 -->
-          <!-- <template v-if="pageType === '차량번호'">
-            <label for="sel002" class="sl-nm" style="width: 100px"
-              >포함 숫자</label
+          <div class='date-wrapper'>
+            <label for="sel002" class="sl-nm">날짜</label>
+            <el-date-picker
+              v-model="search.searchDate"
+              value-format="yyyy-MM-dd"
+              type="date"
+              placeholder="검색날짜"
             >
-            <select id="sel002" class="select" v-model="search.withNum">
-              <option value="">전체</option>
-              <template v-for="(item, index) in code.CAR_NUM_BTN">
-                <option
-                  v-if="item.dataType === 'NUM'"
-                  :value="item.cmmnCd"
-                  :key="index"
-                >
-                  {{ item.cmmnCdNm }}
-                </option>
-              </template>
-            </select>
-            <label for="sel002" class="sl-nm" style="width: 100px"
-              >포함 문자</label
-            >
-            <select id="sel002" class="select" v-model="search.withChar">
-              <option value="">전체</option>
-              <template v-for="(item, index) in code.CAR_NUM_BTN">
-                <option
-                  v-if="item.dataType === 'CHAR'"
-                  :value="item.cmmnCd"
-                  :key="index"
-                >
-                  {{ item.cmmnCdNm }}
-                </option>
-              </template>
-            </select>
-          </template> -->
-
-          <div class="wid4p tx-r">
+            </el-date-picker>
+          </div>
+               
+          <div :class="(pageType != '차량번호' ? 'wid4p' : 'wid5-5p') + ' search-right'">
             <legend>검색영역</legend>
-            <!-- 준공검사 주석 -->
-            <!-- <template v-if="pageType === '번호판' || true">
+            <template v-if="pageType != '차량번호'">
               <label for="sel002" class="sl-nm">유형</label>
-              <select id="sel002" class="select" v-model="search.nmrecgCd">
+              <select id="sel002" class="select" v-model="search.searchLabel" style="width: 100px;">
                 <option value="">전체</option>
-                <template v-for="(item, index) in code.NMRECG_CD">
-                  <option :value="item.cmmnCd" :key="index">
-                    {{ item.cmmnCd }}-{{ item.cmmnCdNm }}
+                <template v-for="(item, index) in labelTypeList">
+                  <option :value="item.cmmnCdNm" :key="index">
+                    {{ item.cmmnCdNm }}
                   </option>
                 </template>
               </select>
+            </template>
+            <template v-else>
+              <div class="ml-2">
+                <label for="sel002" class="sl-nm" style="width: 100px">포함 숫자</label>
+                <select id="sel002" class="select" v-model="search.searchNum">
+                  <option value="">전체</option>
+                  <template v-for="(item, index) in code.CAR_NUM_BTN">
+                    <option
+                      v-if="item.dataType == 'NUM'"
+                      :value="item.cmmnCdNm"
+                      :key="index"
+                    >
+                      {{ item.cmmnCdNm }}
+                    </option>
+                  </template>
+                </select>
+              </div>
+              <div class="ml-2">
+                <label for="sel002" class="sl-nm" style="width: 100px">포함 문자</label>
+                <select id="sel002" class="select" v-model="search.searchChar">
+                  <option value="">전체</option>
+                  <template v-for="(item, index) in code.CAR_NUM_BTN">
+                    <option
+                      v-if="item.dataType == 'CHAR'"
+                      :value="item.cmmnCdNm"
+                      :key="index"
+                    >
+                      {{ item.cmmnCdNm }}
+                    </option>
+                  </template>
+                </select>
+              </div>
             </template>
             <button
               type="button"
@@ -70,7 +68,7 @@
               @click="onSearch(1)"
             >
               조회
-            </button> -->
+            </button>
           </div>
         </div>
       </div>
@@ -142,7 +140,7 @@
                   <tr
                     :key="index"
                     @click="onSelImg(item, index)"
-                    :class="selItem.workNo === item.workNo ? 'active' : ''"
+                    :class="selIndex === index ? 'active' : ''"
                   >
                     <td
                       class="tx-c"
@@ -390,7 +388,7 @@
         @contextmenu.prevent>
       <h2>라벨링 변경</h2>
       <div style="display: flex; justify-content: flex-end;">
-        <select id="sel002" class="select" @change="onClickChangeLabel($event)" style="height:100%">
+        <select id="sel002" class="select" @change="onClickChangeLabel($event)" style="height:100%;font-size: large;">
           <option :key="index" :value='index' v-for="(item, index) in labelTypeList" :selected="selBoxLabel == item.cmmnCdNm">{{ item.cmmnCdNm }}</option>
         </select>
       </div>
@@ -529,7 +527,6 @@ const polygonStyle = {
 export default class extends Vue {
   @Prop()
   pageType: string;
-  search = { nmrecgCd: "", withNum: "", withChar: "" };
   labeler = {} as LabelImg;
   currentMenu: any = {};
 
@@ -544,41 +541,28 @@ export default class extends Vue {
   selBoxId = "";
   selBoxLabel = "";
   
-  showPop = false;
-  changeLabelPop = true;
-  
   imgDataList = [];
   labelTypeList: any = [];
   shapeList: any = [];
 
   code: any = {};
+  search = {
+    searchLabel:'',
+    searchDate:'',
+    searchNum:'',
+    searchChar:'',
+  };
   pageInfo: IPageInfoModel = commonService.getPageInitInfo();
-  shapeID: 0;
-  // dataset: any = { learnDtstType: "" };
-  // labelWorkList: any = [];
-  // url = ""; // 2022.08.21 fqj
+  shapeID = 0;
 
-  isNoImg = false;
-
-  // 입력 캔버스 관련
   lightValue: any = 0;
-  outCanvas: any = "";
-  outCtx: any = "";
-  inFile: any = "";
-  // 캔버스에는 한점한점이 안찍힘. 대신 캔버스에 종이를 붙임.
-  inPaper: any = "";
-  outPaper: any = "";
-  // 입력 파일 및 배열
-  inImgArr: any = [];
-  outImgArr: any = [];
-  // 입력 이미지의 폭과 높이
-  inWidth: any = "";
-  inHeight: any = "";
-  outWidth: any = "";
-  outHeight: any = "";
 
-  selectPointBtn = true;
-  selectLabelBtn = false;
+  showPop = false;
+  changeLabelPop = false;
+  isNoImg = false;
+  isDrawing = false;
+  selectPointBtn = false;
+  selectLabelBtn = true;
 
   quickClassObj = {};
 
@@ -607,11 +591,13 @@ export default class extends Vue {
     const newpage = { ...this.pageInfo, pageNo };
     const search = this.search;
     console.log("====pageNo===", pageNo);
+    console.log("====pageType===", this.pageType);
+    console.log("====search===", this.search);
     const data = await commonService.request(
       {
         pageType: this.pageType,
-        ...newpage,
-        nmrecgCd: search.nmrecgCd,
+        ...search,
+        ...newpage,        
       },
       "/api/crgw-img-data/list/page"
     );
@@ -656,7 +642,6 @@ export default class extends Vue {
         ...v,
         checked: false,
       }));
-      console.log("=====", 1111);
       this.labelTypeList = labelTypeList;
     }
     if (this.pageType === "꺾임") {
@@ -735,14 +720,13 @@ export default class extends Vue {
       console.log("obj===>11", obj);
       if(!obj.ante.isOnImage) return;
       this.changeLabelPop = false;
-      const data = obj.ante.currentTarget.data;
-      console.log('data===', data);
-      if (data == null) {
+      let data = obj.ante.currentTarget.data;
+      if (data == null || data == undefined) {
         // 박스가 없는 공간 클릭
         if (this.selectPointBtn == true) {
-          console.log('빈공간');
+          console.log('좌클릭 빈공간');
           this.nonActive();
-          if (this.pageType == '차량번호') {
+          if (this.pageType == '차량번호' && !this.isDrawing) {
             this.alignShapeList();
             this.setLabelDataText();
           }
@@ -751,33 +735,31 @@ export default class extends Vue {
         else{
           // 폴리곤은 도형이 완전히 그려져야 라벨링 끝마침
           if(this.pageType == '빛' || this.pageType == '꺾임') {
-            if (! obj.ante.isOnShape) return;
+            if (!obj.ante.isOnShape) return;
           }
+          console.log('data===', data);
           // console.log(this.labelTypeList);
           let newBoxId = obj.ante.currentTarget.id;
-          console.log(this.selLabel);
+          console.log('newBoxId',newBoxId);
           this.setLabelDataText(newBoxId);
-          
           console.log('라벨링 완료');
+
           if (this.pageType == '차량번호') {
             this.alignShapeList();
             this.setLabelDataText();
           }
           labeler.render();
+          this.isDrawing = false;
         }
       }
       // 박스 선택
       else {
-        console.log('data===', data);
+        if (this.isDrawing) return;
         this.selBoxId = obj.ante.currentTarget.id;
         console.log('boxid',this.selBoxId);
         if (obj.ante.isOnShape) this.onSelLabel(data);
-        console.log('박스 선택');
+        console.log('좌클릭 박스 선택');
         console.log("shapeList",this.shapeList);
-        // if (this.pageType == '차량번호') {
-        //   this.alignShapeList();
-        //   this.setLabelDataText();
-        // }
       }
     });
     
@@ -787,7 +769,6 @@ export default class extends Vue {
       event.preventDefault();
       if(!event.ante.isOnImage) return;
       const is_right_click = (event.which == 3) || (event.button == 2)
-      // if (! is_right_click) return;
       
       // 우클릭
       if (is_right_click) {
@@ -820,6 +801,9 @@ export default class extends Vue {
       // 좌클릭
       else {
         this.changeLabelPop = false;
+        if (this.selectLabelBtn) {
+          this.isDrawing = true;
+        }
       }
     });
     
@@ -967,15 +951,23 @@ export default class extends Vue {
         shape.style.normal.dotColor = COLORS[colorIndex];
         shape.style.normal.lineColor = COLORS[colorIndex];
         shape.style.normal.fillColor = COLORS[colorIndex];
-        // console.log('1111111111',shape);
         this.labeler.addShape(shape);
-        // this.labeler.render();
       }
     }
 
     this.shapeList = this.labeler.getShapeList();
+    this.setLabelDataText();
+
     this.nonActive();
-    // console.log("shapList====123>", shapList);
+    if (this.selLabel == "") this.selLabel = this.labelTypeList[0].cmmnCd;
+    if (this.selectLabelBtn) {
+      if(this.pageType === '빛' || this.pageType === '꺾임') {
+          this.setLabel('polygon')
+      }
+      else {
+        this.setLabel('rect')
+      }
+    }
   }
   async onNext(newIndex) {
     if (newIndex < this.imgDataList.length) {
@@ -1010,13 +1002,12 @@ export default class extends Vue {
     console.log("=====");
     const selItem = this.selItem;
     
-    if (this.pageType == '차량번호') {
-      this.alignShapeList();
-      this.setLabelDataText();
-    }
+    // if (this.pageType == '차량번호') {
+    //   this.alignShapeList();
+    //   this.setLabelDataText();
+    // }
     
     const list = this.labeler.getShapeList();
-    // if (list.length < 1) return alert("저장할 라벨이 없습니다.");
     const nd = list.filter((v) => !v.data);
     // if (nd.length > 0) return alert("라벨링을 선택하세요.");
     // if (!selItem.nmrecgCd) return alert("분류를 먼저 하셔야 합니다.");
@@ -1043,6 +1034,13 @@ export default class extends Vue {
     saveData.labelType = selItem.nmrecgCd;
     saveData.nmrecgCd = selItem.nmrecgCd;
     
+    if (list.length < 1) {
+      if (dtrmYn == 'Y') {
+        this.$alert('저장할 라벨이 없습니다.','에러', {'type':'error'});
+        return;
+      }
+    }
+
     if (this.pageType == '차량번호') {
       const firstStr = labelDataText.slice(0, 1);
       if (firstStr == "영") {
@@ -1115,7 +1113,6 @@ export default class extends Vue {
   }
   onSelLabel(cd) {
     console.log("onSelLabel: " + cd);
-    console.log('shaplist ---- ',this.shapeList);
     this.shapeList = this.shapeList.map((v, idx) => {
       if(this.selBoxId == v.id) {
         v.setActive(true);
@@ -1177,7 +1174,7 @@ export default class extends Vue {
       }
       return v;
     })
-    if (this.pageType == '차량번호') this.alignShapeList();
+    // if (this.pageType == '차량번호') this.alignShapeList();
     this.labeler.render();
   }
   onRemove(index) {
@@ -1188,9 +1185,11 @@ export default class extends Vue {
     this.selBoxId = '';
     this.shapeList = this.labeler.getShapeList();
     this.nonActive();
+    this.setLabelDataText();
   }
   onDelAll() {
     let idList = [];
+    this.shapeID = 0;
     this.shapeList.map((v) => {
       idList.push(v.id);
     })
@@ -1201,11 +1200,12 @@ export default class extends Vue {
     this.nonActive();
   }
   setLabelDataText(newBoxId="") {
+    console.log('setLabelDataText:',newBoxId);
     let labelDataText = '';
     this.shapeList = this.labeler.getShapeList();
     this.shapeList = this.shapeList.map((v) => {
       labelDataText += this.labelNm(v.data);
-      if (newBoxId == v.id  && newBoxId != "") {
+      if ((newBoxId == v.id  && newBoxId != "")) {
         v.data = this.selLabel;
         let temp = this.labelTypeList.find((v) => {
           if(v.cmmnCd == this.selLabel) return true;
@@ -1247,8 +1247,8 @@ export default class extends Vue {
 
       const midpoint = [(minx + maxx) /2, (miny + maxy) / 2]
 
-      console.log(minx, miny, maxx, maxy);
-      console.log(midpoint);
+      // console.log(minx, miny, maxx, maxy);
+      // console.log(midpoint);
       return {
         'minx': minx,
         'miny': miny,
@@ -1266,7 +1266,7 @@ export default class extends Vue {
     
     // B 타입은 한줄짜리 번호판
     if (this.selImg.labelType == 'B') {
-      console.log('B타입');
+      // console.log('B타입');
       // x축 기준 정렬
       positions.sort((a, b) => {
         const A = a.mid[0];
@@ -1281,7 +1281,7 @@ export default class extends Vue {
       })
     }
     else {
-      console.log('C,D 타입');
+      // console.log('C,D 타입');
       // y축 기준 정렬
       positions.sort((a, b) => {
         const A = a.mid[1];
@@ -1291,18 +1291,18 @@ export default class extends Vue {
         if (A < B) return -1;
         if (A === B) return 0;
       })
-      console.log('after',positions);
+      // console.log('after',positions);
 
       const lineSeparator = positions[0].mid[1] + (positions[0].boxHeight /2);
-      console.log('lineSeparator',lineSeparator);
+      // console.log('lineSeparator',lineSeparator);
 
       // 윗줄, 아랫줄 구분
       positions.forEach((v, i) => {
         if(v.mid[1] < lineSeparator) line1.push(v);
         else line2.push(v);
       })  
-      console.log('line1',line1);
-      console.log('line2',line2);
+      // console.log('line1',line1);
+      // console.log('line2',line2);
 
       // x축 정렬
       line1.sort((a,b) => {
@@ -1326,18 +1326,17 @@ export default class extends Vue {
     // 모두 삭제하고 shape 다시 만듬
     this.onDelAll();
 
-    let id = 0;
     line1.forEach((v, i) => {
-      v.shape.id = String(id).padStart(8, '0');
-      v.shape.registerID = String(id+1);
+      v.shape.id = String(this.shapeID).padStart(8, '0');
+      v.shape.registerID = String(this.shapeID+1);
       this.labeler.addShape(v.shape);
-      id += 1;
+      this.shapeID += 1;
     })
     line2.forEach((v, i) => {
-      v.shape.id = String(id).padStart(8, '0');
-      v.shape.registerID = String(id+1);
+      v.shape.id = String(this.shapeID).padStart(8, '0');
+      v.shape.registerID = String(this.shapeID+1);
       this.labeler.addShape(v.shape);
-      id += 1;
+      this.shapeID += 1;
     })
     console.log("=== align end ===");
   }
@@ -1467,10 +1466,15 @@ export default class extends Vue {
     console.log('validatePlate', this.selImg.labelType, labelDataText);
     if(this.selImg.labelType == 'B') {
       if(!GENERAL1.test(labelDataText)){
+        console.log('GENERAL1');
         if(!GENERAL2.test(labelDataText)){
+          console.log('GENERAL2', GENERAL2.test(labelDataText));
           if(!P7.test(labelDataText)){
+            console.log('P7');
             if(!TEMP1.test(labelDataText)){
+              console.log('TEMP1');
               if(!TEMP2.test(labelDataText)){
+                console.log('TEMP2');
                 return false;
               }
             }
@@ -1483,15 +1487,15 @@ export default class extends Vue {
       if(!GENERAL1.test(labelDataText)) {
         console.log('GENERAL1');
         if(!GENERAL2.test(labelDataText)) {
-        console.log('GENERAL2', GENERAL2.test(labelDataText));
+          console.log('GENERAL2', GENERAL2.test(labelDataText));
           if(!YOUNG.test(labelDataText)) {
-        console.log('YOUNG');
+            console.log('YOUNG');
             if(!FOREIGN.test(labelDataText)) {
-        console.log('FOREIGN');
+              console.log('FOREIGN');
               if(!TEMP1.test(labelDataText)) {
-        console.log('TEMP1');
+                console.log('TEMP1');
                 if(!TEMP2.test(labelDataText)) {
-        console.log('TEMP2');
+                  console.log('TEMP2');
                   return false;
                 }
               }
