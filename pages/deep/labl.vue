@@ -87,6 +87,12 @@
             </figure>
             <figure v-else>
               <img
+                alt="작은 이미지"
+                width="152"
+                height="88"
+                :src="'data:image/jpeg;base64,' + this.selItem.imageData"
+              />
+              <!-- <img
                 v-if="pageType === '꺾임'"
                 alt="작은 이미지"
                 width="152"
@@ -108,7 +114,7 @@
                 width="152"
                 height="88"
                 :src="`/v1/api/crgw-img/data?workDate=${selItem.workDate}&workNo=${this.selItem.workNo}`"
-              />
+              /> -->
             </figure>
           </div>
 
@@ -534,10 +540,11 @@ export default class extends Vue {
   selItem: any = {
     workDate:"",
     workNo:"",
+    imageData:'/images/no-img.png',
   };
   selIndex = -1;
   selLabel = "";
-  selImg: any = null;
+  // selImg: any = null;
   selBoxId = "";
   selBoxLabel = "";
   
@@ -612,6 +619,8 @@ export default class extends Vue {
     if (imgList.length === 0) {
       this.selIndex = -1;
       this.selItem = {};
+      this.isNoImg = true;
+      this.labeler.load('/images/no-img.png');
     } else {
       await this.onNext(0);
     }
@@ -825,6 +834,7 @@ export default class extends Vue {
     this.selIndex = index;
     this.shapeID = 0;
 
+    /*
     let data = null;
 
     if (this.pageType === "꺾임") {
@@ -897,13 +907,24 @@ export default class extends Vue {
         rectStyle.active.lineWidth = data.width/ 100 -1;
       }
     }      
-    
-    if (this.isNoImg == true) {
+    */
+
+    if (this.selItem.imageData == null) {
+      this.isNoImg = true;
       this.labeler.load('/images/no-img.png');
       return;
     }
     else {
-      this.labeler.load('data:image/jpeg;base64,' + data.imgData);
+      this.isNoImg = false;
+      this.labeler.load('data:image/jpeg;base64,' + this.selItem.imageData);
+      polygonStyle.normal.dotRadius = this.selItem.width/ 100;
+      polygonStyle.active.dotRadius = this.selItem.width/ 100;
+      polygonStyle.normal.lineWidth = this.selItem.width/ 100 -2;
+      polygonStyle.active.lineWidth = this.selItem.width/ 100 -1;
+      rectStyle.normal.dotRadius = this.selItem.width/ 100;
+      rectStyle.active.dotRadius = this.selItem.width/ 100;
+      rectStyle.normal.lineWidth = this.selItem.width/ 100 -2;
+      rectStyle.active.lineWidth = this.selItem.width/ 100 -1;
     }
 
     const label = await commonService.request(
@@ -1007,15 +1028,33 @@ export default class extends Vue {
     //   this.setLabelDataText();
     // }
     
+    const cdNmList = this.labelTypeList.map((v) => {
+      return v.cmmnCdNm;
+    })
+        
     const list = this.labeler.getShapeList();
-    const nd = list.filter((v) => !v.data);
-    // if (nd.length > 0) return alert("라벨링을 선택하세요.");
+    const nd = list.filter((v) => !cdNmList.includes(v.tagContent));
+    console.log(nd);
     // if (!selItem.nmrecgCd) return alert("분류를 먼저 하셔야 합니다.");
     let dataText = "";
     let labelDataText = "";
     let positionText = "";
     const saveData: any = {};
     const dtrmYn = this.selItem.dtrmYn === "Y" ? "N" : "Y";
+
+    if (dtrmYn == 'Y') {
+      if (nd.length > 0) {
+        this.$alert('데이터가 잘못되었습니다. 다시 라벨링 해주세요', '에러', {'type':'error'});
+        return;
+      }
+
+      if (list.length < 1) {
+        this.$alert('저장할 라벨이 없습니다.','에러', {'type':'error'});
+        return;
+      }
+    }
+
+
     saveData.dtrmYn = dtrmYn;
     const lis = list.map(({ id, tagContent, positions, data }, index) => {
       dataText += data;
@@ -1034,13 +1073,6 @@ export default class extends Vue {
     saveData.labelType = selItem.nmrecgCd;
     saveData.nmrecgCd = selItem.nmrecgCd;
     
-    if (list.length < 1) {
-      if (dtrmYn == 'Y') {
-        this.$alert('저장할 라벨이 없습니다.','에러', {'type':'error'});
-        return;
-      }
-    }
-
     if (this.pageType == '차량번호') {
       const firstStr = labelDataText.slice(0, 1);
       if (firstStr == "영") {
@@ -1265,7 +1297,7 @@ export default class extends Vue {
     let line2 = [];
     
     // B 타입은 한줄짜리 번호판
-    if (this.selImg.labelType == 'B') {
+    if (this.selItem.labelType == 'B') {
       // console.log('B타입');
       // x축 기준 정렬
       positions.sort((a, b) => {
@@ -1370,11 +1402,11 @@ export default class extends Vue {
     this.onDelAll();
 
     let image = new Image();
-    image.src = 'data:image/jpeg;base64,' + this.selImg.imgData;
+    image.src = 'data:image/jpeg;base64,' + this.selItem.imageData;
     image.onload = () => {
       let canvas = document.createElement('canvas');
-      canvas.width = this.selImg.width;
-      canvas.height = this.selImg.height;
+      canvas.width = this.selItem.width;
+      canvas.height = this.selItem.height;
       let context = canvas.getContext('2d');
       context.drawImage(image,0,0);      
       let pixels= context.getImageData(0,0, canvas.width, canvas.height);
@@ -1455,25 +1487,28 @@ export default class extends Vue {
     this.showPop = show;
   } 
   validatePlate(labelDataText) {
-    const GENERAL1 = /^[0-9]{2}[가-힣]{1}[0-9]{4}/;  //P0, P2, P3
+    const GENERAL1 = /(^[0-9]{2}[가-힣]{1}[0-9]{4}){1}/;  //P0, P2, P3
     const GENERAL2 = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}/; // P1, P4, P5
     const P7 = /^[0-9]{3}[가-힣]{1}[0-9]{4}/; // P7
 
     const FOREIGN = /^[가-힣]{2}[0-9]{3}-[0-9]{3}/; // P1외교, P9외교
-    const TEMP1 = /^임[0-9]{4}/; // P10임시, P11임시
-    const TEMP2 = /^[^a-zA-Z가-힣ㄱ-ㅎ][0-9]{6}?/; // P10임시, P11임시
+    const TEMP1 = /^임[0-9]{4,6}/; // P10임시, P11임시
+    const TEMP2 = /^임시[0-9]{4,6}?/; // P10임시, P11임시
     const YOUNG = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}영/; // P6
-    console.log('validatePlate', this.selImg.labelType, labelDataText);
-    if(this.selImg.labelType == 'B') {
+    console.log('validatePlate', this.selItem.labelType, labelDataText);
+    if (labelDataText.length > 9) {
+      return false;
+    }
+    if(this.selItem.labelType == 'B') {
       if(!GENERAL1.test(labelDataText)){
         console.log('GENERAL1');
         if(!GENERAL2.test(labelDataText)){
           console.log('GENERAL2', GENERAL2.test(labelDataText));
-          if(!P7.test(labelDataText)){
+          if(!P7.test(labelDataText) || labelDataText.length > 8){
             console.log('P7');
-            if(!TEMP1.test(labelDataText)){
+            if(!TEMP1.test(labelDataText) || labelDataText.length > 7){
               console.log('TEMP1');
-              if(!TEMP2.test(labelDataText)){
+              if(!TEMP2.test(labelDataText) || labelDataText.length > 7){
                 console.log('TEMP2');
                 return false;
               }
@@ -1492,9 +1527,9 @@ export default class extends Vue {
             console.log('YOUNG');
             if(!FOREIGN.test(labelDataText)) {
               console.log('FOREIGN');
-              if(!TEMP1.test(labelDataText)) {
+              if(!TEMP1.test(labelDataText) || labelDataText.length > 7) {
                 console.log('TEMP1');
-                if(!TEMP2.test(labelDataText)) {
+                if(!TEMP2.test(labelDataText) || labelDataText.length > 7) {
                   console.log('TEMP2');
                   return false;
                 }
