@@ -5,7 +5,12 @@
       <fieldset>
         <legend>정렬영역</legend>
         <label for="sel002" class="sl-nm">데이터 셋:</label>
-        <select id="sel002" class="select">
+        <select
+          id="sel002"
+          class="select"
+          v-model="hdqrNm"
+          @change="onSearch(1)"
+        >
           <option value="">전체</option>
           <option value="수도권">수도권</option>
         </select>
@@ -141,6 +146,7 @@ export default class extends Vue {
   showPop = false;
   checked = false;
   serverList = [];
+  hdqrNm = "";
   selDatasets = [
     { hdqrNm: "번호판 탐색3", vmIp: "WP-003" },
     { hdqrNm: "번호판 탐색4", vmIp: "WP-004" },
@@ -185,8 +191,9 @@ export default class extends Vue {
   }
   async onSearch(pageNo: number) {
     const newpage = { ...this.pageInfo, pageNo };
+    const hdqrNm = this.hdqrNm;
     const data = await commonService.request(
-      { startDate: "", endDate: "", ...newpage },
+      { startDate: "", endDate: "", ...newpage, hdqrNm },
       "/api/updt/list"
     );
     newpage.totalCount = data.page.totalCount;
