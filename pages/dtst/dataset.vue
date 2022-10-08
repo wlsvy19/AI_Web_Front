@@ -20,7 +20,7 @@
       </fieldset>
 
       <div class="table-l1 mt15">
-        <table>
+        <table style="display: block; overflow-y: auto; height: 500px">
           <colgroup>
             <col width="50" />
             <col width="50" />
