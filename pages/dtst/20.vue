@@ -142,11 +142,11 @@
           </div>
           <div class="clmBox" v-show="isDtl">
             <div class="clm-body4">
-              <div class="table-l1 tb-op1 tb-ov1">
-                <table
-                  class="tx-c"
-                  style="display: block; overflow-y: auto; height: 500px"
-                >
+              <div
+                class="table-l1 tb-op1 tb-ov1"
+                style="display: block; overflow-y: auto; height: 500px"
+              >
+                <table class="tx-c">
                   <thead>
                     <tr>
                       <th class="tx-c">생성일자</th>
@@ -445,43 +445,6 @@ export default class extends Vue {
     );
     newpage.totalCount = data.page.totalCount;
     this.dataList = data.list;
-    this.dataList = [
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-      { workDate: "11", combDtstId: "11", unitDtstCnt: "11", totalCnt: "11" },
-    ];
     this.pageInfo = { ...newpage };
   }
   async onSearchDtl(pageNo: number) {
