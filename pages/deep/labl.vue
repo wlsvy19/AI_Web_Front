@@ -312,11 +312,9 @@
         <!-- 필독 사이즈 변동있으면 연락주세요!! -->
         <div class="labeling-r">
           <template v-if="pageType === '차량번호'">
-            <h2 class="ti-s mb10">라벨링 데이터</h2>
+            <h2 class="ti-s mb10">라벨링 데이터</h2> <!-- !!! -->
             <div class="as-area0">
-              <span style="font-size: 12pt; color: #ff0000">{{
-                selItem.labelDataText
-              }}</span>
+              <span style="font-size: 12pt; color: #ff0000">{{selItem.labelDataText}}</span>
             </div>
             <br />
           </template>
@@ -1006,11 +1004,14 @@ export default class extends Vue {
       this.onNext(9);
     }
   }
+  // !!!
   async onNextImage() {
     if (this.selIndex + 1 < this.imgDataList.length) {
       this.onNext(this.selIndex + 1);
     } else {
+      // 다음 페이지 넘어 갈때
       const pageNo = this.pageInfo.pageNo;
+      console.log("****************pageNo: ",pageNo)
       this.selIndex = 0;
       await this.onSearch(pageNo + 1);
       this.onNext(0);
