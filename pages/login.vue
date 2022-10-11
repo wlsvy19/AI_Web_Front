@@ -45,12 +45,18 @@
                 >비밀번호 찾기</a
               >
             </div>
+            
           </fieldset>
+        </div>
+        <div>
+          <span>배포날짜: {{num}}</span>
         </div>
       </div>
     </div>
+    
     <loginPw v-if="showPw === true" @closeBtn="() => (showPw = false)" />
   </layout>
+  
 </template>
 
 <script lang="ts">
@@ -110,6 +116,12 @@ export default class extends Vue {
     if (loginId) {
       this.chked = true;
       this.search.loginId = loginId;
+    }
+  }
+  data() {
+    const date = new Date();
+    return {
+      num: date.toLocaleString('ko-kr')
     }
   }
 }
