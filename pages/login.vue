@@ -25,6 +25,7 @@
                 class="loginInp"
                 id="log-upw"
                 placeholder="비밀번호"
+                @keyup.enter="handleLogin"
               />
             </label>
             <!-- error message box -->
