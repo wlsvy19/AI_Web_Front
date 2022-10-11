@@ -88,7 +88,10 @@
                 <!-- data input Area [E]-->
               </div>
 
-              <div class="table-l1 tb-op1 tb-ov1">
+              <div
+                class="table-l1 tb-op1 tb-ov1"
+                style="display: block; overflow-y: auto; height: 200px"
+              >
                 <table class="tx-c">
                   <thead>
                     <tr>
@@ -139,7 +142,10 @@
           </div>
           <div class="clmBox" v-show="isDtl">
             <div class="clm-body4">
-              <div class="table-l1 tb-op1 tb-ov1">
+              <div
+                class="table-l1 tb-op1 tb-ov1"
+                style="display: block; overflow-y: auto; height: 500px"
+              >
                 <table class="tx-c">
                   <thead>
                     <tr>
